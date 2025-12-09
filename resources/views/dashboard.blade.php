@@ -57,6 +57,6 @@
         @include('dashboard.sections.parametres')
     </main>
 </div>
-
+<div>hgvhg</div>
 </body>
 </html>
