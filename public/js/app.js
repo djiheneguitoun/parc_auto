@@ -37,6 +37,8 @@ import {
     loadParametres 
 } from './modules/parametres.js';
 
+import { initializeReportsEvents } from './modules/reports.js';
+
 // ============================================================================
 // Application Initialization
 // ============================================================================
@@ -70,6 +72,7 @@ function initializeApp() {
     initializeUserEvents();
     initializeDocumentEvents();
     initializeParametresEvents();
+    initializeReportsEvents();
 
     // Load all initial data
     Promise.all([

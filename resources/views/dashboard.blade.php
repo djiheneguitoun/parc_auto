@@ -32,6 +32,7 @@
         <button class="nav-btn" data-target="overview">Tableau de bord</button>
         <button class="nav-btn" data-target="chauffeurs">Chauffeurs</button>
         <button class="nav-btn" data-target="vehicules">Véhicules</button>
+        <button class="nav-btn" data-target="rapports">Rapports</button>
         <div class="nav-dropdown">
             <button class="nav-btn" id="documents-dropdown-btn" type="button" data-target="documents">
                 <span>Documents</span>
@@ -52,6 +53,7 @@
         @include('dashboard.sections.overview')
         @include('dashboard.sections.chauffeurs')
         @include('dashboard.sections.vehicules')
+        @include('dashboard.sections.rapports')
         @include('dashboard.sections.documents')
         @include('dashboard.sections.utilisateurs')
         @include('dashboard.sections.parametres')

@@ -1,0 +1,472 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Chauffeur;
+use App\Models\Vehicule;
+use App\Models\VehiculeDocument;
+use Illuminate\Http\Request;
+use Mpdf\Mpdf;
+
+class ReportController extends Controller
+{
+    public function exportVehicules(Request $request)
+    {
+        $query = Vehicule::with('chauffeur');
+
+        if ($request->filled('categorie')) {
+            $query->where('categorie', $request->input('categorie'));
+        }
+        if ($request->filled('option_vehicule')) {
+            $query->where('option_vehicule', $request->input('option_vehicule'));
+        }
+        if ($request->filled('energie')) {
+            $query->where('energie', $request->input('energie'));
+        }
+        if ($request->filled('boite')) {
+            $query->where('boite', $request->input('boite'));
+        }
+        if ($request->filled('leasing')) {
+            $query->where('leasing', $request->input('leasing'));
+        }
+        if ($request->filled('utilisation')) {
+            $query->where('utilisation', $request->input('utilisation'));
+        }
+        if ($request->filled('affectation')) {
+            $query->where('affectation', 'like', '%' . $request->input('affectation') . '%');
+        }
+
+        $start = $request->input('date_acquisition_start');
+        $end = $request->input('date_acquisition_end');
+        if ($start) {
+            $query->whereDate('date_acquisition', '>=', $start);
+        }
+        if ($end) {
+            $query->whereDate('date_acquisition', '<=', $end);
+        }
+
+        $vehicules = $query->orderBy('marque')->orderBy('modele')->get();
+
+        $mpdf = new Mpdf(['format' => 'A4-L']);
+        $mpdf->SetTitle('Rapport des véhicules');
+
+        $html = $this->buildHtml($vehicules, $request);
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="vehicules.pdf"',
+        ]);
+    }
+
+    public function exportChauffeurs(Request $request)
+    {
+        $query = Chauffeur::query();
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->input('statut'));
+        }
+        if ($request->filled('mention')) {
+            $query->where('mention', $request->input('mention'));
+        }
+
+        $chauffeurs = $query->orderBy('nom')->orderBy('prenom')->get();
+
+        $mpdf = new Mpdf(['format' => 'A4']);
+        $mpdf->SetTitle('Rapport des chauffeurs');
+        $html = $this->buildChauffeursHtml($chauffeurs, $request);
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="chauffeurs.pdf"',
+        ]);
+    }
+
+    public function exportCharges(Request $request)
+    {
+        $query = VehiculeDocument::with('vehicule');
+
+        if ($request->filled('vehicule')) {
+            $vehicule = $request->input('vehicule');
+            $query->where(function ($q) use ($vehicule) {
+                $q->where('vehicule_id', $vehicule)
+                  ->orWhereHas('vehicule', function ($sub) use ($vehicule) {
+                      $sub->where('code', 'like', "%{$vehicule}%");
+                  });
+            });
+        }
+        if ($request->filled('type')) {
+            $query->where('type', $request->input('type'));
+        }
+
+        $charges = $query->orderBy('type')->orderByDesc('created_at')->get();
+
+        $mpdf = new Mpdf(['format' => 'A4-L']);
+        $mpdf->SetTitle('Rapport des charges véhicules');
+        $html = $this->buildChargesHtml($charges, $request);
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="charges-vehicules.pdf"',
+        ]);
+    }
+
+    public function exportFactures(Request $request)
+    {
+        $query = VehiculeDocument::with('vehicule');
+
+        if ($request->filled('vehicule')) {
+            $vehicule = $request->input('vehicule');
+            $query->where(function ($q) use ($vehicule) {
+                $q->where('vehicule_id', $vehicule)
+                  ->orWhereHas('vehicule', function ($sub) use ($vehicule) {
+                      $sub->where('code', 'like', "%{$vehicule}%");
+                  });
+            });
+        }
+        if ($request->filled('start')) {
+            $query->whereDate('date_facture', '>=', $request->input('start'));
+        }
+        if ($request->filled('end')) {
+            $query->whereDate('date_facture', '<=', $request->input('end'));
+        }
+
+        $factures = $query->whereNotNull('date_facture')->orderBy('date_facture', 'desc')->get();
+
+        $mpdf = new Mpdf(['format' => 'A4']);
+        $mpdf->SetTitle('Rapport des factures véhicule');
+        $html = $this->buildFacturesHtml($factures, $request);
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="factures-vehicule.pdf"',
+        ]);
+    }
+
+    private function buildHtml($vehicules, Request $request)
+    {
+        $date = now()->format('d/m/Y H:i');
+        $filters = $this->formatFilters($request);
+
+        $rows = $vehicules->map(function ($v) {
+            return sprintf(
+                '<tr>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                </tr>',
+                e($v->code),
+                e($v->numero),
+                e(trim(($v->marque ?? '') . ' ' . ($v->modele ?? ''))),
+                e($v->categorie),
+                e($v->option_vehicule),
+                e($v->energie),
+                e($v->boite),
+                e($v->utilisation),
+                e($v->affectation),
+                optional($v->date_acquisition)->format('d/m/Y')
+            );
+        })->implode('');
+
+        if ($rows === '') {
+            $rows = '<tr><td colspan="10" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
+        }
+
+        $filtersHtml = $filters ? '<div class="filters">Filtres : ' . e($filters) . '</div>' : '';
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        .meta { color: #555; margin-bottom: 10px; }
+        .filters { font-size: 11px; margin-bottom: 8px; color: #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; }
+        th { background: #f2f4f8; text-align: left; }
+        tr:nth-child(even) { background: #fafbfc; }
+    </style>
+</head>
+<body>
+    <h1>Rapport des véhicules</h1>
+    <div class="meta">Généré le {$date}</div>
+    {$filtersHtml}
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Numéro</th>
+                <th>Marque / Modèle</th>
+                <th>Catégorie</th>
+                <th>Option</th>
+                <th>Énergie</th>
+                <th>Boîte</th>
+                <th>Utilisation</th>
+                <th>Affectation</th>
+                <th>Date acquisition</th>
+            </tr>
+        </thead>
+        <tbody>
+            {$rows}
+        </tbody>
+    </table>
+</body>
+</html>
+HTML;
+    }
+
+    private function buildChauffeursHtml($chauffeurs, Request $request)
+    {
+        $date = now()->format('d/m/Y H:i');
+        $filters = $this->formatFilters($request, [
+            'statut' => 'Statut',
+            'mention' => 'Mention',
+        ]);
+
+        $rows = $chauffeurs->map(function ($c) {
+            return sprintf(
+                '<tr>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                </tr>',
+                e($c->matricule),
+                e($c->nom),
+                e($c->prenom),
+                e($c->statut),
+                e($c->mention)
+            );
+        })->implode('');
+
+        if ($rows === '') {
+            $rows = '<tr><td colspan="5" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
+        }
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        .meta { color: #555; margin-bottom: 10px; }
+        .filters { font-size: 11px; margin-bottom: 8px; color: #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; }
+        th { background: #f2f4f8; text-align: left; }
+        tr:nth-child(even) { background: #fafbfc; }
+    </style>
+</head>
+<body>
+    <h1>Rapport des chauffeurs</h1>
+    <div class="meta">Généré le {$date}</div>
+    {$filters}
+    <table>
+        <thead>
+            <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Statut</th>
+                <th>Mention</th>
+            </tr>
+        </thead>
+        <tbody>
+            {$rows}
+        </tbody>
+    </table>
+</body>
+</html>
+HTML;
+    }
+
+    private function buildChargesHtml($charges, Request $request)
+    {
+        $date = now()->format('d/m/Y H:i');
+        $filters = $this->formatFilters($request, [
+            'vehicule' => 'Véhicule',
+            'type' => 'Type de charge',
+        ]);
+
+        $rows = $charges->map(function ($c) {
+            return sprintf(
+                '<tr>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                </tr>',
+                e(optional($c->vehicule)->code ?? $c->vehicule_id),
+                e($c->type),
+                e($c->libele),
+                e($c->partenaire),
+                e(optional($c->debut)->format('d/m/Y')),
+                e(optional($c->expiration)->format('d/m/Y'))
+            );
+        })->implode('');
+
+        if ($rows === '') {
+            $rows = '<tr><td colspan="6" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
+        }
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        .meta { color: #555; margin-bottom: 10px; }
+        .filters { font-size: 11px; margin-bottom: 8px; color: #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; }
+        th { background: #f2f4f8; text-align: left; }
+        tr:nth-child(even) { background: #fafbfc; }
+    </style>
+</head>
+<body>
+    <h1>Rapport des charges véhicules</h1>
+    <div class="meta">Généré le {$date}</div>
+    {$filters}
+    <table>
+        <thead>
+            <tr>
+                <th>Véhicule</th>
+                <th>Type</th>
+                <th>Libellé</th>
+                <th>Partenaire</th>
+                <th>Début</th>
+                <th>Expiration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {$rows}
+        </tbody>
+    </table>
+</body>
+</html>
+HTML;
+    }
+
+    private function buildFacturesHtml($factures, Request $request)
+    {
+        $date = now()->format('d/m/Y H:i');
+        $filters = $this->formatFilters($request, [
+            'vehicule' => 'Véhicule',
+            'start' => 'Période début',
+            'end' => 'Période fin',
+        ]);
+
+        $rows = $factures->map(function ($f) {
+            return sprintf(
+                '<tr>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                </tr>',
+                e(optional($f->vehicule)->code ?? $f->vehicule_id),
+                e($f->num_facture),
+                e($f->libele),
+                e(optional($f->date_facture)->format('d/m/Y')),
+                e($f->valeur)
+            );
+        })->implode('');
+
+        if ($rows === '') {
+            $rows = '<tr><td colspan="5" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
+        }
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        .meta { color: #555; margin-bottom: 10px; }
+        .filters { font-size: 11px; margin-bottom: 8px; color: #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; }
+        th { background: #f2f4f8; text-align: left; }
+        tr:nth-child(even) { background: #fafbfc; }
+    </style>
+</head>
+<body>
+    <h1>Rapport des factures véhicule</h1>
+    <div class="meta">Généré le {$date}</div>
+    {$filters}
+    <table>
+        <thead>
+            <tr>
+                <th>Véhicule</th>
+                <th>N° facture</th>
+                <th>Libellé</th>
+                <th>Date facture</th>
+                <th>Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {$rows}
+        </tbody>
+    </table>
+</body>
+</html>
+HTML;
+    }
+
+    private function formatFilters(Request $request, array $labelMap = [])
+    {
+        $parts = [];
+        $map = array_merge([
+            'categorie' => 'Catégorie',
+            'option_vehicule' => 'Option',
+            'energie' => 'Énergie',
+            'boite' => 'Boîte',
+            'leasing' => 'Leasing',
+            'utilisation' => 'Utilisation',
+            'affectation' => 'Affectation',
+        ], $labelMap);
+
+        foreach ($map as $key => $label) {
+            if ($request->filled($key)) {
+                $parts[] = $label . ': ' . $request->input($key);
+            }
+        }
+
+        if ($request->filled('date_acquisition_start') || $request->filled('date_acquisition_end')) {
+            $start = $request->input('date_acquisition_start') ?: '...';
+            $end = $request->input('date_acquisition_end') ?: '...';
+            $parts[] = 'Date acquisition: ' . $start . ' → ' . $end;
+        }
+
+        if ($request->filled('start') || $request->filled('end')) {
+            $start = $request->input('start') ?: '...';
+            $end = $request->input('end') ?: '...';
+            $parts[] = 'Période: ' . $start . ' → ' . $end;
+        }
+
+        return $parts ? '<div class="filters">Filtres : ' . e(implode(' | ', $parts)) . '</div>' : '';
+    }
+}
