@@ -376,6 +376,7 @@ export async function loadDocuments() {
     });
     populateVehiculeFilter();
     renderDocumentTables();
+    document.dispatchEvent(new CustomEvent('data:documents:updated'));
 }
 
 // ============================================================================

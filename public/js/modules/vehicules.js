@@ -224,6 +224,7 @@ export async function loadVehicules() {
             clearVehiculeDetail();
         }
     }
+    document.dispatchEvent(new CustomEvent('data:vehicules:updated'));
 }
 
 // ============================================================================
