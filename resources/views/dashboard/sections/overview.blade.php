@@ -1,4 +1,4 @@
-<section class="panel section active" id="overview">
+<section class="panel section" id="overview">
     <h2>Tableau de bord</h2>
     <p>Vision rapide des métriques clés.</p>
     <div class="grid" id="metric-grid">

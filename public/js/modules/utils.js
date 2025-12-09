@@ -3,6 +3,8 @@
 // ============================================================================
 // Shared utilities for formatting, DOM manipulation, and helpers
 
+import { state } from './state.js';
+
 export function formatDate(date) {
     if (!date) return '-';
     const parsed = new Date(date);
@@ -93,6 +95,64 @@ export function initializeNavigation() {
     const documentsDropdownBtn = document.getElementById('documents-dropdown-btn');
     const documentsDropdown = documentsDropdownBtn?.parentElement;
 
+    const storageKeys = {
+        section: 'nav:lastSection',
+        docType: 'nav:lastDocType',
+    };
+
+    const saveNavState = (sectionId, docType = null) => {
+        if (sectionId) localStorage.setItem(storageKeys.section, sectionId);
+        if (docType) localStorage.setItem(storageKeys.docType, docType);
+    };
+
+    const activateDocuments = (docType) => {
+        const typeToUse = docType || localStorage.getItem(storageKeys.docType) || state.documentCurrentType;
+        const targetSection = document.getElementById('documents');
+
+        navButtons.forEach(b => b.classList.remove('active'));
+        navSubmenuButtons.forEach(b => b.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+
+        if (documentsDropdownBtn) {
+            documentsDropdownBtn.classList.add('active');
+        }
+        if (documentsDropdown) {
+            documentsDropdown.classList.add('open');
+        }
+        if (targetSection) {
+            targetSection.classList.add('active');
+        }
+
+        const matchingSubBtn = Array.from(navSubmenuButtons).find(btn => btn.dataset.docType === typeToUse);
+        if (matchingSubBtn) {
+            matchingSubBtn.classList.add('active');
+        }
+
+        // Persist immediately so refresh restores Documents even if module import fails
+        saveNavState('documents', typeToUse);
+
+        import('./documents.js').then(module => {
+            module.activateDocumentTab(typeToUse);
+        }).catch(err => console.error('Error activating documents tab:', err));
+    };
+
+    const activateMainSection = (sectionId) => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        navSubmenuButtons.forEach(b => b.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+
+        const targetSection = document.getElementById(sectionId);
+        const targetBtn = Array.from(navButtons).find(b => b.dataset.target === sectionId);
+        if (targetBtn) targetBtn.classList.add('active');
+        if (targetSection) targetSection.classList.add('active');
+
+        if (documentsDropdown) {
+            documentsDropdown.classList.remove('open');
+        }
+
+        saveNavState(sectionId);
+    };
+
     console.log('Navigation initialized:', {
         navButtons: navButtons.length,
         navSubmenuButtons: navSubmenuButtons.length,
@@ -102,26 +162,11 @@ export function initializeNavigation() {
     // Gérer les boutons de navigation principaux
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Ignorer si c'est le bouton dropdown
             if (btn.id === 'documents-dropdown-btn') {
-                console.log('Toggle dropdown');
-                documentsDropdown.classList.toggle('open');
+                activateDocuments();
                 return;
             }
-
-            navButtons.forEach(b => b.classList.remove('active'));
-            navSubmenuButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            sections.forEach(s => s.classList.remove('active'));
-            const targetSection = document.getElementById(btn.dataset.target);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-
-            // Fermer le dropdown si on clique ailleurs
-            if (documentsDropdown) {
-                documentsDropdown.classList.remove('open');
-            }
+            activateMainSection(btn.dataset.target);
         });
     });
 
@@ -133,33 +178,16 @@ export function initializeNavigation() {
             const docType = btn.dataset.docType;
             console.log('Submenu clicked:', docType);
             
-            // Désactiver tous les boutons principaux et sous-menu
-            navButtons.forEach(b => b.classList.remove('active'));
-            navSubmenuButtons.forEach(b => b.classList.remove('active'));
-            
-            // Activer le bouton cliqué et le bouton dropdown parent
-            btn.classList.add('active');
-            if (documentsDropdownBtn) {
-                documentsDropdownBtn.classList.add('active');
-            }
-
-            // Afficher la section documents
-            sections.forEach(s => s.classList.remove('active'));
-            const documentsSection = document.getElementById(btn.dataset.target);
-            if (documentsSection) {
-                documentsSection.classList.add('active');
-            }
-
-            // Activer le bon type de document
-            if (docType) {
-                // Importer dynamiquement activateDocumentTab
-                import('./documents.js').then(module => {
-                    console.log('Activating document tab:', docType);
-                    module.activateDocumentTab(docType);
-                }).catch(err => {
-                    console.error('Error loading documents module:', err);
-                });
-            }
+            activateDocuments(docType);
         });
     });
+
+    // Restaurer la dernière section visitée
+    const lastSection = localStorage.getItem(storageKeys.section) || 'overview';
+    const lastDocType = localStorage.getItem(storageKeys.docType) || state.documentCurrentType;
+    if (lastSection === 'documents') {
+        activateDocuments(lastDocType);
+    } else {
+        activateMainSection(lastSection);
+    }
 }

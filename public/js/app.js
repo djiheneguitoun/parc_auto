@@ -90,6 +90,10 @@ function initializeApp() {
 // ============================================================================
 
 if (bootstrapAuth()) {
-    initializeApp();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
 }
 

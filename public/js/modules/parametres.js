@@ -6,15 +6,17 @@
 import { ensureAuth } from './auth.js';
 import { showToast, extractErrorMessage } from './state.js';
 
-// DOM Elements
-const paramForm = document.getElementById('param-form');
+// Grab form on demand to avoid null when script loads before DOM is ready
+const getParamForm = () => document.getElementById('param-form');
 
 export async function loadParametres() {
     ensureAuth();
+    const form = getParamForm();
+    if (!form) return;
     const res = await axios.get('/api/parametres');
     if (res.data) {
-        paramForm.nom_entreprise.value = res.data.nom_entreprise || '';
-        paramForm.lien_archive_facture.value = res.data.lien_archive_facture || '';
+        form.nom_entreprise.value = res.data.nom_entreprise || '';
+        form.lien_archive_facture.value = res.data.lien_archive_facture || '';
     }
 }
 
@@ -23,7 +25,10 @@ export async function loadParametres() {
 // ============================================================================
 
 export function initializeParametresEvents() {
-    paramForm.addEventListener('submit', async (e) => {
+    const form = getParamForm();
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
         const payload = Object.fromEntries(new FormData(e.target).entries());

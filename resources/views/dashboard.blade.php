@@ -29,13 +29,12 @@
 <div class="layout">
     <nav>
         <h4>Menu</h4>
-        <button class="nav-btn active" data-target="overview">Tableau de bord</button>
+        <button class="nav-btn" data-target="overview">Tableau de bord</button>
         <button class="nav-btn" data-target="chauffeurs">Chauffeurs</button>
         <button class="nav-btn" data-target="vehicules">Véhicules</button>
         <div class="nav-dropdown">
-            <button class="nav-btn" id="documents-dropdown-btn" type="button">
+            <button class="nav-btn" id="documents-dropdown-btn" type="button" data-target="documents">
                 <span>Documents</span>
-                <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z"/></svg>
             </button>
             <div class="nav-submenu" id="documents-submenu">
                 <button class="nav-submenu-btn" data-target="documents" data-doc-type="assurance">Assurance</button>
