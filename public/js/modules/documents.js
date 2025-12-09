@@ -150,10 +150,12 @@ function formatDocUtilisation(value) {
     return map[value] || '-';
 }
 
-function formatDocFacture(doc) {
-    const num = doc.num_facture ? `#${doc.num_facture}` : '-';
-    const date = formatDate(doc.date_facture);
-    return `${num} • ${date}`;
+function formatDocFactureNum(doc) {
+    return doc.num_facture ? `#${doc.num_facture}` : '-';
+}
+
+function formatDocFactureDate(doc) {
+    return formatDate(doc.date_facture);
 }
 
 function vehiculeLabel(doc) {
@@ -188,6 +190,7 @@ export const documentTableBodies = {
     reparation: document.getElementById('document-rows-reparation'),
     bon_essence: document.getElementById('document-rows-bon_essence'),
 };
+export const documentVehiculeFilter = document.getElementById('document-vehicule-filter');
 
 // ============================================================================
 // Form & Rendering Functions
@@ -241,18 +244,17 @@ function renderDocumentFormFields(type, doc = {}) {
 }
 
 function renderDocumentRow(type, doc) {
-    const veh = vehiculeLabel(doc);
-    const facture = formatDocFacture(doc);
     if (['assurance', 'vignette', 'controle'].includes(type)) {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${veh}</td>
                 <td>${doc.numero || '-'}</td>
+                <td>${doc.libele || '-'}</td>
                 <td>${doc.partenaire || '-'}</td>
                 <td>${formatDate(doc.debut)}</td>
                 <td>${formatDate(doc.expiration)}</td>
                 <td>${formatCurrency(doc.valeur)}</td>
-                <td>${facture}</td>
+                <td>${formatDocFactureNum(doc)}</td>
+                <td>${formatDocFactureDate(doc)}</td>
                 <td class="row-actions">
                     <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
                     <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
@@ -262,15 +264,16 @@ function renderDocumentRow(type, doc) {
     if (type === 'entretien') {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${veh}</td>
                 <td>${doc.numero || '-'}</td>
+                <td>${doc.libele || '-'}</td>
                 <td>${doc.partenaire || '-'}</td>
                 <td>${formatDate(doc.debut)}</td>
                 <td>${formatDate(doc.expiration)}</td>
                 <td>${formatDocVidange(doc.vidange)}</td>
                 <td>${doc.kilometrage ?? '-'}</td>
                 <td>${formatCurrency(doc.valeur)}</td>
-                <td>${facture}</td>
+                <td>${formatDocFactureNum(doc)}</td>
+                <td>${formatDocFactureDate(doc)}</td>
                 <td class="row-actions">
                     <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
                     <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
@@ -280,14 +283,14 @@ function renderDocumentRow(type, doc) {
     if (type === 'reparation') {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${veh}</td>
                 <td>${doc.numero || '-'}</td>
                 <td>${doc.piece || '-'}</td>
                 <td>${doc.reparateur || '-'}</td>
                 <td>${formatDocTypeReparation(doc.type_reparation)}</td>
                 <td>${formatDate(doc.date_reparation)}</td>
                 <td>${formatCurrency(doc.valeur)}</td>
-                <td>${facture}</td>
+                <td>${formatDocFactureNum(doc)}</td>
+                <td>${formatDocFactureDate(doc)}</td>
                 <td class="row-actions">
                     <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
                     <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
@@ -297,14 +300,14 @@ function renderDocumentRow(type, doc) {
     if (type === 'bon_essence') {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${veh}</td>
                 <td>${doc.numero || '-'}</td>
                 <td>${formatDate(doc.debut)}</td>
                 <td>${formatDocCarburant(doc.typecarburant)}</td>
                 <td>${doc.kilometrage ?? '-'}</td>
                 <td>${formatDocUtilisation(doc.utilisation)}</td>
                 <td>${formatCurrency(doc.valeur)}</td>
-                <td>${facture}</td>
+                <td>${formatDocFactureNum(doc)}</td>
+                <td>${formatDocFactureDate(doc)}</td>
                 <td class="row-actions">
                     <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
                     <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
@@ -315,9 +318,22 @@ function renderDocumentRow(type, doc) {
 }
 
 function renderDocumentTables() {
+    const selectedVehicleId = documentVehiculeFilter.value;
     Object.entries(documentTableBodies).forEach(([type, tbody]) => {
-        const rows = (state.documents[type] || []).map(doc => renderDocumentRow(type, doc)).join('');
-        const colspan = documentTypeConfig[type]?.colspan || 6;
+        let docs = state.documents[type] || [];
+        if (selectedVehicleId) {
+            docs = docs.filter(doc => Number(doc.vehicule_id) === Number(selectedVehicleId));
+        }
+        const rows = docs.map(doc => renderDocumentRow(type, doc)).join('');
+        const colspans = {
+            assurance: 9,
+            vignette: 9,
+            controle: 9,
+            entretien: 11,
+            reparation: 9,
+            bon_essence: 9,
+        };
+        const colspan = colspans[type] || 6;
         tbody.innerHTML = rows || `<tr><td colspan="${colspan}" class="muted">Aucun document ${documentTypeConfig[type]?.label?.toLowerCase() || ''}.</td></tr>`;
     });
 }
@@ -358,6 +374,7 @@ export async function loadDocuments() {
         const list = res?.data?.data || res?.data || [];
         state.documents[type] = list;
     });
+    populateVehiculeFilter();
     renderDocumentTables();
 }
 
@@ -365,7 +382,19 @@ export async function loadDocuments() {
 // Event Listeners
 // ============================================================================
 
+function populateVehiculeFilter() {
+    const options = state.vehicules.map(v => {
+        const label = [v.code, v.numero, v.marque, v.modele].filter(Boolean).join(' · ') || `Véhicule ${v.id}`;
+        return `<option value="${v.id}">${label}</option>`;
+    }).join('');
+    documentVehiculeFilter.innerHTML = `<option value="">-- Tous les véhicules --</option>${options}`;
+}
+
 export function initializeDocumentEvents() {
+    documentVehiculeFilter.addEventListener('change', () => {
+        renderDocumentTables();
+    });
+    
     documentTabs.forEach(tab => {
         tab.addEventListener('click', () => activateDocumentTab(tab.dataset.docTab));
     });

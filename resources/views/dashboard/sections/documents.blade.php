@@ -20,6 +20,15 @@
         <button class="doc-tab" data-doc-tab="bon_essence" type="button">Bon d'essence</button>
     </div>
 
+    <div class="section-subheader" style="margin-bottom: 16px;">
+        <div>
+            <label for="document-vehicule-filter" style="display: block; margin-bottom: 8px; font-weight: 600;">Sélectionner un véhicule</label>
+            <select id="document-vehicule-filter" style="min-width: 300px;">
+                <option value="">-- Tous les véhicules --</option>
+            </select>
+        </div>
+    </div>
+
     <div class="doc-panels">
         <div class="doc-panel active" data-doc-panel="assurance">
             <div class="section-subheader">
@@ -34,7 +43,7 @@
             <div class="table-wrapper table-card">
                 <table class="table-clickable">
                     <thead>
-                    <tr><th>Véhicule</th><th>Numéro</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Valeur</th><th>Facture</th><th>Actions</th></tr>
+                    <tr><th>Numéro</th><th>Libellé</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Valeur</th><th>Facture</th><th>Date facture</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="document-rows-assurance"></tbody>
                 </table>
@@ -54,7 +63,7 @@
             <div class="table-wrapper table-card">
                 <table class="table-clickable">
                     <thead>
-                    <tr><th>Véhicule</th><th>Numéro</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Valeur</th><th>Facture</th><th>Actions</th></tr>
+                    <tr><th>Numéro</th><th>Libellé</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Valeur</th><th>Facture</th><th>Date facture</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="document-rows-vignette"></tbody>
                 </table>
@@ -74,7 +83,7 @@
             <div class="table-wrapper table-card">
                 <table class="table-clickable">
                     <thead>
-                    <tr><th>Véhicule</th><th>Numéro</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Valeur</th><th>Facture</th><th>Actions</th></tr>
+                    <tr><th>Numéro</th><th>Libellé</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Valeur</th><th>Facture</th><th>Date facture</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="document-rows-controle"></tbody>
                 </table>
@@ -94,7 +103,7 @@
             <div class="table-wrapper table-card">
                 <table class="table-clickable">
                     <thead>
-                    <tr><th>Véhicule</th><th>Numéro</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Vidange</th><th>Km</th><th>Valeur</th><th>Facture</th><th>Actions</th></tr>
+                    <tr><th>Numéro</th><th>Libellé</th><th>Partenaire</th><th>Début</th><th>Expiration</th><th>Vidange</th><th>Km</th><th>Valeur</th><th>Facture</th><th>Date facture</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="document-rows-entretien"></tbody>
                 </table>
@@ -114,7 +123,7 @@
             <div class="table-wrapper table-card">
                 <table class="table-clickable">
                     <thead>
-                    <tr><th>Véhicule</th><th>Numéro</th><th>Pièce</th><th>Réparateur</th><th>Type</th><th>Date</th><th>Valeur</th><th>Facture</th><th>Actions</th></tr>
+                    <tr><th>Numéro</th><th>Pièce</th><th>Réparateur</th><th>Type</th><th>Date</th><th>Valeur</th><th>Facture</th><th>Date facture</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="document-rows-reparation"></tbody>
                 </table>
@@ -134,7 +143,7 @@
             <div class="table-wrapper table-card">
                 <table class="table-clickable">
                     <thead>
-                    <tr><th>Véhicule</th><th>Numéro</th><th>Date</th><th>Carburant</th><th>Km</th><th>Utilisation</th><th>Valeur</th><th>Facture</th><th>Actions</th></tr>
+                    <tr><th>Numéro</th><th>Date</th><th>Carburant</th><th>Km</th><th>Utilisation</th><th>Valeur</th><th>Facture</th><th>Date facture</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="document-rows-bon_essence"></tbody>
                 </table>
