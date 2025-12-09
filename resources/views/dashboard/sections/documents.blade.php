@@ -1,19 +1,15 @@
 <section class="panel section" id="documents">
     <style>
-        #documents .doc-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 18px; }
+        #documents .doc-tabs { display: none; }
         #documents .doc-tab { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); background: #eef0f7; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
         #documents .doc-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 10px 22px rgba(24, 38, 110, 0.18); }
         #documents .doc-panel { display: none; gap: 16px; }
         #documents .doc-panel.active { display: block; }
         #documents .table-card { margin-top: 6px; }
+        #documents table th, #documents table td { font-size: 11px; padding: 7px 5px; }
+        #documents table th { font-size: 10px; }
     </style>
 
-    <div class="section-header">
-        <div>
-            <h2>Documents véhicules</h2>
-            <p>Gérez les 6 types de documents avec des formulaires adaptés.</p>
-        </div>
-    </div>
 
     <div class="doc-tabs">
         <button class="doc-tab active" data-doc-tab="assurance" type="button">Assurance</button>

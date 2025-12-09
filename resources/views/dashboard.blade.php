@@ -7,9 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ time() }}">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script type="module" src="{{ asset('js/app.js') }}"></script>
+<script type="module" src="{{ asset('js/app.js') }}?v={{ time() }}"></script>
 
 
 </head>
@@ -32,7 +32,20 @@
         <button class="nav-btn active" data-target="overview">Tableau de bord</button>
         <button class="nav-btn" data-target="chauffeurs">Chauffeurs</button>
         <button class="nav-btn" data-target="vehicules">Véhicules</button>
-        <button class="nav-btn" data-target="documents">Documents</button>
+        <div class="nav-dropdown">
+            <button class="nav-btn" id="documents-dropdown-btn" type="button">
+                <span>Documents</span>
+                <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z"/></svg>
+            </button>
+            <div class="nav-submenu" id="documents-submenu">
+                <button class="nav-submenu-btn" data-target="documents" data-doc-type="assurance">Assurance</button>
+                <button class="nav-submenu-btn" data-target="documents" data-doc-type="vignette">Vignette</button>
+                <button class="nav-submenu-btn" data-target="documents" data-doc-type="controle">Contrôle</button>
+                <button class="nav-submenu-btn" data-target="documents" data-doc-type="entretien">Entretien</button>
+                <button class="nav-submenu-btn" data-target="documents" data-doc-type="reparation">Réparation</button>
+                <button class="nav-submenu-btn" data-target="documents" data-doc-type="bon_essence">Bon d'essence</button>
+            </div>
+        </div>
         <button class="nav-btn" data-target="utilisateurs">Utilisateurs</button>
         <button class="nav-btn" data-target="parametres">Paramètres</button>
     </nav>

@@ -89,12 +89,77 @@ export function toInputDate(value) {
 export function initializeNavigation() {
     const sections = document.querySelectorAll('.section');
     const navButtons = document.querySelectorAll('.nav-btn');
+    const navSubmenuButtons = document.querySelectorAll('.nav-submenu-btn');
+    const documentsDropdownBtn = document.getElementById('documents-dropdown-btn');
+    const documentsDropdown = documentsDropdownBtn?.parentElement;
+
+    console.log('Navigation initialized:', {
+        navButtons: navButtons.length,
+        navSubmenuButtons: navSubmenuButtons.length,
+        hasDropdownBtn: !!documentsDropdownBtn
+    });
+
+    // Gérer les boutons de navigation principaux
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
+            // Ignorer si c'est le bouton dropdown
+            if (btn.id === 'documents-dropdown-btn') {
+                console.log('Toggle dropdown');
+                documentsDropdown.classList.toggle('open');
+                return;
+            }
+
             navButtons.forEach(b => b.classList.remove('active'));
+            navSubmenuButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             sections.forEach(s => s.classList.remove('active'));
-            document.getElementById(btn.dataset.target).classList.add('active');
+            const targetSection = document.getElementById(btn.dataset.target);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Fermer le dropdown si on clique ailleurs
+            if (documentsDropdown) {
+                documentsDropdown.classList.remove('open');
+            }
+        });
+    });
+
+    // Gérer les boutons du sous-menu documents
+    navSubmenuButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const docType = btn.dataset.docType;
+            console.log('Submenu clicked:', docType);
+            
+            // Désactiver tous les boutons principaux et sous-menu
+            navButtons.forEach(b => b.classList.remove('active'));
+            navSubmenuButtons.forEach(b => b.classList.remove('active'));
+            
+            // Activer le bouton cliqué et le bouton dropdown parent
+            btn.classList.add('active');
+            if (documentsDropdownBtn) {
+                documentsDropdownBtn.classList.add('active');
+            }
+
+            // Afficher la section documents
+            sections.forEach(s => s.classList.remove('active'));
+            const documentsSection = document.getElementById(btn.dataset.target);
+            if (documentsSection) {
+                documentsSection.classList.add('active');
+            }
+
+            // Activer le bon type de document
+            if (docType) {
+                // Importer dynamiquement activateDocumentTab
+                import('./documents.js').then(module => {
+                    console.log('Activating document tab:', docType);
+                    module.activateDocumentTab(docType);
+                }).catch(err => {
+                    console.error('Error loading documents module:', err);
+                });
+            }
         });
     });
 }
