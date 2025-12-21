@@ -231,6 +231,7 @@ main {
 .charts-grid {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     align-items: stretch;
+    margin-top: 18px;
 }
 .chart-card canvas {
     width: 100% !important;
