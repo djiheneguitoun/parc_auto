@@ -1,21 +1,4 @@
 <section class="panel section" id="vehicules">
-    <style>
-        /* Detail lecture tweaks */
-        #vehicules .info-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 14px; }
-        #vehicules .info-chip { padding: 10px 12px; border: 1px dashed var(--border); border-radius: 12px; background: #f6f9fe; box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
-        #vehicules .info-chip > div:last-child { font-weight: 650; }
-        #vehicules .section-subheader + .info-grid { margin-top: 6px; }
-        #vehicules .detail-card .muted-small { letter-spacing: 0.15px; }
-        #vehicules #vehicule-images.image-grid { display: flex; flex-wrap: wrap; gap: 12px; }
-        #vehicules #vehicule-images .vehicule-thumb { flex: 1 1 calc(25% - 12px); max-width: 25%; min-width: 160px; cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
-        #vehicules #vehicule-images .vehicule-thumb:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
-        #vehicules #vehicule-images .vehicule-thumb img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; }
-        @media (max-width: 960px) { #vehicules #vehicule-images .vehicule-thumb { flex-basis: calc(50% - 12px); max-width: 50%; } }
-        @media (max-width: 600px) { #vehicules #vehicule-images .vehicule-thumb { flex-basis: 100%; max-width: 100%; } }
-        #vehicules .image-viewer-dialog { width: min(1100px, 96vw); }
-        #vehicules .image-viewer-body { overflow: auto; max-height: 72vh; border-radius: 12px; border: 1px solid var(--border); background: #0a192f; display: flex; justify-content: center; align-items: center; }
-        #vehicules .image-viewer-body img { max-width: 100%; max-height: 72vh; object-fit: contain; cursor: zoom-in; transition: transform 0.12s ease; }
-    </style>
     <div class="section-header">
         <div>
             <h2>Véhicules</h2>

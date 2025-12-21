@@ -1,17 +1,4 @@
 <section class="panel section" id="rapports">
-	<style>
-		#rapports .reports-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
-		#rapports .report-card { display: flex; flex-direction: column; gap: 8px; min-height: 160px; }
-		#rapports .report-card .muted-small { min-height: 40px; }
-		#rapports .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 14px; }
-		#rapports .filters-grid .stack { gap: 6px; }
-		#rapports .filters-inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px 12px; align-items: end; }
-		#rapports .hint { font-size: 13px; color: var(--muted, #556); }
-		#rapports .card { margin-top: 0; }
-		#rapports .modal-dialog { max-width: min(920px, 96vw); }
-		#rapports .modal .section-subheader { margin-bottom: 10px; }
-	</style>
-
 	<div class="section-header">
 		<div>
 			<h2>Rapports</h2>

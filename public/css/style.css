@@ -535,3 +535,173 @@ td {
         padding: 60px 10px 20px;
     }
 }
+
+/* Vehicules section: detail + image viewer tweaks */
+#vehicules .info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px 14px;
+}
+#vehicules .info-chip {
+    padding: 10px 12px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: #f6f9fe;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+#vehicules .info-chip > div:last-child {
+    font-weight: 650;
+}
+#vehicules .section-subheader + .info-grid {
+    margin-top: 6px;
+}
+#vehicules .detail-card .muted-small {
+    letter-spacing: 0.15px;
+}
+#vehicules #vehicule-images.image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+#vehicules #vehicule-images .vehicule-thumb {
+    flex: 1 1 calc(25% - 12px);
+    max-width: 25%;
+    min-width: 160px;
+    cursor: zoom-in;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+#vehicules #vehicule-images .vehicule-thumb:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+#vehicules #vehicule-images .vehicule-thumb img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 10px;
+}
+@media (max-width: 960px) {
+    #vehicules #vehicule-images .vehicule-thumb {
+        flex-basis: calc(50% - 12px);
+        max-width: 50%;
+    }
+}
+@media (max-width: 600px) {
+    #vehicules #vehicule-images .vehicule-thumb {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+}
+#vehicules .image-viewer-dialog {
+    width: min(1100px, 96vw);
+}
+#vehicules .image-viewer-body {
+    overflow: auto;
+    max-height: 72vh;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #0a192f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#vehicules .image-viewer-body img {
+    max-width: 100%;
+    max-height: 72vh;
+    object-fit: contain;
+    cursor: zoom-in;
+    transition: transform 0.12s ease;
+}
+
+/* Rapports section: reports grid + filters modal */
+#rapports .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+}
+#rapports .report-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 160px;
+}
+#rapports .report-card .muted-small {
+    min-height: 40px;
+}
+#rapports .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px 14px;
+}
+#rapports .filters-grid .stack {
+    gap: 6px;
+}
+#rapports .filters-inline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 10px 12px;
+    align-items: end;
+}
+#rapports .hint {
+    font-size: 13px;
+    color: var(--muted, #556);
+}
+#rapports .card {
+    margin-top: 0;
+}
+#rapports .modal-dialog {
+    max-width: min(920px, 96vw);
+}
+#rapports .modal .section-subheader {
+    margin-bottom: 10px;
+}
+
+/* Documents section: tabs + tables */
+#documents .doc-tabs {
+    display: none;
+}
+#documents .doc-tab {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #eef0f7;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+#documents .doc-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 10px 22px rgba(24, 38, 110, 0.18);
+}
+#documents .doc-panel {
+    display: none;
+    gap: 16px;
+}
+#documents .doc-panel.active {
+    display: block;
+}
+#documents .table-card {
+    margin-top: 6px;
+}
+#documents table th,
+#documents table td {
+    font-size: 11px;
+    padding: 7px 5px;
+}
+#documents table th {
+    font-size: 10px;
+}
+
+/* Documents section: vehicle filter row */
+#documents .documents-filter {
+    margin-bottom: 16px;
+}
+#documents label[for="document-vehicule-filter"] {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+#documents #document-vehicule-filter {
+    min-width: 300px;
+}
