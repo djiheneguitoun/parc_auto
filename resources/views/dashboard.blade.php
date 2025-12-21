@@ -36,7 +36,7 @@
         <button class="nav-btn" data-target="rapports">Rapports</button>
         <div class="nav-dropdown">
             <button class="nav-btn" id="documents-dropdown-btn" type="button" data-target="documents">
-                <span>Documents</span>
+                <span>Opération</span>
             </button>
             <div class="nav-submenu" id="documents-submenu">
                 <button class="nav-submenu-btn" data-target="documents" data-doc-type="assurance">Assurance</button>
