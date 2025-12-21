@@ -121,7 +121,12 @@
                     <div><label>Année</label><input name="annee" type="number" min="1900" max="2100"></div>
                     <div><label>Couleur</label><input name="couleur"></div>
                     <div><label>Châssis</label><input name="chassis"></div>
-                    <div><label>Chauffeur ID</label><input name="chauffeur_id" type="number" min="1" placeholder="ID chauffeur"></div>
+                    <div>
+                        <label>Chauffeur</label>
+                        <select name="chauffeur_id" aria-label="Chauffeur">
+                            <option value="">- Choisir un chauffeur -</option>
+                        </select>
+                    </div>
                     <div><label>Date d'acquisition</label><input name="date_acquisition" type="date"></div>
                     <div><label>Valeur</label><input name="valeur" type="number" min="0" step="0.01"></div>
                     <div><label>Statut</label>

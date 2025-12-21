@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles vehicle CRUD operations, modal interactions, rendering, and images
 
-import { state, showToast } from './state.js';
+import { state } from './state.js';
 import { ensureAuth } from './auth.js';
 import { formatDate, formatVehiculeStatut, formatCategorie, formatOptionVehicule, formatEnergie, formatBoite, formatLeasing, formatUtilisation, formatCurrency, resolveVehiculeImageSrc } from './utils.js';
 
@@ -50,6 +50,39 @@ export const closeImageViewerBtn = document.getElementById('close-image-viewer')
 // Image viewer zoom management
 let imageViewerZoom = 1;
 
+async function syncVehiculeChauffeurSelect(selectedId = '') {
+    const select = vehiculeForm?.chauffeur_id;
+    if (!select) return;
+
+    if (!Array.isArray(state.chauffeurs) || !state.chauffeurs.length) {
+        try {
+            ensureAuth();
+            const res = await axios.get('/api/chauffeurs');
+            const list = res.data?.data ?? res.data ?? [];
+            state.chauffeurs = Array.isArray(list) ? list : [];
+        } catch (err) {
+            console.error(err);
+            state.chauffeurs = [];
+        }
+    }
+
+    const selectedValue = selectedId ? String(selectedId) : '';
+    select.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '- Choisir un chauffeur -';
+    select.appendChild(placeholder);
+
+    for (const ch of state.chauffeurs) {
+        const opt = document.createElement('option');
+        opt.value = String(ch.id);
+        opt.textContent = `${ch.nom || ''} ${ch.prenom || ''}`.trim();
+        select.appendChild(opt);
+    }
+
+    select.value = selectedValue;
+}
+
 export function openImageViewer(src, caption = '') {
     imageViewerZoom = 1;
     imageViewerImg.style.transform = 'scale(1)';
@@ -80,7 +113,7 @@ export function setVehiculeFormMode(mode, vehicule = null) {
         vehiculeForm.annee.value = vehicule.annee || '';
         vehiculeForm.couleur.value = vehicule.couleur || '';
         vehiculeForm.chassis.value = vehicule.chassis || '';
-        vehiculeForm.chauffeur_id.value = vehicule.chauffeur_id || '';
+        syncVehiculeChauffeurSelect(vehicule.chauffeur_id);
         vehiculeForm.date_acquisition.value = vehicule.date_acquisition || '';
         vehiculeForm.valeur.value = vehicule.valeur || '';
         vehiculeForm.statut.value = Number(vehicule.statut) === 0 ? '0' : '1';
@@ -99,6 +132,7 @@ export function setVehiculeFormMode(mode, vehicule = null) {
         if (vehiculeImagesInput) vehiculeImagesInput.value = '';
         vehiculeFormTitle.textContent = 'Ajouter un véhicule';
         vehiculeFormSubmit.textContent = 'Enregistrer';
+        syncVehiculeChauffeurSelect('');
     }
 }
 
