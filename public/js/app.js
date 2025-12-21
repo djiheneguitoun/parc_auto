@@ -138,6 +138,8 @@ function renderDashboardCharts() {
                 }],
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     y: { beginAtZero: true, ticks: { stepSize: 1 } }
@@ -163,6 +165,8 @@ function renderDashboardCharts() {
                 }],
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     y: { beginAtZero: true }

@@ -235,6 +235,8 @@ main {
 }
 .chart-card canvas {
     width: 100% !important;
+    height: 180px !important;
+    display: block;
 }
 .badge-soft {
     background: var(--pill);
