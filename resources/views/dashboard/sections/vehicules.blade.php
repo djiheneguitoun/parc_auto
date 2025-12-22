@@ -143,6 +143,7 @@
                             <option value="essence">Essence</option>
                             <option value="diesel">Diesel</option>
                             <option value="gpl">GPL</option>
+                            <option value="electrique">Électrique</option>
                         </select>
                     </div>
                     <div><label>Boîte</label>

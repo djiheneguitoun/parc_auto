@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->timestamp('date_creation')->useCurrent();
             $table->enum('categorie', ['leger', 'lourd', 'transport', 'tracteur', 'engins'])->nullable();
             $table->enum('option_vehicule', ['base', 'base_clim', 'toutes_options'])->nullable();
-            $table->enum('energie', ['essence', 'diesel', 'gpl'])->nullable();
+            $table->enum('energie', ['essence', 'diesel', 'gpl', 'electrique'])->nullable();
             $table->enum('boite', ['semiauto', 'auto', 'manuel'])->nullable();
             $table->enum('leasing', ['location', 'acquisition', 'autre'])->nullable();
             $table->enum('utilisation', ['personnel', 'professionnel'])->nullable();

@@ -36,7 +36,7 @@ export function formatOptionVehicule(value) {
 }
 
 export function formatEnergie(value) {
-    const map = { essence: 'Essence', diesel: 'Diesel', gpl: 'GPL' };
+    const map = { essence: 'Essence', diesel: 'Diesel', gpl: 'GPL', electrique: 'Électrique' };
     return map[value] || '-';
 }
 
