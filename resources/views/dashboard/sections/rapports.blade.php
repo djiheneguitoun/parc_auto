@@ -58,6 +58,8 @@
 							<option value="leger">Léger</option>
 							<option value="lourd">Lourd</option>
 							<option value="transport">Transport</option>
+							<option value="tracteur">Tracteur</option>
+							<option value="engins">Engins</option>
 						</select>
 					</div>
 					<div class="stack">

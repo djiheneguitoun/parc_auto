@@ -26,7 +26,7 @@ export function formatVehiculeStatut(value) {
 }
 
 export function formatCategorie(value) {
-    const map = { leger: 'Léger', lourd: 'Lourd', transport: 'Transport' };
+    const map = { leger: 'Léger', lourd: 'Lourd', transport: 'Transport', tracteur: 'Tracteur', engins: 'Engins' };
     return map[value] || '-';
 }
 

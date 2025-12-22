@@ -94,7 +94,7 @@ class VehiculeController extends Controller
             'valeur' => 'nullable|numeric|min:0',
             'statut' => 'boolean',
             'date_creation' => 'nullable|date',
-            'categorie' => 'nullable|in:leger,lourd,transport',
+            'categorie' => 'nullable|in:leger,lourd,transport,tracteur,engins',
             'option_vehicule' => 'nullable|in:base,base_clim,toutes_options',
             'energie' => 'nullable|in:essence,diesel,gpl',
             'boite' => 'nullable|in:semiauto,auto,manuel',

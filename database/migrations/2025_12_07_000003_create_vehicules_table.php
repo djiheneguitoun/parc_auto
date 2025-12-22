@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->decimal('valeur', 15, 2)->nullable();
             $table->boolean('statut')->default(true);
             $table->timestamp('date_creation')->useCurrent();
-            $table->enum('categorie', ['leger', 'lourd', 'transport'])->nullable();
+            $table->enum('categorie', ['leger', 'lourd', 'transport', 'tracteur', 'engins'])->nullable();
             $table->enum('option_vehicule', ['base', 'base_clim', 'toutes_options'])->nullable();
             $table->enum('energie', ['essence', 'diesel', 'gpl'])->nullable();
             $table->enum('boite', ['semiauto', 'auto', 'manuel'])->nullable();
