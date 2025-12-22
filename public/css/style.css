@@ -465,7 +465,7 @@ td {
     align-items: flex-start;
     justify-content: center;
     z-index: 20;
-    padding: 80px 16px 24px;
+    padding: 120px 16px 32px; /* décaler sous le header */
     overflow-y: auto;
 }
 .modal-backdrop {
@@ -481,7 +481,7 @@ td {
     padding: 18px;
     border: 1px solid var(--border);
     width: min(900px, 92vw);
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 180px);
     overflow: auto;
     box-shadow: 0 20px 40px rgba(6, 39, 82, 0.18);
 }
@@ -532,7 +532,7 @@ td {
         position: static;
     }
     .modal {
-        padding: 60px 10px 20px;
+        padding: 100px 12px 28px;
     }
 }
 
