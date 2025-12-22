@@ -5,6 +5,30 @@
 
 import { state } from './state.js';
 
+const ETAT_LABELS = {
+    disponible: 'Disponible',
+    utilisation: 'Utilisation',
+    technique: 'Technique',
+    reglementaire: 'Réglementaire',
+    incident: 'Incident',
+    fin_de_vie: 'Fin de vie',
+};
+
+const STATUT_LABELS = {
+    disponible: 'Disponible',
+    en_service: 'En service',
+    reserve: 'Réservé',
+    en_maintenance: 'En maintenance',
+    en_panne: 'En panne',
+    en_reparation: 'En réparation',
+    non_conforme: 'Non conforme',
+    interdit: 'Interdit',
+    sinistre: 'Sinistré',
+    en_expertise: 'En expertise',
+    reforme: 'Réformé',
+    sorti_du_parc: 'Sorti du parc (Cédé)',
+};
+
 export function formatDate(date) {
     if (!date) return '-';
     const parsed = new Date(date);
@@ -22,7 +46,11 @@ export function formatStatut(value) {
 }
 
 export function formatVehiculeStatut(value) {
-    return Number(value) === 0 ? 'Inactif' : 'Actif';
+    return STATUT_LABELS[value] || '-';
+}
+
+export function formatEtatFonctionnel(value) {
+    return ETAT_LABELS[value] || '-';
 }
 
 export function formatCategorie(value) {

@@ -5,15 +5,18 @@
 
 import { state } from './state.js';
 import { ensureAuth } from './auth.js';
-import { formatDate, formatVehiculeStatut, formatCategorie, formatOptionVehicule, formatEnergie, formatBoite, formatLeasing, formatUtilisation, formatCurrency, resolveVehiculeImageSrc } from './utils.js';
+import { formatDate, formatVehiculeStatut, formatEtatFonctionnel, formatCategorie, formatOptionVehicule, formatEnergie, formatBoite, formatLeasing, formatUtilisation, formatCurrency, resolveVehiculeImageSrc } from './utils.js';
 
 // DOM Elements
 export const vehiculeTableBody = document.getElementById('vehicule-rows');
 export const vehiculeDetailEmpty = document.getElementById('vehicule-detail-empty');
 export const vehiculeDetail = document.getElementById('vehicule-detail');
 export const vehiculeDetailTitle = document.getElementById('vehicule-detail-title');
+export const vehiculeDetailEtat = document.getElementById('vehicule-detail-etat');
 export const vehiculeDetailStatut = document.getElementById('vehicule-detail-statut');
 export const vehiculeDetailCategory = document.getElementById('vehicule-detail-category');
+export const detailEtat = document.getElementById('detail-etat');
+export const detailStatut = document.getElementById('detail-statut');
 export const detailCode = document.getElementById('detail-code');
 export const detailNumero = document.getElementById('detail-numero');
 export const detailModele = document.getElementById('detail-modele');
@@ -46,6 +49,15 @@ export const imageViewerModal = document.getElementById('image-viewer-modal');
 export const imageViewerImg = document.getElementById('image-viewer-img');
 export const imageViewerCaption = document.getElementById('image-viewer-caption');
 export const closeImageViewerBtn = document.getElementById('close-image-viewer');
+
+const ETAT_STATUT_MAP = {
+    disponible: ['disponible'],
+    utilisation: ['en_service', 'reserve'],
+    technique: ['en_maintenance', 'en_panne', 'en_reparation'],
+    reglementaire: ['non_conforme', 'interdit'],
+    incident: ['sinistre', 'en_expertise'],
+    fin_de_vie: ['reforme', 'sorti_du_parc'],
+};
 
 // Image viewer zoom management
 let imageViewerZoom = 1;
@@ -100,6 +112,32 @@ export function adjustImageViewerZoom(delta) {
     imageViewerImg.style.transform = `scale(${imageViewerZoom})`;
 }
 
+function filterStatutOptions(selectedEtat, selectedStatut = '') {
+    const select = vehiculeForm?.statut;
+    if (!select) return;
+
+    const allowed = ETAT_STATUT_MAP[selectedEtat] || [];
+    Array.from(select.options).forEach((opt) => {
+        if (!opt.value) {
+            opt.disabled = false;
+            opt.hidden = false;
+            return;
+        }
+        const enabled = allowed.length === 0 || allowed.includes(opt.value);
+        opt.disabled = !enabled;
+        opt.hidden = !enabled;
+    });
+
+    if (selectedStatut && allowed.includes(selectedStatut)) {
+        select.value = selectedStatut;
+        return;
+    }
+
+    if (!allowed.includes(select.value)) {
+        select.value = allowed[0] ?? '';
+    }
+}
+
 export function setVehiculeFormMode(mode, vehicule = null) {
     if (vehiculeImagesInput) vehiculeImagesInput.value = '';
     if (mode === 'edit' && vehicule) {
@@ -116,7 +154,10 @@ export function setVehiculeFormMode(mode, vehicule = null) {
         syncVehiculeChauffeurSelect(vehicule.chauffeur_id);
         vehiculeForm.date_acquisition.value = vehicule.date_acquisition || '';
         vehiculeForm.valeur.value = vehicule.valeur || '';
-        vehiculeForm.statut.value = Number(vehicule.statut) === 0 ? '0' : '1';
+        const etat = vehicule.etat_fonctionnel || '';
+        vehiculeForm.etat_fonctionnel.value = etat;
+        filterStatutOptions(etat, vehicule.statut || '');
+        vehiculeForm.statut.value = vehicule.statut || '';
         vehiculeForm.date_creation.value = vehicule.date_creation ? vehicule.date_creation.slice(0, 10) : '';
         vehiculeForm.categorie.value = vehicule.categorie || '';
         vehiculeForm.option_vehicule.value = vehicule.option_vehicule || '';
@@ -133,6 +174,7 @@ export function setVehiculeFormMode(mode, vehicule = null) {
         vehiculeFormTitle.textContent = 'Ajouter un véhicule';
         vehiculeFormSubmit.textContent = 'Enregistrer';
         syncVehiculeChauffeurSelect('');
+        filterStatutOptions('');
     }
 }
 
@@ -153,6 +195,7 @@ export function renderVehiculeRows() {
             <td>${v.numero || ''}</td>
             <td>${[v.marque, v.modele].filter(Boolean).join(' ')}</td>
             <td>${v.chauffeur ? `${v.chauffeur.nom || ''} ${v.chauffeur.prenom || ''}`.trim() : '-'}</td>
+            <td>${formatEtatFonctionnel(v.etat_fonctionnel)}</td>
             <td><span class="badge">${formatVehiculeStatut(v.statut)}</span></td>
             <td>${formatCategorie(v.categorie)}</td>
             <td class="row-actions">
@@ -172,8 +215,11 @@ export function clearVehiculeDetail() {
 
 export function renderVehiculeDetail(v) {
     vehiculeDetailTitle.textContent = `${v.marque || ''} ${v.modele || ''}`.trim() || v.code || 'Véhicule';
+    vehiculeDetailEtat.textContent = formatEtatFonctionnel(v.etat_fonctionnel);
     vehiculeDetailStatut.textContent = formatVehiculeStatut(v.statut);
     vehiculeDetailCategory.textContent = `${formatCategorie(v.categorie)} • ${formatOptionVehicule(v.option_vehicule)}`;
+    detailEtat.textContent = formatEtatFonctionnel(v.etat_fonctionnel);
+    detailStatut.textContent = formatVehiculeStatut(v.statut);
     detailCode.textContent = v.code || '-';
     detailNumero.textContent = v.numero || '-';
     detailModele.textContent = `${v.marque || '-'} ${v.modele || ''}`.trim();
@@ -266,6 +312,12 @@ export async function loadVehicules() {
 // ============================================================================
 
 export function initializeVehiculeEvents() {
+    if (vehiculeForm?.etat_fonctionnel) {
+        vehiculeForm.etat_fonctionnel.addEventListener('change', (e) => {
+            filterStatutOptions(e.target.value);
+        });
+    }
+
     vehiculeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();

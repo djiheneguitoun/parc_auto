@@ -19,7 +19,7 @@
         <div class="table-wrapper">
             <table class="table-clickable">
                 <thead>
-                    <tr><th>Code</th><th>Numéro</th><th>Marque / Modèle</th><th>Chauffeur</th><th>Statut</th><th>Catégorie</th><th>Actions</th></tr>
+                    <tr><th>Code</th><th>Numéro</th><th>Marque / Modèle</th><th>Chauffeur</th><th>État fonctionnel</th><th>Statut</th><th>Catégorie</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="vehicule-rows"></tbody>
             </table>
@@ -32,12 +32,15 @@
             <div class="section-subheader">
                 <div class="detail-heading">
                     <h3 id="vehicule-detail-title"></h3>
+                    <div class="pill" id="vehicule-detail-etat"></div>
                     <div class="pill" id="vehicule-detail-statut"></div>
                 </div>
                 <div class="muted-small" id="vehicule-detail-category"></div>
             </div>
 
             <div class="grid info-grid">
+                <div class="stack info-chip"><div class="muted-small">État fonctionnel</div><div id="detail-etat"></div></div>
+                <div class="stack info-chip"><div class="muted-small">Statut</div><div id="detail-statut"></div></div>
                 <div class="stack info-chip"><div class="muted-small">Code</div><div id="detail-code"></div></div>
                 <div class="stack info-chip"><div class="muted-small">Numéro</div><div id="detail-numero"></div></div>
                 <div class="stack info-chip"><div class="muted-small">Marque / Modèle</div><div id="detail-modele"></div></div>
@@ -112,10 +115,32 @@
                     </div>
                     <div><label>Date d'acquisition</label><input name="date_acquisition" type="date"></div>
                     <div><label>Valeur</label><input name="valeur" type="number" min="0" step="0.01"></div>
+                    <div><label>État fonctionnel</label>
+                        <select name="etat_fonctionnel" required>
+                            <option value="">-</option>
+                            <option value="disponible">Disponible</option>
+                            <option value="utilisation">Utilisation</option>
+                            <option value="technique">Technique</option>
+                            <option value="reglementaire">Réglementaire</option>
+                            <option value="incident">Incident</option>
+                            <option value="fin_de_vie">Fin de vie</option>
+                        </select>
+                    </div>
                     <div><label>Statut</label>
-                        <select name="statut">
-                            <option value="1">Actif</option>
-                            <option value="0">Inactif</option>
+                        <select name="statut" required>
+                            <option value="">-</option>
+                            <option value="disponible">Disponible</option>
+                            <option value="en_service">En service</option>
+                            <option value="reserve">Réservé</option>
+                            <option value="en_maintenance">En maintenance</option>
+                            <option value="en_panne">En panne</option>
+                            <option value="en_reparation">En réparation</option>
+                            <option value="non_conforme">Non conforme</option>
+                            <option value="interdit">Interdit</option>
+                            <option value="sinistre">Sinistré</option>
+                            <option value="en_expertise">En expertise</option>
+                            <option value="reforme">Réformé</option>
+                            <option value="sorti_du_parc">Sorti du parc (Cédé)</option>
                         </select>
                     </div>
                     <div><label>Date de création</label><input name="date_creation" type="date"></div>

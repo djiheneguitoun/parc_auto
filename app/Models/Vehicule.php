@@ -21,6 +21,7 @@ class Vehicule extends Model
         'chauffeur_id',
         'date_acquisition',
         'valeur',
+        'etat_fonctionnel',
         'statut',
         'date_creation',
         'categorie',
@@ -35,7 +36,8 @@ class Vehicule extends Model
     protected $casts = [
         'date_creation' => 'datetime',
         'date_acquisition' => 'date',
-        'statut' => 'boolean',
+        'statut' => 'string',
+        'etat_fonctionnel' => 'string',
     ];
 
     public function chauffeur()

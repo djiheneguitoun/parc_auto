@@ -20,7 +20,8 @@ return new class extends Migration {
             $table->foreignId('chauffeur_id')->nullable()->constrained('chauffeurs')->nullOnDelete();
             $table->date('date_acquisition')->nullable();
             $table->decimal('valeur', 15, 2)->nullable();
-            $table->boolean('statut')->default(true);
+            $table->enum('etat_fonctionnel', ['disponible', 'utilisation', 'technique', 'reglementaire', 'incident', 'fin_de_vie'])->default('disponible');
+            $table->enum('statut', ['disponible', 'en_service', 'reserve', 'en_maintenance', 'en_panne', 'en_reparation', 'non_conforme', 'interdit', 'sinistre', 'en_expertise', 'reforme', 'sorti_du_parc'])->default('disponible');
             $table->timestamp('date_creation')->useCurrent();
             $table->enum('categorie', ['leger', 'lourd', 'transport', 'tracteur', 'engins'])->nullable();
             $table->enum('option_vehicule', ['base', 'base_clim', 'toutes_options'])->nullable();

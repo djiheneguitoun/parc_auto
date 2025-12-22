@@ -6,9 +6,44 @@ use App\Http\Controllers\Controller;
 use App\Models\Chauffeur;
 use App\Models\Vehicule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class VehiculeController extends Controller
 {
+    private const ETATS_FONCTIONNELS = [
+        'disponible',
+        'utilisation',
+        'technique',
+        'reglementaire',
+        'incident',
+        'fin_de_vie',
+    ];
+
+    private const STATUTS = [
+        'disponible',
+        'en_service',
+        'reserve',
+        'en_maintenance',
+        'en_panne',
+        'en_reparation',
+        'non_conforme',
+        'interdit',
+        'sinistre',
+        'en_expertise',
+        'reforme',
+        'sorti_du_parc',
+    ];
+
+    private const ETAT_STATUT_MAP = [
+        'disponible' => ['disponible'],
+        'utilisation' => ['en_service', 'reserve'],
+        'technique' => ['en_maintenance', 'en_panne', 'en_reparation'],
+        'reglementaire' => ['non_conforme', 'interdit'],
+        'incident' => ['sinistre', 'en_expertise'],
+        'fin_de_vie' => ['reforme', 'sorti_du_parc'],
+    ];
+
     public function index(Request $request)
     {
         $query = Vehicule::with(['chauffeur', 'documents', 'images']);
@@ -80,7 +115,7 @@ class VehiculeController extends Controller
             $uniqueCode .= ',' . $vehiculeId;
         }
 
-        return $request->validate([
+        $validator = Validator::make($request->all(), [
             'numero' => ['required', 'string', 'max:50', $uniqueNumero],
             'code' => ['required', 'string', 'max:50', $uniqueCode],
             'description' => 'nullable|string',
@@ -92,7 +127,8 @@ class VehiculeController extends Controller
             'chauffeur_id' => 'nullable|exists:chauffeurs,id',
             'date_acquisition' => 'nullable|date',
             'valeur' => 'nullable|numeric|min:0',
-            'statut' => 'boolean',
+            'etat_fonctionnel' => ['required', Rule::in(self::ETATS_FONCTIONNELS)],
+            'statut' => ['required', Rule::in(self::STATUTS)],
             'date_creation' => 'nullable|date',
             'categorie' => 'nullable|in:leger,lourd,transport,tracteur,engins',
             'option_vehicule' => 'nullable|in:base,base_clim,toutes_options',
@@ -102,5 +138,18 @@ class VehiculeController extends Controller
             'utilisation' => 'nullable|in:personnel,professionnel',
             'affectation' => 'nullable|string|max:150',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $etat = $request->input('etat_fonctionnel');
+            $statut = $request->input('statut');
+            if ($etat && $statut) {
+                $allowed = self::ETAT_STATUT_MAP[$etat] ?? [];
+                if (!in_array($statut, $allowed, true)) {
+                    $validator->errors()->add('statut', 'Statut incompatible avec l\'état fonctionnel choisi.');
+                }
+            }
+        });
+
+        return $validator->validate();
     }
 }
