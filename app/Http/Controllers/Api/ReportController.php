@@ -11,6 +11,24 @@ use Mpdf\Mpdf;
 
 class ReportController extends Controller
 {
+    private const MENTION_LABELS = [
+        'excellent' => ['label' => 'Excellent', 'score' => 5],
+        'tres_bon' => ['label' => 'Très bon', 'score' => 4],
+        'bon' => ['label' => 'Bon', 'score' => 3],
+        'moyen' => ['label' => 'Moyen', 'score' => 2],
+        'insuffisant' => ['label' => 'Insuffisant', 'score' => 1],
+    ];
+
+    private const COMPORTEMENT_LABELS = [
+        'excellent' => 'Excellent',
+        'tres_bon' => 'Très bon',
+        'satisfaisant' => 'Satisfaisant',
+        'a_ameliorer' => 'À améliorer',
+        'insuffisant' => 'Insuffisant',
+        'non_conforme' => 'Non conforme',
+        'a_risque' => 'À risque',
+    ];
+
     public function exportVehicules(Request $request)
     {
         $query = Vehicule::with('chauffeur');
@@ -234,6 +252,8 @@ HTML;
         $filters = $this->formatFilters($request, [
             'statut' => 'Statut',
             'mention' => 'Mention',
+        ], [
+            'mention' => fn($value) => $this->formatMentionLabel($value),
         ]);
 
         $rows = $chauffeurs->map(function ($c) {
@@ -244,17 +264,19 @@ HTML;
                     <td>%s</td>
                     <td>%s</td>
                     <td>%s</td>
+                    <td>%s</td>
                 </tr>',
                 e($c->matricule),
                 e($c->nom),
                 e($c->prenom),
                 e($c->statut),
-                e($c->mention)
+                e($this->formatMentionLabel($c->mention)),
+                e($this->formatComportementLabel($c->comportement))
             );
         })->implode('');
 
         if ($rows === '') {
-            $rows = '<tr><td colspan="5" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
+            $rows = '<tr><td colspan="6" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
         }
 
         return <<<HTML
@@ -285,6 +307,7 @@ HTML;
                 <th>Prénom</th>
                 <th>Statut</th>
                 <th>Mention</th>
+                <th>Comportement</th>
             </tr>
         </thead>
         <tbody>
@@ -436,7 +459,32 @@ HTML;
 HTML;
     }
 
-    private function formatFilters(Request $request, array $labelMap = [])
+    private function formatMentionLabel(?string $value): string
+    {
+        if (!$value || !isset(self::MENTION_LABELS[$value])) {
+            return $value ?: '-';
+        }
+
+        $config = self::MENTION_LABELS[$value];
+        return $config['label'] . ' ' . $this->starString($config['score']);
+    }
+
+    private function formatComportementLabel(?string $value): string
+    {
+        if (!$value) {
+            return '-';
+        }
+
+        return self::COMPORTEMENT_LABELS[$value] ?? $value;
+    }
+
+    private function starString(int $score): string
+    {
+        $score = max(0, min(5, $score));
+        return str_repeat('★', $score) . str_repeat('☆', 5 - $score);
+    }
+
+    private function formatFilters(Request $request, array $labelMap = [], array $transformMap = [])
     {
         $parts = [];
         $map = array_merge([
@@ -451,7 +499,11 @@ HTML;
 
         foreach ($map as $key => $label) {
             if ($request->filled($key)) {
-                $parts[] = $label . ': ' . $request->input($key);
+                $value = $request->input($key);
+                if (isset($transformMap[$key]) && is_callable($transformMap[$key])) {
+                    $value = $transformMap[$key]($value);
+                }
+                $parts[] = $label . ': ' . $value;
             }
         }
 

@@ -70,7 +70,8 @@ class InitialDataSeeder extends Seeder
             'date_permis' => Carbon::create(2018, 5, 20),
             'lieu_permis' => 'Casablanca',
             'statut' => 'contractuel',
-            'mention' => 'bien',
+            'mention' => 'bon',
+            'comportement' => 'satisfaisant',
             'created_at' => $now,
             'updated_at' => $now,
         ]);

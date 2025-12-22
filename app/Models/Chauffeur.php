@@ -22,6 +22,7 @@ class Chauffeur extends Model
         'lieu_permis',
         'statut',
         'mention',
+        'comportement',
     ];
 
     public function vehicules()

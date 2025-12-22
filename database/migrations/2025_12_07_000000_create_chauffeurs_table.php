@@ -20,7 +20,16 @@ return new class extends Migration {
             $table->date('date_permis')->nullable();
             $table->string('lieu_permis', 150)->nullable();
             $table->enum('statut', ['contractuel', 'permanent'])->default('contractuel');
-            $table->enum('mention', ['tres_bien', 'bien', 'mauvais', 'blame'])->default('bien');
+            $table->enum('mention', ['excellent', 'tres_bon', 'bon', 'moyen', 'insuffisant'])->default('bon');
+            $table->enum('comportement', [
+                'excellent',
+                'tres_bon',
+                'satisfaisant',
+                'a_ameliorer',
+                'insuffisant',
+                'non_conforme',
+                'a_risque',
+            ])->default('satisfaisant');
             $table->timestamps();
         });
     }

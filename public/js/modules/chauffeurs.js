@@ -5,7 +5,7 @@
 
 import { state, showToast } from './state.js';
 import { ensureAuth } from './auth.js';
-import { formatDate, formatMention, formatStatut } from './utils.js';
+import { formatComportement, formatDate, formatMention, formatMentionStars, formatStatut } from './utils.js';
 
 // DOM Elements
 export const chauffeurFormTitle = document.getElementById('chauffeur-form-title');
@@ -25,6 +25,7 @@ export const detailNumeroPermis = document.getElementById('detail-numero-permis'
 export const detailDatePermis = document.getElementById('detail-date-permis');
 export const detailLieuPermis = document.getElementById('detail-lieu-permis');
 export const detailMention = document.getElementById('detail-mention');
+export const detailComportement = document.getElementById('detail-comportement');
 export const chauffeurModal = document.getElementById('chauffeur-modal');
 export const openChauffeurModalBtn = document.getElementById('open-chauffeur-modal');
 export const closeChauffeurModalBtn = document.getElementById('close-chauffeur-modal');
@@ -45,12 +46,15 @@ export function setChauffeurFormMode(mode, chauffeur = null) {
         chauffeurForm.date_permis.value = chauffeur.date_permis || '';
         chauffeurForm.lieu_permis.value = chauffeur.lieu_permis || '';
         chauffeurForm.statut.value = chauffeur.statut || 'contractuel';
-        chauffeurForm.mention.value = chauffeur.mention || 'bien';
+        chauffeurForm.mention.value = chauffeur.mention || 'bon';
+        chauffeurForm.comportement.value = chauffeur.comportement || 'satisfaisant';
     } else {
         state.chauffeurEditingId = null;
         chauffeurForm.reset();
         chauffeurFormTitle.textContent = 'Ajouter un chauffeur';
         chauffeurFormSubmit.textContent = 'Enregistrer';
+        chauffeurForm.mention.value = 'bon';
+        chauffeurForm.comportement.value = 'satisfaisant';
     }
 }
 
@@ -71,7 +75,8 @@ export function renderChauffeurRows() {
             <td>${ch.nom} ${ch.prenom}</td>
             <td>${ch.telephone || ''}</td>
             <td><span class="badge">${formatStatut(ch.statut)}</span></td>
-            <td>${formatMention(ch.mention)}</td>
+            <td>${formatMentionStars(ch.mention)}</td>
+            <td>${formatComportement(ch.comportement)}</td>
             <td class="row-actions">
                 <button class="btn secondary xs" data-action="edit" type="button">Modifier</button>
                 <button class="btn danger xs" data-action="delete" type="button">Supprimer</button>
@@ -99,6 +104,7 @@ export function renderChauffeurDetail(ch) {
     detailDatePermis.textContent = formatDate(ch.date_permis);
     detailLieuPermis.textContent = ch.lieu_permis || '-';
     detailMention.textContent = formatMention(ch.mention);
+    detailComportement.textContent = formatComportement(ch.comportement);
     chauffeurDetailEmpty.style.display = 'none';
     chauffeurDetail.style.display = 'block';
 }

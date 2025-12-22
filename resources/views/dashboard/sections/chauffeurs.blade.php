@@ -18,7 +18,7 @@
         <div class="table-wrapper">
             <table class="table-clickable">
                 <thead>
-                    <tr><th>Matricule</th><th>Nom</th><th>Contact</th><th>Statut</th><th>Mention</th><th>Actions</th></tr>
+                    <tr><th>Matricule</th><th>Nom</th><th>Contact</th><th>Statut</th><th>Mention</th><th>Comportement</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="chauffeur-rows"></tbody>
             </table>
@@ -58,6 +58,10 @@
                 <div class="stack">
                     <div class="muted-small">Mention</div>
                     <div id="detail-mention"></div>
+                </div>
+                <div class="stack">
+                    <div class="muted-small">Comportement</div>
+                    <div id="detail-comportement"></div>
                 </div>
             </div>
 
@@ -107,12 +111,24 @@
                             <option value="permanent">Permanent</option>
                         </select>
                     </div>
-                    <div><label>Mention</label>
+                    <div><label>Mention (notation)</label>
                         <select name="mention" required>
-                            <option value="tres_bien">Très bien</option>
-                            <option value="bien">Bien</option>
-                            <option value="mauvais">Mauvais</option>
-                            <option value="blame">Blâme</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="tres_bon">Très bon</option>
+                            <option value="bon">Bon</option>
+                            <option value="moyen">Moyen</option>
+                            <option value="insuffisant">Insuffisant</option>
+                        </select>
+                    </div>
+                    <div><label>Comportement</label>
+                        <select name="comportement" required>
+                            <option value="excellent">Excellent</option>
+                            <option value="tres_bon">Très bon</option>
+                            <option value="satisfaisant">Satisfaisant</option>
+                            <option value="a_ameliorer">À améliorer</option>
+                            <option value="insuffisant">Insuffisant</option>
+                            <option value="non_conforme">Non conforme</option>
+                            <option value="a_risque">À risque</option>
                         </select>
                     </div>
                 </div>

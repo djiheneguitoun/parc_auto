@@ -162,10 +162,11 @@
 						<label for="filter-chauffeur-mention">Mention</label>
 						<select id="filter-chauffeur-mention" name="mention">
 							<option value="">Toutes</option>
-							<option value="tres_bien">Très bien</option>
-							<option value="bien">Bien</option>
-							<option value="mauvais">Mauvais</option>
-							<option value="blame">Blâme</option>
+							<option value="excellent">Excellent</option>
+							<option value="tres_bon">Très bon</option>
+							<option value="bon">Bon</option>
+							<option value="moyen">Moyen</option>
+							<option value="insuffisant">Insuffisant</option>
 						</select>
 					</div>
 				</div>

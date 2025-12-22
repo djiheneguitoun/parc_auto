@@ -29,6 +29,24 @@ const STATUT_LABELS = {
     sorti_du_parc: 'Sorti du parc (Cédé)',
 };
 
+const MENTION_CONFIG = {
+    excellent: { label: 'Excellent', score: 5 },
+    tres_bon: { label: 'Très bon', score: 4 },
+    bon: { label: 'Bon', score: 3 },
+    moyen: { label: 'Moyen', score: 2 },
+    insuffisant: { label: 'Insuffisant', score: 1 },
+};
+
+const COMPORTEMENT_LABELS = {
+    excellent: 'Excellent',
+    tres_bon: 'Très bon',
+    satisfaisant: 'Satisfaisant',
+    a_ameliorer: 'À améliorer',
+    insuffisant: 'Insuffisant',
+    non_conforme: 'Non conforme',
+    a_risque: 'À risque',
+};
+
 export function formatDate(date) {
     if (!date) return '-';
     const parsed = new Date(date);
@@ -36,8 +54,19 @@ export function formatDate(date) {
 }
 
 export function formatMention(value) {
-    const map = { tres_bien: 'Très bien', bien: 'Bien', mauvais: 'Mauvais', blame: 'Blâme' };
-    return map[value] || value || '-';
+    const config = MENTION_CONFIG[value];
+    if (!config) return value || '-';
+    return config.label; // Affichage texte normal
+}
+
+export function formatMentionStars(value) {
+    const config = MENTION_CONFIG[value];
+    if (!config) return value || '-';
+    return starString(config.score); // Affichage étoiles (tableau)
+}
+
+export function formatComportement(value) {
+    return COMPORTEMENT_LABELS[value] || value || '-';
 }
 
 export function formatStatut(value) {
@@ -85,6 +114,11 @@ export function formatUtilisation(value) {
 
 export function formatUserStatus(value) {
     return Number(value) === 1 ? 'Actif' : 'Inactif';
+}
+
+function starString(score) {
+    const safeScore = Math.min(5, Math.max(0, Number(score) || 0));
+    return '★'.repeat(safeScore) + '☆'.repeat(5 - safeScore);
 }
 
 export function formatCurrency(value) {

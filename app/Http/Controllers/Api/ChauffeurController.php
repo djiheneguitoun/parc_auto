@@ -8,6 +8,17 @@ use Illuminate\Http\Request;
 
 class ChauffeurController extends Controller
 {
+    private const MENTION_VALUES = ['excellent', 'tres_bon', 'bon', 'moyen', 'insuffisant'];
+    private const COMPORTEMENT_VALUES = [
+        'excellent',
+        'tres_bon',
+        'satisfaisant',
+        'a_ameliorer',
+        'insuffisant',
+        'non_conforme',
+        'a_risque',
+    ];
+
     public function index(Request $request)
     {
         $query = Chauffeur::query();
@@ -38,7 +49,8 @@ class ChauffeurController extends Controller
             'date_permis' => 'nullable|date',
             'lieu_permis' => 'nullable|string|max:150',
             'statut' => 'required|in:contractuel,permanent',
-            'mention' => 'required|in:tres_bien,bien,mauvais,blame',
+            'mention' => 'required|in:' . implode(',', self::MENTION_VALUES),
+            'comportement' => 'required|in:' . implode(',', self::COMPORTEMENT_VALUES),
         ]);
 
         $chauffeur = Chauffeur::create($data);
@@ -65,7 +77,8 @@ class ChauffeurController extends Controller
             'date_permis' => 'nullable|date',
             'lieu_permis' => 'nullable|string|max:150',
             'statut' => 'sometimes|required|in:contractuel,permanent',
-            'mention' => 'sometimes|required|in:tres_bien,bien,mauvais,blame',
+            'mention' => 'sometimes|required|in:' . implode(',', self::MENTION_VALUES),
+            'comportement' => 'sometimes|required|in:' . implode(',', self::COMPORTEMENT_VALUES),
         ]);
 
         $chauffeur->update($data);
