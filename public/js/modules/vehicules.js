@@ -152,7 +152,7 @@ export function setVehiculeFormMode(mode, vehicule = null) {
         vehiculeForm.couleur.value = vehicule.couleur || '';
         vehiculeForm.chassis.value = vehicule.chassis || '';
         syncVehiculeChauffeurSelect(vehicule.chauffeur_id);
-        vehiculeForm.date_acquisition.value = vehicule.date_acquisition || '';
+        vehiculeForm.date_acquisition.value = vehicule.date_acquisition ? vehicule.date_acquisition.slice(0, 10) : '';
         vehiculeForm.valeur.value = vehicule.valeur || '';
         const etat = vehicule.etat_fonctionnel || '';
         vehiculeForm.etat_fonctionnel.value = etat;
