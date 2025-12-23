@@ -423,6 +423,17 @@ header .actions {
     border-color: rgba(30, 45, 120, 0.12);
 }
 
+/* Selected state for sinistre filters (e.g. 'Tous les véhicules') */
+.section-subheader .section-actions .sinistre-filter .custom-select__trigger.selected {
+    background: var(--accent);
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    border: 1px solid rgba(14, 29, 86, 0.08);
+    box-shadow: 0 10px 20px rgba(30, 45, 120, 0.12);
+}
+
+
 /* bouton d'action dans l'en-tête : harmonisé avec la palette */
 .section-subheader .section-actions .btn {
     padding: 8px 12px;

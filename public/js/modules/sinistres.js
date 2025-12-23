@@ -115,13 +115,18 @@ function populateVehiculeOptions(selectEl, placeholder = 'Choisir un véhicule')
         const container = document.querySelector(`.custom-select[data-name="${selectEl.id}"]`);
         if (!container) return;
         const optionsEl = container.querySelector('.custom-select__options');
+        const trigger = container.querySelector('.custom-select__trigger');
+        const valueElem = container.querySelector('.custom-select__value');
         // build items
         const items = state.vehicules.map(v => {
             const label = v.numero || `Véhicule ${v.id}`;
             return `<li role="option" data-value="${v.id}">${label}</li>`;
         }).join('');
-        // include placeholder as first option
-        optionsEl.innerHTML = `<li role="option" data-value="">${placeholder}</li>${items}`;
+        // include placeholder as first option, and re-assert it as the selected value so the filter defaults to "tous"
+        optionsEl.innerHTML = `<li role="option" data-value="" aria-selected="true">${placeholder}</li>${items}`;
+        selectEl.value = '';
+        if (valueElem) valueElem.textContent = placeholder;
+        if (trigger) trigger.classList.add('selected');
         // if searchable, ensure search input exists at top
         if (container.dataset.searchable === 'true') {
             var search = optionsEl.querySelector('.custom-select__search');
@@ -191,7 +196,6 @@ function renderSinistreRows() {
                 <td><span class="badge">${formatSinistreStatut(s.statut_sinistre)}</span></td>
                 <td>${formatCurrency(s.cout_total)}</td>
                 <td class="row-actions">
-                    <button class="btn secondary xs" data-action="view" type="button">Voir</button>
                     <button class="btn secondary xs" data-action="edit" type="button">Modifier</button>
                     <button class="btn danger xs" data-action="close" type="button">Clôturer</button>
                 </td>
