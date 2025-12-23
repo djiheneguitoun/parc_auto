@@ -54,4 +54,9 @@ class Vehicule extends Model
     {
         return $this->hasMany(VehiculeImage::class);
     }
+
+    public function sinistres()
+    {
+        return $this->hasMany(Sinistre::class);
+    }
 }

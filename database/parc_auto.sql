@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : lun. 22 déc. 2025 à 15:08
+-- Généré le : lun. 22 déc. 2025 à 17:10
 -- Version du serveur : 9.1.0
 -- Version de PHP : 8.3.14
 
@@ -41,20 +41,20 @@ CREATE TABLE IF NOT EXISTS `chauffeurs` (
   `date_permis` date DEFAULT NULL,
   `lieu_permis` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `statut` enum('contractuel','permanent') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'contractuel',
-  `mention` enum('tres_bien','bien','mauvais','blame') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'bien',
+  `mention` enum('excellent','tres_bon','bon','moyen','insuffisant') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'bon',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `comportement` enum('excellent','tres_bon','satisfaisant','a_ameliorer','insuffisant','non_conforme','a_risque') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'satisfaisant',
   PRIMARY KEY (`id`),
   UNIQUE KEY `chauffeurs_matricule_unique` (`matricule`)
-) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `chauffeurs`
 --
 
-INSERT INTO `chauffeurs` (`id`, `matricule`, `nom`, `prenom`, `date_naissance`, `date_recrutement`, `adresse`, `telephone`, `numero_permis`, `date_permis`, `lieu_permis`, `statut`, `mention`, `created_at`, `updated_at`) VALUES
-(1, 'CHF-00100000', 'Doe', 'John', '1990-04-17', '2020-06-01', '123 Rue Principale', '+2126000000022', 'PER-2020-0012222', '2018-05-20', 'Casablancahghg', 'contractuel', 'blame', '2025-12-07 11:03:27', '2025-12-08 23:36:45'),
-(16, 'jkhbjhnb', 'jbjhv', 'kjbjhb', '2025-12-21', '2025-12-11', ',nb', '4646', '65468', '2025-12-18', 'kjjb', 'contractuel', 'tres_bien', '2025-12-21 19:43:36', '2025-12-21 19:43:36');
+INSERT INTO `chauffeurs` (`id`, `matricule`, `nom`, `prenom`, `date_naissance`, `date_recrutement`, `adresse`, `telephone`, `numero_permis`, `date_permis`, `lieu_permis`, `statut`, `mention`, `created_at`, `updated_at`, `comportement`) VALUES
+(1, 'CHF-00100000', 'Doe', 'John', '1990-04-17', '2020-06-01', '123 Rue Principale', '+2126000000022', 'PER-2020-0012222', '2018-05-20', 'Casablancahghg', 'contractuel', 'bon', '2025-12-07 11:03:27', '2025-12-08 23:36:45', 'a_risque');
 
 -- --------------------------------------------------------
 
@@ -141,7 +141,7 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (65, 'App\\Models\\Utilisateur', 1, 'api', '24341ed18eda23d50fa1b8ac9d3e9a64ca3ad4d89bdb09df9a20191a1a2f9a4a', '[\"*\"]', '2025-12-09 09:30:21', '2025-12-09 09:29:34', '2025-12-09 09:30:21'),
 (74, 'App\\Models\\Utilisateur', 1, 'api', 'fc2d52e111c75165ef044c180ad0cac808099ce378621eb35865d941b85a100b', '[\"*\"]', '2025-12-09 16:39:34', '2025-12-09 16:39:07', '2025-12-09 16:39:34'),
 (91, 'App\\Models\\Utilisateur', 1, 'api', '985c9b95e020b9b414d2a8bd0df0c4074aad4d9832a0448900b2a9616f76bef3', '[\"*\"]', '2025-12-10 10:13:16', '2025-12-10 10:11:58', '2025-12-10 10:13:16'),
-(109, 'App\\Models\\Utilisateur', 1, 'api', '9bf4715f89e2b5af3a273014f632a4b7f13ffcaacf23ba9e3457d00de51b577d', '[\"*\"]', '2025-12-22 13:00:29', '2025-12-21 23:04:23', '2025-12-22 13:00:29');
+(109, 'App\\Models\\Utilisateur', 1, 'api', '9bf4715f89e2b5af3a273014f632a4b7f13ffcaacf23ba9e3457d00de51b577d', '[\"*\"]', '2025-12-22 16:07:15', '2025-12-21 23:04:23', '2025-12-22 16:07:15');
 
 -- --------------------------------------------------------
 
@@ -196,7 +196,8 @@ CREATE TABLE IF NOT EXISTS `vehicules` (
   `chauffeur_id` bigint UNSIGNED DEFAULT NULL,
   `date_acquisition` date DEFAULT NULL,
   `valeur` decimal(15,2) DEFAULT NULL,
-  `statut` tinyint(1) NOT NULL DEFAULT '1',
+  `etat_fonctionnel` enum('disponible','utilisation','technique','reglementaire','incident','fin_de_vie') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'disponible',
+  `statut` enum('disponible','en_service','reserve','en_maintenance','en_panne','en_reparation','non_conforme','interdit','sinistre','en_expertise','reforme','sorti_du_parc') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'disponible',
   `date_creation` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `categorie` enum('leger','lourd','transport','tracteur','engins') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `option_vehicule` enum('base','base_clim','toutes_options') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -211,16 +212,14 @@ CREATE TABLE IF NOT EXISTS `vehicules` (
   UNIQUE KEY `vehicules_numero_unique` (`numero`),
   UNIQUE KEY `vehicules_code_unique` (`code`),
   KEY `vehicules_chauffeur_id_foreign` (`chauffeur_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `vehicules`
 --
 
-INSERT INTO `vehicules` (`id`, `numero`, `code`, `description`, `marque`, `modele`, `annee`, `couleur`, `chassis`, `chauffeur_id`, `date_acquisition`, `valeur`, `statut`, `date_creation`, `categorie`, `option_vehicule`, `energie`, `boite`, `leasing`, `utilisation`, `affectation`, `created_at`, `updated_at`) VALUES
-(1, 'VH-001', 'VHC-2025-001', 'SUV de pool pour les missions quotidiennes', 'Toyota', 'RAV4', 2023, 'Gris', 'CHS-123456789', 1, '2025-12-11', 35000.00, 1, '2025-12-06 23:00:00', 'lourd', 'toutes_options', 'diesel', 'auto', 'acquisition', 'professionnel', 'Direction technique', '2025-12-07 11:03:27', '2025-12-09 08:22:15'),
-(3, '635463', 'kjsdncj', 'kjdcjsc', 's,ndb', 'sdhbj', 2000, 'jqhnsbdh', 'kjdb', 1, NULL, 6546.00, 1, '2025-12-09 23:00:00', 'engins', 'base_clim', 'essence', 'semiauto', 'acquisition', 'personnel', 'akjzd', '2025-12-09 08:24:35', '2025-12-21 23:05:35'),
-(6, 'knhje', 'kdjf', NULL, 'sljdn', 'snjsdkjf', 2000, 'skj', 'ksjd', 16, NULL, 54.00, 1, '2025-12-26 23:00:00', 'engins', 'base_clim', 'electrique', 'semiauto', 'acquisition', 'personnel', 'test', '2025-12-21 23:09:56', '2025-12-21 23:14:22');
+INSERT INTO `vehicules` (`id`, `numero`, `code`, `description`, `marque`, `modele`, `annee`, `couleur`, `chassis`, `chauffeur_id`, `date_acquisition`, `valeur`, `etat_fonctionnel`, `statut`, `date_creation`, `categorie`, `option_vehicule`, `energie`, `boite`, `leasing`, `utilisation`, `affectation`, `created_at`, `updated_at`) VALUES
+(1, 'VH-001', 'VHC-2025-001', 'SUV de pool pour les missions quotidiennes', 'Toyota', 'RAV4', 2023, 'Gris', 'CHS-123456789', 1, '2025-12-24', 35000.00, 'disponible', 'disponible', '2025-12-21 23:00:00', 'lourd', 'toutes_options', 'diesel', 'auto', 'acquisition', 'professionnel', 'Direction technique', '2025-12-07 11:03:27', '2025-12-22 14:53:47');
 
 -- --------------------------------------------------------
 

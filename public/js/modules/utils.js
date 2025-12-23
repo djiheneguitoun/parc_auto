@@ -1,7 +1,6 @@
 // ============================================================================
-// Utility Functions & Formatting
+// Utility Functions & Navigation Helpers
 // ============================================================================
-// Shared utilities for formatting, DOM manipulation, and helpers
 
 import { state } from './state.js';
 
@@ -47,31 +46,55 @@ const COMPORTEMENT_LABELS = {
     a_risque: 'À risque',
 };
 
+const SINISTRE_STATUT_LABELS = {
+    declare: 'Déclaré',
+    en_cours: 'En cours',
+    en_reparation: 'En réparation',
+    clos: 'Clos',
+};
+
+const SINISTRE_TYPE_LABELS = {
+    accident: 'Accident',
+    panne: 'Panne',
+    vol: 'Vol',
+    incendie: 'Incendie',
+};
+
+const SINISTRE_GRAVITE_LABELS = {
+    mineur: 'Mineur',
+    moyen: 'Moyen',
+    grave: 'Grave',
+};
+
+const SINISTRE_RESPONSABLE_LABELS = {
+    chauffeur: 'Chauffeur',
+    tiers: 'Tiers',
+    inconnu: 'Inconnu',
+};
+
 export function formatDate(date) {
     if (!date) return '-';
     const parsed = new Date(date);
-    return isNaN(parsed) ? '-' : parsed.toLocaleDateString('fr-FR');
+    return Number.isNaN(parsed.getTime()) ? '-' : parsed.toLocaleDateString('fr-FR');
+}
+
+export function formatTime(value) {
+    if (!value) return '-';
+    if (/^\d{2}:\d{2}$/.test(value)) return value;
+    if (/^\d{2}:\d{2}:\d{2}$/.test(value)) return value.slice(0, 5);
+    return value;
 }
 
 export function formatMention(value) {
     const config = MENTION_CONFIG[value];
     if (!config) return value || '-';
-    return config.label; // Affichage texte normal
+    return config.label;
 }
 
 export function formatMentionStars(value) {
     const config = MENTION_CONFIG[value];
     if (!config) return value || '-';
-    return starString(config.score); // Affichage étoiles (tableau)
-}
-
-export function formatComportement(value) {
-    return COMPORTEMENT_LABELS[value] || value || '-';
-}
-
-export function formatStatut(value) {
-    const map = { contractuel: 'Contractuel', permanent: 'Permanent' };
-    return map[value] || value || '-';
+    return starString(config.score);
 }
 
 export function formatVehiculeStatut(value) {
@@ -116,9 +139,29 @@ export function formatUserStatus(value) {
     return Number(value) === 1 ? 'Actif' : 'Inactif';
 }
 
-function starString(score) {
-    const safeScore = Math.min(5, Math.max(0, Number(score) || 0));
-    return '★'.repeat(safeScore) + '☆'.repeat(5 - safeScore);
+export function formatComportement(value) {
+    return COMPORTEMENT_LABELS[value] || '-';
+}
+
+export function formatStatut(value) {
+    const map = { contractuel: 'Contractuel', permanent: 'Permanent' };
+    return map[value] || '-';
+}
+
+export function formatSinistreStatut(value) {
+    return SINISTRE_STATUT_LABELS[value] || '-';
+}
+
+export function formatSinistreType(value) {
+    return SINISTRE_TYPE_LABELS[value] || '-';
+}
+
+export function formatSinistreGravite(value) {
+    return SINISTRE_GRAVITE_LABELS[value] || '-';
+}
+
+export function formatSinistreResponsable(value) {
+    return SINISTRE_RESPONSABLE_LABELS[value] || '-';
 }
 
 export function formatCurrency(value) {
@@ -153,103 +196,123 @@ export function toInputDate(value) {
 export function initializeNavigation() {
     const sections = document.querySelectorAll('.section');
     const navButtons = document.querySelectorAll('.nav-btn');
-    const navSubmenuButtons = document.querySelectorAll('.nav-submenu-btn');
+    const documentSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-doc-type]');
+    const sinistreSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-sinistre-tab]');
     const documentsDropdownBtn = document.getElementById('documents-dropdown-btn');
     const documentsDropdown = documentsDropdownBtn?.parentElement;
+    const sinistresDropdownBtn = document.getElementById('sinistres-dropdown-btn');
+    const sinistresDropdown = sinistresDropdownBtn?.parentElement;
 
     const storageKeys = {
         section: 'nav:lastSection',
         docType: 'nav:lastDocType',
+        sinistreTab: 'nav:lastSinistreTab',
     };
 
-    const saveNavState = (sectionId, docType = null) => {
+    const saveNavState = (sectionId, tab = null) => {
         if (sectionId) localStorage.setItem(storageKeys.section, sectionId);
-        if (docType) localStorage.setItem(storageKeys.docType, docType);
+        if (tab && sectionId === 'documents') localStorage.setItem(storageKeys.docType, tab);
+        if (tab && sectionId === 'sinistres') localStorage.setItem(storageKeys.sinistreTab, tab);
+    };
+
+    const resetNav = () => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        documentSubmenuButtons.forEach(b => b.classList.remove('active'));
+        sinistreSubmenuButtons.forEach(b => b.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        if (documentsDropdown) documentsDropdown.classList.remove('open');
+        if (sinistresDropdown) sinistresDropdown.classList.remove('open');
     };
 
     const activateDocuments = (docType) => {
-        const typeToUse = docType || localStorage.getItem(storageKeys.docType) || state.documentCurrentType;
+        const typeToUse = docType || localStorage.getItem(storageKeys.docType) || state.documentCurrentType || 'assurance';
         const targetSection = document.getElementById('documents');
 
-        navButtons.forEach(b => b.classList.remove('active'));
-        navSubmenuButtons.forEach(b => b.classList.remove('active'));
-        sections.forEach(s => s.classList.remove('active'));
+        resetNav();
+        if (documentsDropdownBtn) documentsDropdownBtn.classList.add('active');
+        if (documentsDropdown) documentsDropdown.classList.add('open');
+        if (targetSection) targetSection.classList.add('active');
 
-        if (documentsDropdownBtn) {
-            documentsDropdownBtn.classList.add('active');
-        }
-        if (documentsDropdown) {
-            documentsDropdown.classList.add('open');
-        }
-        if (targetSection) {
-            targetSection.classList.add('active');
-        }
+        const matchingSubBtn = Array.from(documentSubmenuButtons).find(btn => btn.dataset.docType === typeToUse);
+        if (matchingSubBtn) matchingSubBtn.classList.add('active');
 
-        const matchingSubBtn = Array.from(navSubmenuButtons).find(btn => btn.dataset.docType === typeToUse);
-        if (matchingSubBtn) {
-            matchingSubBtn.classList.add('active');
-        }
-
-        // Persist immediately so refresh restores Documents even if module import fails
         saveNavState('documents', typeToUse);
 
-        import('./documents.js').then(module => {
-            module.activateDocumentTab(typeToUse);
-        }).catch(err => console.error('Error activating documents tab:', err));
+        import('./documents.js')
+            .then(module => module.activateDocumentTab(typeToUse))
+            .catch(err => console.error('Error activating documents tab:', err));
+    };
+
+    const activateSinistres = (tabKey) => {
+        const tabToUse = tabKey || localStorage.getItem(storageKeys.sinistreTab) || state.sinistreCurrentTab || 'tableau';
+        const targetSection = document.getElementById('sinistres');
+
+        resetNav();
+        if (sinistresDropdownBtn) sinistresDropdownBtn.classList.add('active');
+        if (sinistresDropdown) sinistresDropdown.classList.add('open');
+        if (targetSection) targetSection.classList.add('active');
+
+        const matchingSubBtn = Array.from(sinistreSubmenuButtons).find(btn => btn.dataset.sinistreTab === tabToUse);
+        if (matchingSubBtn) matchingSubBtn.classList.add('active');
+
+        saveNavState('sinistres', tabToUse);
+
+        import('./sinistres.js')
+            .then(module => module.activateSinistreTab(tabToUse))
+            .catch(err => console.error('Error activating sinistres tab:', err));
     };
 
     const activateMainSection = (sectionId) => {
-        navButtons.forEach(b => b.classList.remove('active'));
-        navSubmenuButtons.forEach(b => b.classList.remove('active'));
-        sections.forEach(s => s.classList.remove('active'));
-
+        resetNav();
         const targetSection = document.getElementById(sectionId);
         const targetBtn = Array.from(navButtons).find(b => b.dataset.target === sectionId);
         if (targetBtn) targetBtn.classList.add('active');
         if (targetSection) targetSection.classList.add('active');
-
-        if (documentsDropdown) {
-            documentsDropdown.classList.remove('open');
-        }
-
         saveNavState(sectionId);
     };
 
-    console.log('Navigation initialized:', {
-        navButtons: navButtons.length,
-        navSubmenuButtons: navSubmenuButtons.length,
-        hasDropdownBtn: !!documentsDropdownBtn
-    });
-
-    // Gérer les boutons de navigation principaux
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.id === 'documents-dropdown-btn') {
                 activateDocuments();
                 return;
             }
+            if (btn.id === 'sinistres-dropdown-btn') {
+                activateSinistres();
+                return;
+            }
             activateMainSection(btn.dataset.target);
         });
     });
 
-    // Gérer les boutons du sous-menu documents
-    navSubmenuButtons.forEach(btn => {
+    documentSubmenuButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            
-            const docType = btn.dataset.docType;
-            console.log('Submenu clicked:', docType);
-            
-            activateDocuments(docType);
+            activateDocuments(btn.dataset.docType);
         });
     });
 
-    // Restaurer la dernière section visitée
+    sinistreSubmenuButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activateSinistres(btn.dataset.sinistreTab);
+        });
+    });
+
     const lastSection = localStorage.getItem(storageKeys.section) || 'overview';
-    const lastDocType = localStorage.getItem(storageKeys.docType) || state.documentCurrentType;
+    const lastDocType = localStorage.getItem(storageKeys.docType) || state.documentCurrentType || 'assurance';
+    const lastSinistreTab = localStorage.getItem(storageKeys.sinistreTab) || state.sinistreCurrentTab || 'tableau';
+
     if (lastSection === 'documents') {
         activateDocuments(lastDocType);
+    } else if (lastSection === 'sinistres') {
+        activateSinistres(lastSinistreTab);
     } else {
         activateMainSection(lastSection);
     }
+}
+
+function starString(score) {
+    const safeScore = Math.min(5, Math.max(0, Number(score) || 0));
+    return '★'.repeat(safeScore) + '☆'.repeat(5 - safeScore);
 }

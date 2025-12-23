@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AssuranceSinistreController;
 use App\Http\Controllers\Api\ChauffeurController;
 use App\Http\Controllers\Api\ParametreController;
+use App\Http\Controllers\Api\ReparationSinistreController;
+use App\Http\Controllers\Api\SinistreController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UtilisateurController;
 use App\Http\Controllers\Api\VehiculeController;
@@ -42,6 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('vehicule-documents', VehiculeDocumentController::class);
 
     Route::apiResource('vehicule-images', VehiculeImageController::class)->only(['index', 'store', 'destroy']);
+
+    Route::get('sinistres/stats', [SinistreController::class, 'stats']);
+    Route::apiResource('sinistres', SinistreController::class);
+    Route::apiResource('assurance-sinistres', AssuranceSinistreController::class)->only(['store', 'show', 'update', 'destroy']);
+    Route::apiResource('reparation-sinistres', ReparationSinistreController::class)->only(['store', 'show', 'update', 'destroy']);
 
     Route::get('reports/vehicules/export', [ReportController::class, 'exportVehicules']);
     Route::get('reports/chauffeurs/export', [ReportController::class, 'exportChauffeurs']);

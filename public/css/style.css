@@ -705,3 +705,49 @@ td {
 #documents #document-vehicule-filter {
     min-width: 300px;
 }
+
+/* Sinistres section */
+#sinistres .sinistre-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+#sinistres .sinistre-tab {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #eef0f7;
+    font-weight: 750;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+#sinistres .sinistre-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 12px 24px rgba(24, 38, 110, 0.18);
+}
+#sinistres .sinistre-panel {
+    display: none;
+    gap: 16px;
+}
+#sinistres .sinistre-panel.active {
+    display: block;
+}
+#sinistres .table-card table th,
+#sinistres .table-card table td {
+    font-size: 12px;
+}
+#sinistres .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+#sinistres .stats-grid .card {
+    background: #ffffff;
+}
+#sinistres .section-actions select {
+    min-width: 180px;
+}

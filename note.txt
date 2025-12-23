@@ -1,0 +1,128 @@
+tache 1: 
+bon donne moi le script sql(des requete sq pour l'ajout des table ctt ) pour changer dans la bdd et ajouter ces tables 
+ Table : sinistre (Module Central)
+
+Enregistre chaque accident ou incident.
+
+    id_sinistre (INT, PK, Auto-increment) : Identifiant unique.
+
+    numero_sinistre (VARCHAR) : Numéro de dossier interne.
+
+    id_vehicule (INT, FK) : Lien vers le véhicule concerné.
+
+    id_chauffeur (INT, FK) : Chauffeur au moment du sinistre.
+
+    date_sinistre (DATE) : Date de l'accident.
+
+    heure_sinistre (TIME) : Heure de l'accident.
+
+    lieu_sinistre (VARCHAR) : Lieu de l'incident.
+
+    type_sinistre (ENUM) : 'Accident', 'Panne', 'Vol', 'Incendie'.
+
+    description (TEXT) : Détails précis du sinistre.
+
+    gravite (ENUM) : 'Mineur', 'Moyen', 'Grave'.
+
+    responsable (ENUM) : 'Chauffeur', 'Tiers', 'Inconnu'.
+
+    statut_sinistre (ENUM) : 'Déclaré', 'En cours', 'En réparation', 'Clos'.
+
+    montant_estime (DECIMAL) : Estimation financière initiale.
+
+    cree_par (INT) : ID de l'utilisateur ayant créé la fiche.
+
+    date_creation (DATETIME) : Date d'enregistrement dans le système.
+• 1 sinistre ➜ 1 véhicule 
+• 1 sinistre ➜ 0 ou 1 assurance sinistré 
+• 1 sinistre ➜ 0 ou plusieurs réparations   
+Table : assurance_sinistre
+
+Gère le traitement du dossier par la compagnie d'assurance.
+
+    id_assurance_sinistre (INT, PK, Auto-increment).
+
+    id_sinistre (INT, FK) : Référence au sinistre (Relation 1:1 ou 1:0).
+
+    compagnie_assurance (VARCHAR) : Nom de l'assurance.
+
+    numero_dossier (VARCHAR) : Référence dossier assurance.
+
+    date_declaration (DATE) : Date de déclaration à l'assureur.
+
+    expert_nom (VARCHAR) : Nom de l'expert mandaté.
+
+    date_expertise (DATE) : Date du passage de l'expert.
+
+    decision (ENUM) : 'Accepté', 'Refusé', 'En attente'.
+
+    montant_pris_en_charge (DECIMAL) : Somme remboursée par l'assurance.
+
+    franchise (DECIMAL) : Montant de la franchise restant à charge.
+
+    date_validation (DATE) : Date de validation finale du dossier.
+
+    statut_assurance (ENUM) : 'En cours', 'Validé', 'Refusé'.
+
+Table : reparation_sinistre
+
+Gère les travaux de remise en état.
+
+    id_reparation (INT, PK, Auto-increment).
+
+    id_sinistre (INT, FK) : Référence au sinistre (Relation 1:N).
+
+    garage (VARCHAR) : Nom du garage réparateur.
+
+    type_reparation (ENUM) : 'Mécanique', 'Carrosserie'.
+
+    date_debut (DATE) : Début des travaux.
+
+    date_fin_prevue (DATE) : Date de fin estimée.
+
+    date_fin_reelle (DATE) : Date de restitution du véhicule.
+
+    cout_reparation (DECIMAL) : Coût total des travaux.
+
+    prise_en_charge (ENUM) : 'Assurance', 'Société'.
+
+    statut_reparation (ENUM) : 'En attente', 'En cours', 'Terminé'.
+
+    facture_reference (VARCHAR) : Numéro de la facture finale.                                                                            2. Règles de Gestion Automatiques (Business Logic)
+
+
+tache2: 
+pour limplemntation des pages (code dans le projet ) on va ajouter dans dahsboard item menu sinistre
+et comme sous menu (comme dans oparation )
+on aura 
+
+1.Tableau de suivi=(Déclarer un sinistre+ Liste des sinistres)
+2.Suivi Assurance, 
+3.Suivi Réparations,
+4. Statistiques.
+
+
+-pour tableau de suivi ==> liste des sinistre  : Afficher les colonnes Numéro, Véhicule, Date, Gravité, Statut, Coût Total et Boutons d'actions (Voir/Modifier/Clôturer).
+
+-Le champ statut_sinistre dans la table sinistre doit se mettre à jour automatiquement selon les actions suivantes :
+
+    Action : Création d'un sinistre ➜ Statut = Déclaré.
+
+    Action : Création d'une fiche assurance ➜ Statut = En cours.
+
+    Action : Lancement d'une réparation (date_debut renseignée) ➜ Statut = En réparation.
+
+    Action : Réparation terminée (statut_reparation = 'Terminé') ➜ Statut = Clos.                                                                    
+    
+    
+- Statistiques Générer des rapports sur :
+
+    Le nombre de sinistres par période.
+
+    Le coût total des sinistres par véhicule.
+
+    Le classement des sinistres par chauffeur.
+
+    Le taux de prise en charge moyen par l'assurance.
+
+    Les véhicules les plus sinistrés de la flotte.    

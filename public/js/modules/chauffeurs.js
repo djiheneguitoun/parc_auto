@@ -143,6 +143,7 @@ export async function loadChauffeurs() {
             clearChauffeurDetail();
         }
     }
+    document.dispatchEvent(new CustomEvent('data:chauffeurs:updated'));
 }
 
 // ============================================================================

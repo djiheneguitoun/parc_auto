@@ -40,6 +40,12 @@ import {
 
 import { initializeReportsEvents } from './modules/reports.js';
 
+import {
+    initializeSinistreEvents,
+    loadSinistres,
+    loadSinistreStats,
+} from './modules/sinistres.js';
+
 // ============================================================================
 // Application Initialization
 // ============================================================================
@@ -190,6 +196,7 @@ function initializeApp() {
     initializeDocumentEvents();
     initializeParametresEvents();
     initializeReportsEvents();
+    initializeSinistreEvents();
 
     // Load all initial data
     Promise.all([
@@ -199,6 +206,8 @@ function initializeApp() {
         loadDocuments(),
         loadMetrics(),
         loadParametres(),
+        loadSinistres(),
+        loadSinistreStats(),
     ]).then(() => {
         renderDashboardCharts();
     }).catch(err => console.error('Error loading initial data:', err));

@@ -24,6 +24,19 @@ export const state = {
     },
     documentCurrentType: 'assurance',
     documentEditingId: null,
+    sinistres: [],
+    selectedSinistreId: null,
+    sinistreEditingId: null,
+    sinistreCurrentTab: 'tableau',
+    assuranceEditingId: null,
+    reparationEditingId: null,
+    sinistreStats: {
+        par_periode: [],
+        cout_par_vehicule: [],
+        classement_chauffeurs: [],
+        taux_prise_en_charge_moyen: 0,
+        vehicules_plus_sinistres: [],
+    },
 };
 
 // ============================================================================

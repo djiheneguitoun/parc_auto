@@ -29,4 +29,9 @@ class Chauffeur extends Model
     {
         return $this->hasMany(Vehicule::class);
     }
+
+    public function sinistres()
+    {
+        return $this->hasMany(Sinistre::class);
+    }
 }

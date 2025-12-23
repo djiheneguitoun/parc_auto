@@ -47,6 +47,17 @@
                 <button class="nav-submenu-btn" data-target="documents" data-doc-type="bon_essence">Bon d'essence</button>
             </div>
         </div>
+        <div class="nav-dropdown">
+            <button class="nav-btn" id="sinistres-dropdown-btn" type="button" data-target="sinistres">
+                <span>Sinistres</span>
+            </button>
+            <div class="nav-submenu" id="sinistres-submenu">
+                <button class="nav-submenu-btn" data-target="sinistres" data-sinistre-tab="tableau">Tableau de suivi</button>
+                <button class="nav-submenu-btn" data-target="sinistres" data-sinistre-tab="assurance">Suivi assurance</button>
+                <button class="nav-submenu-btn" data-target="sinistres" data-sinistre-tab="reparations">Suivi réparations</button>
+                <button class="nav-submenu-btn" data-target="sinistres" data-sinistre-tab="stats">Statistiques</button>
+            </div>
+        </div>
         <button class="nav-btn" data-target="utilisateurs">Utilisateurs</button>
         <button class="nav-btn" data-target="parametres">Paramètres</button>
     </nav>
@@ -56,6 +67,7 @@
         @include('dashboard.sections.vehicules')
         @include('dashboard.sections.rapports')
         @include('dashboard.sections.documents')
+        @include('dashboard.sections.sinistres')
         @include('dashboard.sections.utilisateurs')
         @include('dashboard.sections.parametres')
     </main>
