@@ -6,18 +6,18 @@
                     <h3>Tableau de suivi</h3>
                     <div class="muted-small">Déclarer, consulter et clôturer les dossiers.</div>
                 </div>
-                <div class="section-actions" style="flex-wrap: wrap; gap: 10px;">
-                    <select id="sinistre-filter-statut">
+                <div class="section-actions">
+                    <select id="sinistre-filter-statut" class="sinistre-filter">
                         <option value="">Tous les statuts</option>
                         <option value="declare">Déclaré</option>
                         <option value="en_cours">En cours</option>
                         <option value="en_reparation">En réparation</option>
                         <option value="clos">Clos</option>
                     </select>
-                    <select id="sinistre-filter-vehicule">
+                    <select id="sinistre-filter-vehicule" class="sinistre-filter">
                         <option value="">Tous les véhicules</option>
                     </select>
-                    <button class="btn secondary xs" id="refresh-sinistres" type="button">Rafraîchir</button>
+                    <button class="btn primary" id="open-sinistre-modal" type="button">Ajouter un sinistre</button>
                 </div>
             </div>
             <div class="table-wrapper table-card">
@@ -73,7 +73,7 @@
                     <h3>Suivi assurance</h3>
                     <div class="muted-small">Déclarations, décisions et montants pris en charge.</div>
                 </div>
-                <div class="section-actions" style="flex-wrap: wrap; gap: 10px;">
+                <div class="section-actions">
                     <select id="assurance-sinistre-select">
                         <option value="">Choisir un sinistre</option>
                     </select>
@@ -96,7 +96,7 @@
                     <h3>Suivi réparations</h3>
                     <div class="muted-small">Ordonnancer et clôturer les réparations liées aux sinistres.</div>
                 </div>
-                <div class="section-actions" style="flex-wrap: wrap; gap: 10px;">
+                <div class="section-actions">
                     <select id="reparation-sinistre-select">
                         <option value="">Choisir un sinistre</option>
                     </select>
@@ -119,7 +119,7 @@
                     <h3>Statistiques</h3>
                     <div class="muted-small">Volumes, coûts et prise en charge par période.</div>
                 </div>
-                <div class="section-actions" style="flex-wrap: wrap; gap: 10px;">
+                <div class="section-actions">
                     <input type="date" id="stats-date-start">
                     <input type="date" id="stats-date-end">
                     <button class="btn secondary xs" id="refresh-sinistre-stats" type="button">Mettre à jour</button>

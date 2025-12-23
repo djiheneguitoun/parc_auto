@@ -398,6 +398,57 @@ header .actions {
 .collapsed {
     display: none !important;
 }
+
+/* Sinistres: filtres et positionnement des actions */
+.section-subheader .section-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: nowrap; /* garder horizontal par défaut */
+}
+
+.section-subheader .section-actions .sinistre-filter {
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: var(--pill); /* palette cohérente */
+    min-width: 180px;
+    font-size: 14px;
+    color: var(--accent-2);
+    box-shadow: none;
+}
+.section-subheader .section-actions .sinistre-filter:focus {
+    outline: none;
+    box-shadow: 0 8px 24px rgba(30, 45, 120, 0.06);
+    border-color: rgba(30, 45, 120, 0.12);
+}
+
+/* bouton d'action dans l'en-tête : harmonisé avec la palette */
+.section-subheader .section-actions .btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+.section-subheader .section-actions .btn.primary {
+    background: var(--accent);
+    color: #ffffff;
+    border: 1px solid rgba(14, 29, 86, 0.08);
+    box-shadow: 0 10px 20px rgba(30, 45, 120, 0.12);
+}
+
+@media (max-width: 720px) {
+    .section-subheader {
+        align-items: flex-start;
+    }
+    .section-subheader .section-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    .section-subheader .section-actions .sinistre-filter {
+        min-width: 140px;
+    }
+}
 .hidden {
     display: none !important;
 }

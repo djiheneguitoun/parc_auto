@@ -93,14 +93,14 @@ function formatReparationStatut(value) {
 // Helpers
 function sinistreLabel(s) {
     const vehicule = s.vehicule;
-    const vehiculeLabel = vehicule ? [vehicule.code, vehicule.numero, vehicule.marque, vehicule.modele].filter(Boolean).join(' · ') : 'Véhicule';
+    const vehiculeLabel = vehicule ? (vehicule.numero || `Véhicule ${vehicule.id}`) : 'Véhicule';
     return `${s.numero_sinistre || 'Nouveau'} — ${vehiculeLabel}`;
 }
 
 function populateVehiculeOptions(selectEl, placeholder = 'Choisir un véhicule') {
     if (!selectEl) return;
     const options = state.vehicules.map(v => {
-        const label = [v.code, v.numero, v.marque, v.modele].filter(Boolean).join(' · ') || `Véhicule ${v.id}`;
+        const label = v.numero || `Véhicule ${v.id}`;
         return `<option value="${v.id}">${label}</option>`;
     }).join('');
     selectEl.innerHTML = `<option value="">${placeholder}</option>${options}`;
@@ -139,7 +139,7 @@ function renderSinistreRows() {
 
     const rows = filtered.map(s => {
         const vehicule = s.vehicule;
-        const vehiculeLabel = vehicule ? [vehicule.code, vehicule.numero, vehicule.marque, vehicule.modele].filter(Boolean).join(' · ') : '-';
+        const vehiculeLabel = vehicule ? (vehicule.numero || `Véhicule ${vehicule.id}`) : '-';
         return `
             <tr data-sinistre-id="${s.id}">
                 <td>${s.numero_sinistre || '-'}</td>
