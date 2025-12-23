@@ -7,16 +7,32 @@
                     <div class="muted-small">Déclarer, consulter et clôturer les dossiers.</div>
                 </div>
                 <div class="section-actions">
-                    <select id="sinistre-filter-statut" class="sinistre-filter">
-                        <option value="">Tous les statuts</option>
-                        <option value="declare">Déclaré</option>
-                        <option value="en_cours">En cours</option>
-                        <option value="en_reparation">En réparation</option>
-                        <option value="clos">Clos</option>
-                    </select>
-                    <select id="sinistre-filter-vehicule" class="sinistre-filter">
-                        <option value="">Tous les véhicules</option>
-                    </select>
+                    <!-- Custom select pour Statut -->
+                    <div class="custom-select sinistre-filter" data-name="sinistre-filter-statut">
+                        <button type="button" class="custom-select__trigger selected" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select__value">Tous les statuts</span>
+                            <span class="custom-select__arrow">▾</span>
+                        </button>
+                        <ul class="custom-select__options" role="listbox" tabindex="-1">
+                            <li role="option" data-value="" aria-selected="true">Tous les statuts</li>
+                            <li role="option" data-value="declare">Déclaré</li>
+                            <li role="option" data-value="en_cours">En cours</li>
+                            <li role="option" data-value="en_reparation">En réparation</li>
+                            <li role="option" data-value="clos">Clos</li>
+                        </ul>
+                        <input type="hidden" id="sinistre-filter-statut" name="sinistre_filter_statut" value="">
+                    </div>
+                    <!-- Custom select pour Véhicule -->
+                    <div class="custom-select sinistre-filter" data-name="sinistre-filter-vehicule">
+                        <button type="button" class="custom-select__trigger selected" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select__value">Tous les véhicules</span>
+                            <span class="custom-select__arrow">▾</span>
+                        </button>
+                        <ul class="custom-select__options" role="listbox" tabindex="-1">
+                            <li role="option" data-value="" aria-selected="true">Tous les véhicules</li>
+                        </ul>
+                        <input type="hidden" id="sinistre-filter-vehicule" name="sinistre_filter_vehicule" value="">
+                    </div>
                     <button class="btn primary" id="open-sinistre-modal" type="button">Ajouter un sinistre</button>
                 </div>
             </div>
@@ -136,6 +152,90 @@
         </div>
     </div>
 </section>
+
+    <script>
+    // Custom select init for sinistre filter
+    ;(function(){
+        function setupCustomSelect(root){
+            var trigger = root.querySelector('.custom-select__trigger');
+            var options = root.querySelector('.custom-select__options');
+            var valueElem = root.querySelector('.custom-select__value');
+            var hidden = root.querySelector('input[type="hidden"]');
+
+            // initialize from markup: if an option is pre-marked aria-selected, use it
+            var pre = options.querySelector('li[aria-selected="true"]') || options.querySelector('li');
+            if (pre) {
+                var pv = pre.getAttribute('data-value') || '';
+                hidden.value = pv;
+                valueElem.textContent = pre.textContent.trim();
+                options.querySelectorAll('li').forEach(function(x){ x.setAttribute('aria-selected','false'); });
+                pre.setAttribute('aria-selected','true');
+                trigger.classList.add('selected');
+            }
+
+            function open(){
+                root.classList.add('open');
+                trigger.setAttribute('aria-expanded','true');
+            }
+            function close(){
+                root.classList.remove('open');
+                trigger.setAttribute('aria-expanded','false');
+            }
+
+            // If this select is searchable, wire up the search input to filter options
+            var searchInput = null;
+            if (root.dataset.searchable === 'true') {
+                // search input may be inside options container as .custom-select__search
+                searchInput = options.querySelector('.custom-select__search');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e){
+                        var q = (e.target.value || '').toLowerCase();
+                        options.querySelectorAll('li[role="option"]').forEach(function(li){
+                            var txt = li.textContent.trim().toLowerCase();
+                            li.style.display = txt.indexOf(q) !== -1 ? '' : 'none';
+                        });
+                    });
+                    // prevent click propagation from search input to options click handler
+                    searchInput.addEventListener('click', function(e){ e.stopPropagation(); });
+                }
+            }
+
+            trigger.addEventListener('click', function(e){
+                e.stopPropagation();
+                if(root.classList.contains('open')) close(); else open();
+            });
+
+            options.addEventListener('click', function(e){
+                var li = e.target.closest('li');
+                if(!li) return;
+                var v = li.getAttribute('data-value') || '';
+                var text = li.textContent.trim();
+                hidden.value = v;
+                valueElem.textContent = text;
+                // mark selected
+                options.querySelectorAll('li').forEach(function(x){ x.setAttribute('aria-selected','false'); });
+                li.setAttribute('aria-selected','true');
+                close();
+                // dispatch a custom event so existing JS can react to filter change
+                var ev = new CustomEvent('sinistreFilterChange', { detail: { name: hidden.id, value: v } });
+                root.dispatchEvent(ev);
+                // trigger native change on hidden input so existing listeners (renderSinistreRows) run
+                var nativeEv = new Event('change', { bubbles: true });
+                hidden.dispatchEvent(nativeEv);
+            });
+
+            // close on outside click
+            document.addEventListener('click', function(){ close(); });
+            // close on escape
+            document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            var elems = document.querySelectorAll('.custom-select');
+            elems.forEach(setupCustomSelect);
+        });
+    })();
+    </script>
 
 <div class="modal hidden" id="sinistre-modal">
     <div class="modal-backdrop" data-close="sinistre-modal"></div>

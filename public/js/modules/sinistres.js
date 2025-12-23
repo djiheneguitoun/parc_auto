@@ -99,11 +99,53 @@ function sinistreLabel(s) {
 
 function populateVehiculeOptions(selectEl, placeholder = 'Choisir un véhicule') {
     if (!selectEl) return;
-    const options = state.vehicules.map(v => {
-        const label = v.numero || `Véhicule ${v.id}`;
-        return `<option value="${v.id}">${label}</option>`;
-    }).join('');
-    selectEl.innerHTML = `<option value="">${placeholder}</option>${options}`;
+    // If target is a native select element, populate normally
+    if (selectEl.tagName === 'SELECT') {
+        const options = state.vehicules.map(v => {
+            const label = v.numero || `Véhicule ${v.id}`;
+            return `<option value="${v.id}">${label}</option>`;
+        }).join('');
+        selectEl.innerHTML = `<option value="">${placeholder}</option>${options}`;
+        return;
+    }
+
+    // If target is a hidden input (custom-select), populate the custom-select options list
+    if (selectEl.tagName === 'INPUT') {
+        // find the custom-select container by data-name matching the input id
+        const container = document.querySelector(`.custom-select[data-name="${selectEl.id}"]`);
+        if (!container) return;
+        const optionsEl = container.querySelector('.custom-select__options');
+        // build items
+        const items = state.vehicules.map(v => {
+            const label = v.numero || `Véhicule ${v.id}`;
+            return `<li role="option" data-value="${v.id}">${label}</li>`;
+        }).join('');
+        // include placeholder as first option
+        optionsEl.innerHTML = `<li role="option" data-value="">${placeholder}</li>${items}`;
+        // if searchable, ensure search input exists at top
+        if (container.dataset.searchable === 'true') {
+            var search = optionsEl.querySelector('.custom-select__search');
+            if (!search) {
+                var wrap = document.createElement('div');
+                wrap.className = 'custom-select__searchwrap';
+                wrap.innerHTML = '<input type="search" class="custom-select__search" placeholder="Rechercher véhicule...">';
+                optionsEl.insertBefore(wrap, optionsEl.firstChild);
+                search = wrap.querySelector('.custom-select__search');
+            }
+            // attach handler to filter options
+            if (search) {
+                search.addEventListener('input', function(e){
+                    var q = (e.target.value || '').toLowerCase();
+                    optionsEl.querySelectorAll('li[role="option"]').forEach(function(li){
+                        var txt = li.textContent.trim().toLowerCase();
+                        li.style.display = txt.indexOf(q) !== -1 ? '' : 'none';
+                    });
+                });
+                search.addEventListener('click', function(e){ e.stopPropagation(); });
+            }
+        }
+        return;
+    }
 }
 
 function populateChauffeurOptions(selectEl) {
