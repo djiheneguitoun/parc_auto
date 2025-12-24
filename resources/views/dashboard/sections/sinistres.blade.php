@@ -36,7 +36,7 @@
                     <button class="btn secondary" id="open-sinistre-modal" type="button">Ajouter un sinistre</button>
                 </div>
             </div>
-            <div class="table-wrapper table-card" style="margin-top:12px;">
+            <div class="table-wrapper table-card" style="margin-top:20px;">
                 <table class="table-clickable">
                     <thead>
                     <tr><th>Numéro</th><th>Véhicule</th><th>Date</th><th>Gravité</th><th>Statut</th><th>Coût total</th><th style="width: 180px;">Actions</th></tr>
