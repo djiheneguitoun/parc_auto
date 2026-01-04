@@ -1,0 +1,565 @@
+/* ============================================
+   PARC AUTO - RAPPORTS STYLES
+   Modern & Professional with Colors
+   ============================================ */
+
+#rapports {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Section Header */
+#rapports .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+#rapports .section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+#rapports .section-header h2 .icon-box {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #1e2d78, #1e2d78);
+    color: white;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#rapports .section-header p {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin: 0;
+    padding-left: calc(40px + var(--space-3));
+}
+
+/* Reports Grid */
+#rapports .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+/* Report Card - Different colors for each */
+#rapports .report-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius-xl);
+    transition: all 0.2s ease;
+    cursor: default;
+}
+#rapports .report-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+#rapports .report-card[data-report="vehicules"] {
+    border-left-color: #3b82f6;
+}
+#rapports .report-card[data-report="vehicules"] .report-icon {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+#rapports .report-card[data-report="vehicules"] .btn.primary {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+#rapports .report-card[data-report="vehicules"] .btn.primary:hover {
+    background: #2563eb;
+}
+
+#rapports .report-card[data-report="chauffeurs"] {
+    border-left-color: #10b981;
+}
+#rapports .report-card[data-report="chauffeurs"] .report-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+#rapports .report-card[data-report="chauffeurs"] .btn.primary {
+    background: #10b981;
+    border-color: #10b981;
+}
+#rapports .report-card[data-report="chauffeurs"] .btn.primary:hover {
+    background: #059669;
+}
+
+#rapports .report-card[data-report="charges"] {
+    border-left-color: #f59e0b;
+}
+#rapports .report-card[data-report="charges"] .report-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+#rapports .report-card[data-report="charges"] .btn.primary {
+    background: #f59e0b;
+    border-color: #f59e0b;
+}
+#rapports .report-card[data-report="charges"] .btn.primary:hover {
+    background: #d97706;
+}
+
+#rapports .report-card[data-report="factures"] {
+    border-left-color: #8b5cf6;
+}
+#rapports .report-card[data-report="factures"] .report-icon {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+#rapports .report-card[data-report="factures"] .btn.primary {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+}
+#rapports .report-card[data-report="factures"] .btn.primary:hover {
+    background: #7c3aed;
+}
+
+#rapports .report-icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+}
+
+#rapports .report-content {
+    flex: 1;
+    min-width: 0;
+}
+#rapports .report-content h3 {
+    font-size: var(--text-md);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-1) 0;
+}
+#rapports .report-content p {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+#rapports .report-card .btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Modals - Amazing Modern Style */
+#modal-vehicules-report,
+#modal-chauffeurs-report,
+#modal-charges-report,
+#modal-factures-report {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#modal-vehicules-report.hidden,
+#modal-chauffeurs-report.hidden,
+#modal-charges-report.hidden,
+#modal-factures-report.hidden {
+    display: none !important;
+}
+
+#modal-vehicules-report .modal-backdrop,
+#modal-chauffeurs-report .modal-backdrop,
+#modal-charges-report .modal-backdrop,
+#modal-factures-report .modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    z-index: 1 !important;
+}
+
+#modal-vehicules-report .modal-dialog,
+#modal-chauffeurs-report .modal-dialog,
+#modal-charges-report .modal-dialog,
+#modal-factures-report .modal-dialog {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 90% !important;
+    max-width: 480px !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
+    animation: modalSlideIn 0.2s ease-out !important;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Modal Headers - Solid Colors */
+#modal-vehicules-report .modal-header {
+    background: #3b82f6 !important;
+}
+#modal-chauffeurs-report .modal-header {
+    background: #10b981 !important;
+}
+#modal-charges-report .modal-header {
+    background: #f59e0b !important;
+}
+#modal-factures-report .modal-header {
+    background: #8b5cf6 !important;
+}
+
+#modal-vehicules-report .modal-header,
+#modal-chauffeurs-report .modal-header,
+#modal-charges-report .modal-header,
+#modal-factures-report .modal-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 18px !important;
+    border-radius: 12px 12px 0 0 !important;
+    border-bottom: none !important;
+}
+
+#modal-vehicules-report .modal-header h3,
+#modal-chauffeurs-report .modal-header h3,
+#modal-charges-report .modal-header h3,
+#modal-factures-report .modal-header h3 {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+#modal-vehicules-report .modal-header h3 svg,
+#modal-chauffeurs-report .modal-header h3 svg,
+#modal-charges-report .modal-header h3 svg,
+#modal-factures-report .modal-header h3 svg {
+    stroke: white !important;
+    opacity: 0.9 !important;
+}
+
+#modal-vehicules-report .modal-header .close-btn,
+#modal-chauffeurs-report .modal-header .close-btn,
+#modal-charges-report .modal-header .close-btn,
+#modal-factures-report .modal-header .close-btn {
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+#modal-vehicules-report .modal-header .close-btn:hover,
+#modal-chauffeurs-report .modal-header .close-btn:hover,
+#modal-charges-report .modal-header .close-btn:hover,
+#modal-factures-report .modal-header .close-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.08) !important;
+}
+
+/* Forms - Professional Styling */
+#modal-vehicules-report form,
+#modal-chauffeurs-report form,
+#modal-charges-report form,
+#modal-factures-report form {
+    padding: 18px !important;
+    background: #f8fafc !important;
+}
+
+#modal-vehicules-report .form-grid,
+#modal-chauffeurs-report .form-grid,
+#modal-charges-report .form-grid,
+#modal-factures-report .form-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+}
+
+#modal-vehicules-report .form-grid.cols-2,
+#modal-chauffeurs-report .form-grid.cols-2,
+#modal-charges-report .form-grid.cols-2,
+#modal-factures-report .form-grid.cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+}
+
+#modal-vehicules-report .form-grid.cols-3,
+#modal-chauffeurs-report .form-grid.cols-3,
+#modal-charges-report .form-grid.cols-3,
+#modal-factures-report .form-grid.cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+}
+
+#modal-vehicules-report .form-group,
+#modal-chauffeurs-report .form-group,
+#modal-charges-report .form-group,
+#modal-factures-report .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+#modal-vehicules-report .form-group label,
+#modal-chauffeurs-report .form-group label,
+#modal-charges-report .form-group label,
+#modal-factures-report .form-group label {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+}
+
+#modal-vehicules-report .form-group input,
+#modal-vehicules-report .form-group select,
+#modal-chauffeurs-report .form-group input,
+#modal-chauffeurs-report .form-group select,
+#modal-charges-report .form-group input,
+#modal-charges-report .form-group select,
+#modal-factures-report .form-group input,
+#modal-factures-report .form-group select {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    transition: all 0.2s ease !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+
+#modal-vehicules-report .form-group select,
+#modal-chauffeurs-report .form-group select,
+#modal-charges-report .form-group select,
+#modal-factures-report .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    padding-right: 40px !important;
+}
+
+#modal-vehicules-report .form-group input:hover,
+#modal-vehicules-report .form-group select:hover,
+#modal-chauffeurs-report .form-group input:hover,
+#modal-chauffeurs-report .form-group select:hover,
+#modal-charges-report .form-group input:hover,
+#modal-charges-report .form-group select:hover,
+#modal-factures-report .form-group input:hover,
+#modal-factures-report .form-group select:hover {
+    border-color: #cbd5e1 !important;
+}
+
+#modal-vehicules-report .form-group input:focus,
+#modal-vehicules-report .form-group select:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+}
+
+#modal-chauffeurs-report .form-group input:focus,
+#modal-chauffeurs-report .form-group select:focus {
+    outline: none !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+}
+
+#modal-charges-report .form-group input:focus,
+#modal-charges-report .form-group select:focus {
+    outline: none !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15) !important;
+}
+
+#modal-factures-report .form-group input:focus,
+#modal-factures-report .form-group select:focus {
+    outline: none !important;
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Form Hint */
+#modal-vehicules-report .form-hint,
+#modal-chauffeurs-report .form-hint,
+#modal-charges-report .form-hint,
+#modal-factures-report .form-hint {
+    font-size: 11px !important;
+    color: #0c4a6e !important;
+    margin-bottom: 14px !important;
+    padding: 8px 12px !important;
+    background: #e0f2fe !important;
+    border: 1px solid #bae6fd !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+#modal-vehicules-report .form-hint::before,
+#modal-chauffeurs-report .form-hint::before,
+#modal-charges-report .form-hint::before,
+#modal-factures-report .form-hint::before {
+    content: "💡" !important;
+    font-size: 14px !important;
+}
+
+/* Form Actions */
+#modal-vehicules-report .form-actions,
+#modal-chauffeurs-report .form-actions,
+#modal-charges-report .form-actions,
+#modal-factures-report .form-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    margin-top: 6px !important;
+}
+
+#modal-vehicules-report .form-actions .btn,
+#modal-chauffeurs-report .form-actions .btn,
+#modal-charges-report .form-actions .btn,
+#modal-factures-report .form-actions .btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+#modal-vehicules-report .form-actions .btn.secondary,
+#modal-chauffeurs-report .form-actions .btn.secondary,
+#modal-charges-report .form-actions .btn.secondary,
+#modal-factures-report .form-actions .btn.secondary {
+    background: #f1f5f9 !important;
+    border: 1.5px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+#modal-vehicules-report .form-actions .btn.secondary:hover,
+#modal-chauffeurs-report .form-actions .btn.secondary:hover,
+#modal-charges-report .form-actions .btn.secondary:hover,
+#modal-factures-report .form-actions .btn.secondary:hover {
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Primary buttons match modal colors */
+#modal-vehicules-report .form-actions .btn.primary {
+    background: #3b82f6 !important;
+    border: none !important;
+    color: white !important;
+}
+#modal-vehicules-report .form-actions .btn.primary:hover {
+    background: #2563eb !important;
+}
+
+#modal-chauffeurs-report .form-actions .btn.primary {
+    background: #10b981 !important;
+    border: none !important;
+    color: white !important;
+}
+#modal-chauffeurs-report .form-actions .btn.primary:hover {
+    background: #059669 !important;
+}
+
+#modal-charges-report .form-actions .btn.primary {
+    background: #f59e0b !important;
+    border: none !important;
+    color: white !important;
+}
+#modal-charges-report .form-actions .btn.primary:hover {
+    background: #d97706 !important;
+}
+
+#modal-factures-report .form-actions .btn.primary {
+    background: #8b5cf6 !important;
+    border: none !important;
+    color: white !important;
+}
+#modal-factures-report .form-actions .btn.primary:hover {
+    background: #7c3aed !important;
+}
+
+/* Responsive for modals */
+@media (max-width: 640px) {
+    #modal-vehicules-report .form-grid,
+    #modal-chauffeurs-report .form-grid,
+    #modal-charges-report .form-grid,
+    #modal-factures-report .form-grid,
+    #modal-vehicules-report .form-grid.cols-2,
+    #modal-chauffeurs-report .form-grid.cols-2,
+    #modal-charges-report .form-grid.cols-2,
+    #modal-factures-report .form-grid.cols-2,
+    #modal-vehicules-report .form-grid.cols-3,
+    #modal-chauffeurs-report .form-grid.cols-3,
+    #modal-charges-report .form-grid.cols-3,
+    #modal-factures-report .form-grid.cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Responsive - Report Cards */
+@media (max-width: 900px) {
+    #rapports .reports-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    #rapports .report-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #rapports .report-card .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

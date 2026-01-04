@@ -19,10 +19,27 @@ const chauffeursSubmit = document.getElementById('chauffeurs-report-submit');
 const chargesSubmit = document.getElementById('charges-report-submit');
 const facturesSubmit = document.getElementById('factures-report-submit');
 
+// All report modals
+const reportModals = [
+	document.getElementById('modal-vehicules-report'),
+	document.getElementById('modal-chauffeurs-report'),
+	document.getElementById('modal-charges-report'),
+	document.getElementById('modal-factures-report')
+];
+
 function toggleModal(modalId, open) {
 	const modal = document.getElementById(modalId);
 	if (!modal) return;
 	modal.classList[open ? 'remove' : 'add']('hidden');
+}
+
+function moveModalsToBody() {
+	// Move modals to body to prevent clipping issues (same as chauffeurs/vehicules)
+	reportModals.forEach(modal => {
+		if (modal && modal.parentElement !== document.body) {
+			document.body.appendChild(modal);
+		}
+	});
 }
 
 function setupModalTriggers() {
@@ -31,9 +48,23 @@ function setupModalTriggers() {
 		btn.addEventListener('click', () => toggleModal(target, true));
 	});
 
+	// Close buttons with data-close attribute
 	closeButtons.forEach(btn => {
-		const target = btn.dataset.close;
-		btn.addEventListener('click', () => toggleModal(target, false));
+		btn.addEventListener('click', () => {
+			const target = btn.dataset.close;
+			if (target) toggleModal(target, false);
+		});
+	});
+
+	// Close on backdrop click
+	reportModals.forEach(modal => {
+		if (!modal) return;
+		const backdrop = modal.querySelector('.modal-backdrop');
+		if (backdrop) {
+			backdrop.addEventListener('click', () => {
+				toggleModal(modal.id, false);
+			});
+		}
 	});
 }
 
@@ -79,6 +110,7 @@ async function downloadPdf(endpoint, form, submitBtn, filenamePrefix) {
 }
 
 export function initializeReportsEvents() {
+	moveModalsToBody();
 	setupModalTriggers();
 
 	if (vehiculesForm) {
