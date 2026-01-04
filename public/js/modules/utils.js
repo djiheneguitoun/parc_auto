@@ -143,6 +143,22 @@ export function formatComportement(value) {
     return COMPORTEMENT_LABELS[value] || '-';
 }
 
+// Comportement badge avec couleur
+export function formatComportementBadge(value) {
+    const label = COMPORTEMENT_LABELS[value] || '-';
+    const colorMap = {
+        excellent: 'success',
+        tres_bon: 'primary',
+        satisfaisant: 'info',
+        a_ameliorer: 'warning',
+        insuffisant: 'danger',
+        non_conforme: 'danger',
+        a_risque: 'danger'
+    };
+    const color = colorMap[value] || 'gray';
+    return `<span class="badge ${color}">${label}</span>`;
+}
+
 export function formatStatut(value) {
     const map = { contractuel: 'Contractuel', permanent: 'Permanent' };
     return map[value] || '-';
@@ -274,11 +290,21 @@ export function initializeNavigation() {
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.id === 'documents-dropdown-btn') {
-                activateDocuments();
+                // Toggle: fermer si déjà ouvert
+                if (documentsDropdown?.classList.contains('open')) {
+                    documentsDropdown.classList.remove('open');
+                } else {
+                    activateDocuments();
+                }
                 return;
             }
             if (btn.id === 'sinistres-dropdown-btn') {
-                activateSinistres();
+                // Toggle: fermer si déjà ouvert
+                if (sinistresDropdown?.classList.contains('open')) {
+                    sinistresDropdown.classList.remove('open');
+                } else {
+                    activateSinistres();
+                }
                 return;
             }
             activateMainSection(btn.dataset.target);
@@ -314,5 +340,7 @@ export function initializeNavigation() {
 
 function starString(score) {
     const safeScore = Math.min(5, Math.max(0, Number(score) || 0));
-    return '★'.repeat(safeScore) + '☆'.repeat(5 - safeScore);
+    const filled = '★'.repeat(safeScore);
+    const empty = '☆'.repeat(5 - safeScore);
+    return `<span class="stars" title="${safeScore}/5"><span class="filled">${filled}</span><span class="empty">${empty}</span></span>`;
 }

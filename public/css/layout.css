@@ -1,0 +1,402 @@
+/* ============================================
+   PARC AUTO - LAYOUT STYLES
+   Header, Sidebar & Main Content
+   ============================================ */
+
+/* ─────────────────────────────────────────
+   VEIL / OVERLAY
+   ───────────────────────────────────────── */
+.veil {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: var(--z-modal-backdrop);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-normal),
+        visibility var(--transition-normal);
+}
+
+.veil.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ─────────────────────────────────────────
+   HEADER
+   ───────────────────────────────────────── */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-5);
+    z-index: var(--z-sticky);
+    box-shadow: var(--shadow-xs);
+}
+
+/* Brand / Logo */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.logo-mark {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: var(--radius-lg);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.brand-text > div:first-child {
+    font-size: var(--text-md);
+    font-weight: var(--font-bold);
+    color: var(--accent);
+    letter-spacing: -0.02em;
+}
+
+.brand-text > div:last-child {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    font-weight: var(--font-medium);
+}
+
+/* Header Actions */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* Header User Info (optional) */
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.header-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+}
+
+/* ─────────────────────────────────────────
+   MAIN LAYOUT
+   ───────────────────────────────────────── */
+.layout {
+    display: flex;
+    min-height: 100vh;
+    padding-top: var(--header-height);
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR NAVIGATION
+   ───────────────────────────────────────── */
+nav {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-light);
+    padding: var(--space-4);
+    overflow-y: auto;
+    z-index: var(--z-fixed);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+nav h4 {
+    font-size: var(--text-2xs);
+    font-weight: var(--font-bold);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-1);
+}
+
+/* Navigation Button */
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2-5);
+    width: 100%;
+    padding: var(--space-2-5) var(--space-3);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    position: relative;
+}
+
+.nav-btn::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--accent);
+    border-radius: 0 var(--radius-full) var(--radius-full) 0;
+    transition: height var(--transition-fast);
+}
+
+.nav-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.nav-btn.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: var(--font-semibold);
+}
+
+.nav-btn.active::before {
+    height: 60%;
+}
+
+/* Nav Icon */
+.nav-btn svg,
+.nav-btn .nav-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.nav-btn:hover svg,
+.nav-btn:hover .nav-icon,
+.nav-btn.active svg,
+.nav-btn.active .nav-icon {
+    opacity: 1;
+}
+
+/* Navigation Dropdown */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown > .nav-btn::after {
+    content: "";
+    margin-left: auto;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    opacity: 0.5;
+    transition: transform var(--transition-fast);
+}
+
+.nav-dropdown.open > .nav-btn::after {
+    transform: rotate(180deg);
+}
+
+/* Navigation Submenu */
+.nav-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-normal) var(--ease-out);
+    padding-left: var(--space-4);
+}
+
+.nav-dropdown.open .nav-submenu {
+    max-height: 400px;
+}
+
+.nav-submenu-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    position: relative;
+}
+
+.nav-submenu-btn::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--gray-300);
+    flex-shrink: 0;
+    transition: background var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.nav-submenu-btn:hover {
+    color: var(--accent);
+    background: var(--primary-50);
+}
+
+.nav-submenu-btn:hover::before {
+    background: var(--accent);
+    transform: scale(1.2);
+}
+
+.nav-submenu-btn.active {
+    color: var(--accent);
+    font-weight: var(--font-semibold);
+}
+
+.nav-submenu-btn.active::before {
+    background: var(--accent);
+}
+
+/* ─────────────────────────────────────────
+   MAIN CONTENT AREA
+   ───────────────────────────────────────── */
+main {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: var(--space-6);
+    background: var(--bg-primary);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Section / Panel */
+.section,
+.panel {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.section.active,
+.panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.section-header h2 {
+    margin-bottom: var(--space-1);
+}
+
+.section-header p {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.section-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+/* Section Subheader */
+.section-subheader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.section-subheader h3,
+.section-subheader h4 {
+    margin-bottom: var(--space-0-5);
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────── */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 200px;
+    }
+
+    main {
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    nav {
+        transform: translateX(-100%);
+        width: 260px;
+        transition: transform var(--transition-normal);
+    }
+
+    nav.open {
+        transform: translateX(0);
+    }
+
+    main {
+        margin-left: 0;
+    }
+
+    .section-header {
+        flex-direction: column;
+    }
+}

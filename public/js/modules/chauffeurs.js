@@ -5,15 +5,13 @@
 
 import { state, showToast } from './state.js';
 import { ensureAuth } from './auth.js';
-import { formatComportement, formatDate, formatMention, formatMentionStars, formatStatut } from './utils.js';
+import { formatComportement, formatComportementBadge, formatDate, formatMention, formatMentionStars, formatStatut } from './utils.js';
 
 // DOM Elements
 export const chauffeurFormTitle = document.getElementById('chauffeur-form-title');
 export const chauffeurFormSubmit = document.getElementById('chauffeur-form-submit');
 export const chauffeurForm = document.getElementById('chauffeur-form');
 export const chauffeurTableBody = document.getElementById('chauffeur-rows');
-export const chauffeurDetailEmpty = document.getElementById('chauffeur-detail-empty');
-export const chauffeurDetail = document.getElementById('chauffeur-detail');
 export const chauffeurDetailName = document.getElementById('chauffeur-detail-name');
 export const chauffeurDetailStatut = document.getElementById('chauffeur-detail-statut');
 export const detailMatricule = document.getElementById('detail-matricule');
@@ -27,8 +25,10 @@ export const detailLieuPermis = document.getElementById('detail-lieu-permis');
 export const detailMention = document.getElementById('detail-mention');
 export const detailComportement = document.getElementById('detail-comportement');
 export const chauffeurModal = document.getElementById('chauffeur-modal');
+export const chauffeurDetailModal = document.getElementById('chauffeur-detail-modal');
 export const openChauffeurModalBtn = document.getElementById('open-chauffeur-modal');
 export const closeChauffeurModalBtn = document.getElementById('close-chauffeur-modal');
+export const closeChauffeurDetailModalBtn = document.getElementById('close-chauffeur-detail-modal');
 
 export function setChauffeurFormMode(mode, chauffeur = null) {
     if (mode === 'edit' && chauffeur) {
@@ -71,30 +71,66 @@ export function closeChauffeurModal() {
 export function renderChauffeurRows() {
     const rows = state.chauffeurs.map(ch => `
         <tr data-id="${ch.id}">
-            <td>${ch.matricule}</td>
-            <td>${ch.nom} ${ch.prenom}</td>
-            <td>${ch.telephone || ''}</td>
-            <td><span class="badge">${formatStatut(ch.statut)}</span></td>
+            <td><span class="matricule-badge">${ch.matricule}</span></td>
+            <td>
+                <div class="driver-name">
+                    <span class="driver-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </span>
+                    ${ch.nom} ${ch.prenom}
+                </div>
+            </td>
+            <td><span class="contact-cell">${ch.telephone || '-'}</span></td>
+            <td><span class="badge ${ch.statut}">${formatStatut(ch.statut)}</span></td>
             <td>${formatMentionStars(ch.mention)}</td>
-            <td>${formatComportement(ch.comportement)}</td>
+            <td>${formatComportementBadge(ch.comportement)}</td>
             <td class="row-actions">
-                <button class="btn secondary xs" data-action="edit" type="button">Modifier</button>
-                <button class="btn danger xs" data-action="delete" type="button">Supprimer</button>
+                <button class="action-btn view" data-action="view" type="button" title="Voir">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+                <button class="action-btn edit" data-action="edit" type="button" title="Modifier">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                </button>
+                <button class="action-btn delete" data-action="delete" type="button" title="Supprimer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <line x1="10" x2="10" y1="11" y2="17"/>
+                        <line x1="14" x2="14" y1="11" y2="17"/>
+                    </svg>
+                </button>
             </td>
         </tr>
     `).join('');
     chauffeurTableBody.innerHTML = rows;
+    
+    // Update count display
+    const countEl = document.querySelector('#chauffeurs-count .count');
+    if (countEl) {
+        countEl.textContent = state.chauffeurs.length;
+    }
 }
 
 export function clearChauffeurDetail() {
-    chauffeurDetail.style.display = 'none';
-    chauffeurDetailEmpty.style.display = 'block';
-    state.selectedChauffeurId = null;
+    closeDetailModal();
 }
+
+// Removed toggle function - no longer needed with modal
 
 export function renderChauffeurDetail(ch) {
     chauffeurDetailName.textContent = `${ch.nom} ${ch.prenom}`;
     chauffeurDetailStatut.textContent = formatStatut(ch.statut);
+    chauffeurDetailStatut.className = `pill ${ch.statut}`;
     detailMatricule.textContent = ch.matricule || '-';
     detailTelephone.textContent = ch.telephone || '-';
     detailAdresse.textContent = ch.adresse || '-';
@@ -105,8 +141,33 @@ export function renderChauffeurDetail(ch) {
     detailLieuPermis.textContent = ch.lieu_permis || '-';
     detailMention.textContent = formatMention(ch.mention);
     detailComportement.textContent = formatComportement(ch.comportement);
-    chauffeurDetailEmpty.style.display = 'none';
-    chauffeurDetail.style.display = 'block';
+    
+    // Open the detail modal
+    openDetailModal();
+    
+    // Highlight selected row
+    document.querySelectorAll('#chauffeur-rows tr.selected').forEach(row => {
+        row.classList.remove('selected');
+    });
+    const selectedRow = document.querySelector(`#chauffeur-rows tr[data-id="${ch.id}"]`);
+    if (selectedRow) selectedRow.classList.add('selected');
+}
+
+function openDetailModal() {
+    if (chauffeurDetailModal) {
+        chauffeurDetailModal.classList.remove('hidden');
+    }
+}
+
+function closeDetailModal() {
+    if (chauffeurDetailModal) {
+        chauffeurDetailModal.classList.add('hidden');
+    }
+    // Clear row selection
+    document.querySelectorAll('#chauffeur-rows tr.selected').forEach(row => {
+        row.classList.remove('selected');
+    });
+    state.selectedChauffeurId = null;
 }
 
 async function fetchChauffeur(id) {
@@ -151,6 +212,11 @@ export async function loadChauffeurs() {
 // ============================================================================
 
 export function initializeChauffeurEvents() {
+    // Move modal to body to prevent clipping issues
+    if (chauffeurModal && chauffeurModal.parentElement !== document.body) {
+        document.body.appendChild(chauffeurModal);
+    }
+    
     chauffeurForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
@@ -168,23 +234,56 @@ export function initializeChauffeurEvents() {
         const row = e.target.closest('tr[data-id]');
         if (!row) return;
         const id = row.dataset.id;
-        if (e.target.matches('[data-action="edit"]')) {
+        
+        // Handle action buttons
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
             e.stopPropagation();
-            const chauffeur = await fetchChauffeur(id);
-            setChauffeurFormMode('edit', chauffeur);
-            openChauffeurModal('edit', chauffeur);
-            return;
+            const action = actionBtn.dataset.action;
+            if (action === 'view') {
+                showChauffeurDetail(id);
+                return;
+            }
+            if (action === 'edit') {
+                const chauffeur = await fetchChauffeur(id);
+                setChauffeurFormMode('edit', chauffeur);
+                openChauffeurModal('edit', chauffeur);
+                return;
+            }
+            if (action === 'delete') {
+                await handleDeleteChauffeur(id);
+                return;
+            }
         }
-        if (e.target.matches('[data-action="delete"]')) {
-            e.stopPropagation();
-            await handleDeleteChauffeur(id);
-            return;
-        }
-        showChauffeurDetail(id);
     });
 
     openChauffeurModalBtn.addEventListener('click', () => openChauffeurModal('create'));
     closeChauffeurModalBtn.addEventListener('click', () => closeChauffeurModal());
+    
+    // Detail modal close button
+    if (closeChauffeurDetailModalBtn) {
+        closeChauffeurDetailModalBtn.addEventListener('click', () => closeDetailModal());
+    }
+    
+    // Detail modal backdrop click
+    if (chauffeurDetailModal) {
+        chauffeurDetailModal.addEventListener('click', (e) => {
+            if (e.target.dataset.close === 'chauffeur-detail-modal') {
+                closeDetailModal();
+            }
+        });
+        // Move detail modal to body
+        if (chauffeurDetailModal.parentElement !== document.body) {
+            document.body.appendChild(chauffeurDetailModal);
+        }
+    }
+    
+    // Cancel button
+    const cancelBtn = document.getElementById('cancel-chauffeur-form');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => closeChauffeurModal());
+    }
+    
     chauffeurModal.addEventListener('click', (e) => {
         if (e.target.dataset.close === 'chauffeur-modal') {
             closeChauffeurModal();
