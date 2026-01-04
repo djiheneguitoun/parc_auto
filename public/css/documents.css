@@ -1,0 +1,631 @@
+/* ============================================
+   PARC AUTO - DOCUMENTS STYLES
+   Same style as chauffeurs/vehicules
+   ============================================ */
+
+#documents {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ─────────────────────────────────────────
+   SECTION HEADER
+   ───────────────────────────────────────── */
+#documents .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+#documents .section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+#documents .section-header h2 .icon-box {
+    width: 40px;
+    height: 40px;
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(30, 45, 120, 0.4);
+}
+
+#documents .section-header p {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin: 0;
+    padding-left: calc(40px + var(--space-3));
+}
+
+#documents .section-header .section-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+#documents .section-header .filter-group {
+    display: flex;
+    align-items: center;
+}
+
+#documents #document-vehicule-filter {
+    min-width: 180px;
+    padding: var(--space-1-5) var(--space-2-5);
+    font-size: var(--text-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#documents #document-vehicule-filter:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ─────────────────────────────────────────
+   TAB NAVIGATION
+   ───────────────────────────────────────── */
+#documents .doc-tabs {
+    display: flex;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+}
+
+#documents .doc-tab {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+#documents .doc-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+}
+
+#documents .doc-tab.active {
+    color: white;
+    background: var(--accent);
+    box-shadow: 0 2px 6px rgba(30, 45, 120, 0.3);
+}
+
+/* ─────────────────────────────────────────
+   PANELS
+   ───────────────────────────────────────── */
+#documents .doc-panel {
+    display: none;
+}
+
+#documents .doc-panel.active {
+    display: block;
+}
+
+/* ─────────────────────────────────────────
+   TABLE CARD - Same as chauffeurs
+   ───────────────────────────────────────── */
+#documents .table-card {
+    border-left: 4px solid var(--accent);
+    margin-bottom: var(--space-4);
+    transition: all 0.2s ease;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+#documents .table-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Section subheader */
+#documents .doc-panel .section-subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+#documents .doc-panel .section-subheader h3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+#documents .doc-panel .section-subheader h3 .doc-title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(
+        135deg,
+        var(--accent),
+        var(--accent-dark, #1a2d6d)
+    );
+    color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(30, 45, 120, 0.35);
+}
+
+#documents .doc-panel .section-subheader .muted-small {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    margin-top: var(--space-0-5);
+}
+
+/* Filtre véhicule stylisé */
+#documents .document-vehicule-filter {
+    min-width: 200px;
+    padding: 10px 16px !important;
+    font-size: var(--text-sm) !important;
+    font-weight: var(--font-medium);
+    color: var(--text-primary) !important;
+    border: 2px solid var(--accent) !important;
+    border-radius: var(--radius-md) !important;
+    background: linear-gradient(
+        to bottom,
+        white,
+        var(--bg-secondary)
+    ) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(30, 45, 120, 0.1);
+}
+
+#documents .document-vehicule-filter:hover {
+    border-color: var(--accent-dark) !important;
+    box-shadow: 0 4px 12px rgba(30, 45, 120, 0.2);
+}
+
+#documents .document-vehicule-filter:focus {
+    outline: none;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 4px rgba(30, 45, 120, 0.15);
+}
+
+/* Conteneur des actions avec filtre */
+#documents .doc-filter-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+#documents .stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 6px rgba(30, 45, 120, 0.3);
+}
+
+/* Table */
+#documents .table-wrapper {
+    overflow-x: auto;
+}
+
+#documents table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#documents th,
+#documents td {
+    padding: var(--space-2-5) var(--space-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#documents th {
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#documents td {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+}
+
+#documents th:last-child,
+#documents td:last-child {
+    text-align: center;
+}
+
+#documents tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+#documents tbody tr:hover {
+    background: var(--accent-soft);
+}
+
+#documents tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Numero badge */
+#documents .numero-badge {
+    display: inline-flex;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    font-family: "Monaco", "Consolas", monospace;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius-md);
+    letter-spacing: 0.02em;
+}
+
+/* Cell styles */
+#documents .libele-cell {
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+}
+
+#documents .partenaire-cell {
+    color: var(--text-secondary);
+}
+
+#documents .piece-cell {
+    font-weight: var(--font-medium);
+    color: var(--primary-600);
+}
+
+#documents .facture-num {
+    font-family: "Monaco", "Consolas", monospace;
+    font-size: var(--text-xs);
+    color: var(--info-600);
+    font-weight: var(--font-medium);
+}
+
+#documents .km-cell {
+    font-weight: var(--font-semibold);
+    color: var(--primary-600);
+}
+
+/* Value cell */
+#documents .value-cell {
+    font-weight: var(--font-bold);
+    color: var(--success-600);
+}
+
+/* Date cells */
+#documents .date-cell {
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+}
+
+/* Badge status */
+#documents .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-0-5) var(--space-2);
+    font-size: var(--text-2xs);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+#documents .badge.success {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+#documents .badge.warning {
+    background: var(--warning-100);
+    color: var(--warning-700);
+}
+
+#documents .badge.danger {
+    background: var(--danger-100);
+    color: var(--danger-700);
+}
+
+#documents .badge.info {
+    background: var(--info-100);
+    color: var(--info-700);
+}
+
+#documents .badge.primary {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+
+#documents .badge.accent {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* Action buttons */
+#documents .row-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-1);
+}
+
+#documents .action-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+#documents .action-btn.edit {
+    background: var(--primary-100);
+    color: var(--primary-600);
+}
+
+#documents .action-btn.edit:hover {
+    background: var(--primary-500);
+    color: white;
+}
+
+#documents .action-btn.delete {
+    background: var(--danger-100);
+    color: var(--danger-600);
+}
+
+#documents .action-btn.delete:hover {
+    background: var(--danger-500);
+    color: white;
+}
+
+/* Empty row */
+#documents .empty-row td {
+    padding: var(--space-6);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+/* Section actions button */
+#documents .section-actions .btn.secondary {
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: var(--accent);
+}
+
+#documents .section-actions .btn.secondary:hover {
+    background: var(--accent);
+    color: white;
+}
+
+/* ─────────────────────────────────────────
+   MODAL - Same as chauffeurs
+   ───────────────────────────────────────── */
+#document-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#document-modal.hidden {
+    display: none !important;
+}
+
+#document-modal .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+#document-modal .modal-dialog {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#document-modal .section-subheader {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--accent);
+    border-radius: 12px 12px 0 0;
+}
+
+#document-modal .section-subheader h3 {
+    font-size: var(--text-md);
+    font-weight: var(--font-bold);
+    color: white;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+#document-modal .section-subheader .muted-small {
+    font-size: var(--text-xs);
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: var(--space-0-5);
+}
+
+#document-modal .section-subheader .btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: var(--space-1-5) var(--space-3);
+    border-radius: var(--radius-md);
+}
+
+#document-modal .section-subheader .btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Form - 2 columns like chauffeurs */
+#document-modal form {
+    padding: var(--space-3) var(--space-4);
+}
+
+#document-modal .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2-5);
+    margin-bottom: var(--space-3);
+}
+
+#document-modal .grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+#document-modal .grid label {
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+}
+
+#document-modal .grid input,
+#document-modal .grid select,
+#document-modal .grid textarea {
+    padding: var(--space-1-5) var(--space-2);
+    font-size: var(--text-sm);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#document-modal .grid input:focus,
+#document-modal .grid select:focus,
+#document-modal .grid textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+#document-modal .section-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border-light);
+}
+
+#document-modal .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(30, 45, 120, 0.3);
+}
+
+#document-modal .btn.primary:hover {
+    background: var(--accent-dark);
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────── */
+@media (max-width: 900px) {
+    #documents .doc-tabs {
+        flex-wrap: wrap;
+    }
+
+    #documents .doc-tab {
+        flex: 1 1 calc(33.333% - var(--space-1));
+    }
+}
+
+@media (max-width: 768px) {
+    #documents .documents-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #documents #document-vehicule-filter {
+        min-width: auto;
+        width: 100%;
+    }
+
+    #documents .doc-tab {
+        flex: 1 1 calc(50% - var(--space-1));
+    }
+
+    #documents .table-wrapper {
+        overflow-x: auto;
+    }
+
+    #documents table {
+        min-width: 600px;
+    }
+
+    #document-modal .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    #documents .doc-tab {
+        flex: 1 1 100%;
+    }
+}

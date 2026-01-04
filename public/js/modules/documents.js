@@ -158,6 +158,63 @@ function formatDocFactureDate(doc) {
     return formatDate(doc.date_facture);
 }
 
+// Badge formatting functions
+function formatExpirationCell(dateStr) {
+    if (!dateStr) return '<span class="date-cell">-</span>';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+        return `<span class="badge danger">Expiré</span>`;
+    } else if (diffDays <= 30) {
+        return `<span class="badge warning">${formatDate(dateStr)}</span>`;
+    } else {
+        return `<span class="badge success">${formatDate(dateStr)}</span>`;
+    }
+}
+
+function formatVidangeBadge(value) {
+    const map = {
+        complet: { label: 'Complet', class: 'success' },
+        partiel: { label: 'Partiel', class: 'warning' }
+    };
+    const config = map[value];
+    if (!config) return '<span class="badge">-</span>';
+    return `<span class="badge ${config.class}">${config.label}</span>`;
+}
+
+function formatTypeReparationBadge(value) {
+    const map = {
+        carosserie: { label: 'Carrosserie', class: 'info' },
+        mecanique: { label: 'Mécanique', class: 'warning' }
+    };
+    const config = map[value];
+    if (!config) return '<span class="badge">-</span>';
+    return `<span class="badge ${config.class}">${config.label}</span>`;
+}
+
+function formatCarburantBadge(value) {
+    const map = {
+        essence: { label: 'Essence', class: 'success' },
+        gasoil: { label: 'Gasoil', class: 'warning' },
+        gpl: { label: 'GPL', class: 'info' }
+    };
+    const config = map[value];
+    if (!config) return '<span class="badge">-</span>';
+    return `<span class="badge ${config.class}">${config.label}</span>`;
+}
+
+function formatUtilisationBadge(value) {
+    const map = {
+        trajet: { label: 'Trajet', class: 'primary' },
+        interne: { label: 'Interne', class: 'accent' }
+    };
+    const config = map[value];
+    if (!config) return '<span class="badge">-</span>';
+    return `<span class="badge ${config.class}">${config.label}</span>`;
+}
+
 function vehiculeLabel(doc) {
     const vehicle = doc?.vehicule;
     if (vehicle) {
@@ -190,7 +247,14 @@ export const documentTableBodies = {
     reparation: document.getElementById('document-rows-reparation'),
     bon_essence: document.getElementById('document-rows-bon_essence'),
 };
-export const documentVehiculeFilter = document.getElementById('document-vehicule-filter');
+export const documentVehiculeFilters = {
+    assurance: document.getElementById('document-vehicule-filter-assurance'),
+    vignette: document.getElementById('document-vehicule-filter-vignette'),
+    controle: document.getElementById('document-vehicule-filter-controle'),
+    entretien: document.getElementById('document-vehicule-filter-entretien'),
+    reparation: document.getElementById('document-vehicule-filter-reparation'),
+    bon_essence: document.getElementById('document-vehicule-filter-bon_essence'),
+};
 
 // ============================================================================
 // Form & Rendering Functions
@@ -244,82 +308,80 @@ function renderDocumentFormFields(type, doc = {}) {
 }
 
 function renderDocumentRow(type, doc) {
+    const editIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+    const deleteIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+    
+    const actionBtns = `
+        <td class="row-actions">
+            <button class="action-btn edit" data-doc-action="edit" type="button" title="Modifier">${editIcon}</button>
+            <button class="action-btn delete" data-doc-action="delete" type="button" title="Supprimer">${deleteIcon}</button>
+        </td>`;
+
     if (['assurance', 'vignette', 'controle'].includes(type)) {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${doc.numero || '-'}</td>
-                <td>${doc.libele || '-'}</td>
-                <td>${doc.partenaire || '-'}</td>
-                <td>${formatDate(doc.debut)}</td>
-                <td>${formatDate(doc.expiration)}</td>
-                <td>${formatCurrency(doc.valeur)}</td>
-                <td>${formatDocFactureNum(doc)}</td>
-                <td>${formatDocFactureDate(doc)}</td>
-                <td class="row-actions">
-                    <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
-                    <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
-                </td>
+                <td><span class="numero-badge">${doc.numero || '-'}</span></td>
+                <td><span class="libele-cell">${doc.libele || '-'}</span></td>
+                <td><span class="partenaire-cell">${doc.partenaire || '-'}</span></td>
+                <td><span class="date-cell">${formatDate(doc.debut)}</span></td>
+                <td>${formatExpirationCell(doc.expiration)}</td>
+                <td><span class="value-cell">${formatCurrency(doc.valeur)}</span></td>
+                <td><span class="facture-num">${formatDocFactureNum(doc)}</span></td>
+                <td><span class="date-cell">${formatDocFactureDate(doc)}</span></td>
+                ${actionBtns}
             </tr>`;
     }
     if (type === 'entretien') {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${doc.numero || '-'}</td>
-                <td>${doc.libele || '-'}</td>
-                <td>${doc.partenaire || '-'}</td>
-                <td>${formatDate(doc.debut)}</td>
-                <td>${formatDate(doc.expiration)}</td>
-                <td>${formatDocVidange(doc.vidange)}</td>
-                <td>${doc.kilometrage ?? '-'}</td>
-                <td>${formatCurrency(doc.valeur)}</td>
-                <td>${formatDocFactureNum(doc)}</td>
-                <td>${formatDocFactureDate(doc)}</td>
-                <td class="row-actions">
-                    <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
-                    <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
-                </td>
+                <td><span class="numero-badge">${doc.numero || '-'}</span></td>
+                <td><span class="libele-cell">${doc.libele || '-'}</span></td>
+                <td><span class="partenaire-cell">${doc.partenaire || '-'}</span></td>
+                <td><span class="date-cell">${formatDate(doc.debut)}</span></td>
+                <td>${formatExpirationCell(doc.expiration)}</td>
+                <td>${formatVidangeBadge(doc.vidange)}</td>
+                <td><span class="km-cell">${doc.kilometrage ? doc.kilometrage + ' km' : '-'}</span></td>
+                <td><span class="value-cell">${formatCurrency(doc.valeur)}</span></td>
+                <td><span class="facture-num">${formatDocFactureNum(doc)}</span></td>
+                <td><span class="date-cell">${formatDocFactureDate(doc)}</span></td>
+                ${actionBtns}
             </tr>`;
     }
     if (type === 'reparation') {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${doc.numero || '-'}</td>
-                <td>${doc.piece || '-'}</td>
-                <td>${doc.reparateur || '-'}</td>
-                <td>${formatDocTypeReparation(doc.type_reparation)}</td>
-                <td>${formatDate(doc.date_reparation)}</td>
-                <td>${formatCurrency(doc.valeur)}</td>
-                <td>${formatDocFactureNum(doc)}</td>
-                <td>${formatDocFactureDate(doc)}</td>
-                <td class="row-actions">
-                    <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
-                    <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
-                </td>
+                <td><span class="numero-badge">${doc.numero || '-'}</span></td>
+                <td><span class="piece-cell">${doc.piece || '-'}</span></td>
+                <td><span class="partenaire-cell">${doc.reparateur || '-'}</span></td>
+                <td>${formatTypeReparationBadge(doc.type_reparation)}</td>
+                <td><span class="date-cell">${formatDate(doc.date_reparation)}</span></td>
+                <td><span class="value-cell">${formatCurrency(doc.valeur)}</span></td>
+                <td><span class="facture-num">${formatDocFactureNum(doc)}</span></td>
+                <td><span class="date-cell">${formatDocFactureDate(doc)}</span></td>
+                ${actionBtns}
             </tr>`;
     }
     if (type === 'bon_essence') {
         return `
             <tr data-doc-id="${doc.id}" data-doc-type="${type}">
-                <td>${doc.numero || '-'}</td>
-                <td>${formatDate(doc.debut)}</td>
-                <td>${formatDocCarburant(doc.typecarburant)}</td>
-                <td>${doc.kilometrage ?? '-'}</td>
-                <td>${formatDocUtilisation(doc.utilisation)}</td>
-                <td>${formatCurrency(doc.valeur)}</td>
-                <td>${formatDocFactureNum(doc)}</td>
-                <td>${formatDocFactureDate(doc)}</td>
-                <td class="row-actions">
-                    <button class="btn secondary xs" data-doc-action="edit" type="button">Modifier</button>
-                    <button class="btn danger xs" data-doc-action="delete" type="button">Supprimer</button>
-                </td>
+                <td><span class="numero-badge">${doc.numero || '-'}</span></td>
+                <td><span class="date-cell">${formatDate(doc.debut)}</span></td>
+                <td>${formatCarburantBadge(doc.typecarburant)}</td>
+                <td><span class="km-cell">${doc.kilometrage ? doc.kilometrage + ' km' : '-'}</span></td>
+                <td>${formatUtilisationBadge(doc.utilisation)}</td>
+                <td><span class="value-cell">${formatCurrency(doc.valeur)}</span></td>
+                <td><span class="facture-num">${formatDocFactureNum(doc)}</span></td>
+                <td><span class="date-cell">${formatDocFactureDate(doc)}</span></td>
+                ${actionBtns}
             </tr>`;
     }
     return '';
 }
 
 function renderDocumentTables() {
-    const selectedVehicleId = documentVehiculeFilter.value;
     Object.entries(documentTableBodies).forEach(([type, tbody]) => {
+        const filter = documentVehiculeFilters[type];
+        const selectedVehicleId = filter ? filter.value : '';
         let docs = state.documents[type] || [];
         if (selectedVehicleId) {
             docs = docs.filter(doc => Number(doc.vehicule_id) === Number(selectedVehicleId));
@@ -355,6 +417,8 @@ export function openDocumentModal(type, doc = null) {
     documentFormDescription.textContent = config.description || '';
     documentFormSubmit.textContent = doc ? 'Mettre à jour' : 'Enregistrer';
     renderDocumentFormFields(type, doc || {});
+    // Update modal class for type-specific styling
+    documentModal.className = `modal modal-${type}`;
     documentModal.classList.remove('hidden');
 }
 
@@ -374,7 +438,7 @@ export async function loadDocuments() {
         const list = res?.data?.data || res?.data || [];
         state.documents[type] = list;
     });
-    populateVehiculeFilter();
+    populateVehiculeFilters();
     renderDocumentTables();
     document.dispatchEvent(new CustomEvent('data:documents:updated'));
 }
@@ -383,17 +447,35 @@ export async function loadDocuments() {
 // Event Listeners
 // ============================================================================
 
-function populateVehiculeFilter() {
+function populateVehiculeFilters() {
     const options = state.vehicules.map(v => {
         const label = [v.code, v.numero, v.marque, v.modele].filter(Boolean).join(' · ') || `Véhicule ${v.id}`;
         return `<option value="${v.id}">${label}</option>`;
     }).join('');
-    documentVehiculeFilter.innerHTML = `<option value="">-- Tous les véhicules --</option>${options}`;
+    const defaultOption = `<option value="">-- Tous les véhicules --</option>`;
+    Object.values(documentVehiculeFilters).forEach(filter => {
+        if (filter) {
+            filter.innerHTML = defaultOption + options;
+        }
+    });
+}
+
+// Move modal to body to prevent clipping issues
+function moveModalToBody() {
+    if (documentModal && documentModal.parentElement !== document.body) {
+        document.body.appendChild(documentModal);
+    }
 }
 
 export function initializeDocumentEvents() {
-    documentVehiculeFilter.addEventListener('change', () => {
-        renderDocumentTables();
+    moveModalToBody();
+    
+    Object.values(documentVehiculeFilters).forEach(filter => {
+        if (filter) {
+            filter.addEventListener('change', () => {
+                renderDocumentTables();
+            });
+        }
     });
     
     documentTabs.forEach(tab => {
