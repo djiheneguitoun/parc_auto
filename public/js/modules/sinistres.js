@@ -35,6 +35,8 @@ const sinistreStatutSelect = document.getElementById('sinistre-statut-select');
 const sinistreDetailCard = document.getElementById('sinistre-detail-card');
 const sinistreDetailEmpty = document.getElementById('sinistre-detail-empty');
 const sinistreDetail = document.getElementById('sinistre-detail');
+const sinistreDetailModal = document.getElementById('sinistre-detail-modal');
+const closeSinistreDetailModalBtn = document.getElementById('close-sinistre-detail-modal');
 const sinistreDetailNumero = document.getElementById('sinistre-detail-numero');
 const sinistreDetailStatut = document.getElementById('sinistre-detail-statut');
 const sinistreDetailVehicule = document.getElementById('sinistre-detail-vehicule');
@@ -88,6 +90,26 @@ function formatReparationType(value) {
 function formatReparationStatut(value) {
     const map = { en_attente: 'En attente', en_cours: 'En cours', termine: 'Terminé' };
     return map[value] || '-';
+}
+
+function formatAssuranceDecision(value) {
+    const map = { 
+        en_attente: 'En attente', 
+        accepte: 'Acceptée', 
+        refuse: 'Refusée', 
+        partiel: 'Partielle'
+    };
+    return map[value] || value || '-';
+}
+
+function formatAssuranceStatut(value) {
+    const map = { 
+        en_attente: 'En attente', 
+        en_cours: 'En cours', 
+        cloture: 'Clôturé', 
+        termine: 'Terminé'
+    };
+    return map[value] || value || '-';
 }
 
 // Helpers
@@ -184,43 +206,54 @@ function renderSinistreRows() {
         return matchStatut && matchVehicule;
     });
 
+    // Update count badge
+    const countBadge = document.getElementById('sinistres-count');
+    if (countBadge) {
+        countBadge.innerHTML = `<span class="count">${filtered.length}</span> sinistre${filtered.length > 1 ? 's' : ''}`;
+    }
+
     const rows = filtered.map(s => {
         const vehicule = s.vehicule;
         const vehiculeLabel = vehicule ? (vehicule.numero || `Véhicule ${vehicule.id}`) : '-';
         return `
             <tr data-sinistre-id="${s.id}">
-                <td>${s.numero_sinistre || '-'}</td>
+                <td><span class="numero-badge">${s.numero_sinistre || '-'}</span></td>
                 <td>${vehiculeLabel || '-'}</td>
                 <td>${formatDate(s.date_sinistre)}</td>
-                <td>${formatSinistreGravite(s.gravite)}</td>
-                <td><span class="badge">${formatSinistreStatut(s.statut_sinistre)}</span></td>
+                <td>${formatSinistreType(s.type_sinistre)}</td>
+                <td><span class="pill ${s.gravite || ''}">${formatSinistreGravite(s.gravite)}</span></td>
+                <td><span class="pill ${s.statut_sinistre || ''}">${formatSinistreStatut(s.statut_sinistre)}</span></td>
                 <td>${formatCurrency(s.cout_total)}</td>
-                <td class="row-actions">
-                    <button class="btn secondary xs" data-action="edit" type="button">Modifier</button>
-                    <button class="btn danger xs" data-action="close" type="button">Clôturer</button>
+                <td class="action-btns">
+                    <button class="action-btn view" data-action="view" type="button" title="Voir détails">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button class="action-btn edit" data-action="edit" type="button" title="Modifier">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="action-btn close-sinistre" data-action="close" type="button" title="Clôturer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </button>
                 </td>
             </tr>
         `;
     }).join('');
 
-    sinistreTableBody.innerHTML = rows || '<tr><td colspan="7" class="muted">Aucun sinistre trouvé.</td></tr>';
+    sinistreTableBody.innerHTML = rows || '<tr><td colspan="8" class="muted" style="text-align:center;padding:var(--space-6);">Aucun sinistre trouvé.</td></tr>';
 }
 
 function renderSinistreDetail(s) {
-    if (!s) {
-        sinistreDetail.style.display = 'none';
-        sinistreDetailEmpty.style.display = 'block';
-        return;
-    }
+    if (!s || !sinistreDetailModal) return;
 
     sinistreDetailNumero.textContent = s.numero_sinistre || 'Sinistre';
     sinistreDetailStatut.textContent = formatSinistreStatut(s.statut_sinistre);
+    sinistreDetailStatut.className = `pill ${s.statut_sinistre || ''}`;
     sinistreDetailVehicule.textContent = sinistreLabel(s);
     sinistreDetailDate.textContent = formatDate(s.date_sinistre);
     sinistreDetailHeure.textContent = formatTime(s.heure_sinistre);
     sinistreDetailLieu.textContent = s.lieu_sinistre || '-';
     sinistreDetailType.textContent = formatSinistreType(s.type_sinistre);
-    sinistreDetailGravite.textContent = formatSinistreGravite(s.gravite);
+    sinistreDetailGravite.innerHTML = `<span class="pill ${s.gravite || ''}">${formatSinistreGravite(s.gravite)}</span>`;
     sinistreDetailResponsable.textContent = formatSinistreResponsable(s.responsable);
     sinistreDetailMontant.textContent = formatCurrency(s.montant_estime);
     sinistreDetailCoutTotal.textContent = formatCurrency(s.cout_total);
@@ -229,44 +262,83 @@ function renderSinistreDetail(s) {
     if (s.assurance) {
         const a = s.assurance;
         sinistreDetailAssurance.innerHTML = `
-            <div class="chip">${a.compagnie_assurance || 'Compagnie inconnue'}</div>
-            <div class="muted-small">Dossier ${a.numero_dossier || '-'} · ${formatDate(a.date_declaration)}</div>
-            <div class="muted-small">Décision ${a.decision || 'en_attente'} · Statut ${a.statut_assurance}</div>
+            <div class="assurance-info">
+                <span class="compagnie">${a.compagnie_assurance || 'Compagnie inconnue'}</span>
+                <span class="dossier">Dossier ${a.numero_dossier || '-'}</span>
+            </div>
+            <div class="assurance-status">
+                <span class="pill ${a.decision || 'en_attente'}">${formatAssuranceDecision(a.decision)}</span>
+                <span class="pill ${a.statut_assurance || ''}">${formatAssuranceStatut(a.statut_assurance)}</span>
+            </div>
         `;
     } else {
-        sinistreDetailAssurance.innerHTML = '<span class="muted-small">Aucune fiche assurance.</span>';
+        sinistreDetailAssurance.innerHTML = '<span class="muted-small">Aucune fiche assurance enregistrée.</span>';
     }
 
     if (s.reparations && s.reparations.length) {
-        const parts = s.reparations.map(r => `${r.garage || 'Garage'} · ${formatReparationType(r.type_reparation)} · ${formatReparationStatut(r.statut_reparation)} · ${formatCurrency(r.cout_reparation)}`);
-        sinistreDetailReparations.textContent = parts.join(' | ');
+        const reps = s.reparations.map(r => `
+            <div class="reparation-item">
+                <span class="garage">${r.garage || 'Garage'}</span>
+                <span class="type">${formatReparationType(r.type_reparation)}</span>
+                <span class="pill ${r.statut_reparation || ''}">${formatReparationStatut(r.statut_reparation)}</span>
+                <span class="cout">${formatCurrency(r.cout_reparation)}</span>
+            </div>
+        `).join('');
+        sinistreDetailReparations.innerHTML = reps;
     } else {
-        sinistreDetailReparations.textContent = 'Aucune réparation enregistrée.';
+        sinistreDetailReparations.innerHTML = '<span class="muted-small">Aucune réparation enregistrée.</span>';
     }
 
-    sinistreDetailEmpty.style.display = 'none';
-    sinistreDetail.style.display = 'block';
+    // Show the modal
+    sinistreDetailModal.classList.remove('hidden');
 }
 
 function renderAssuranceRows() {
     const rows = state.sinistres.map(s => {
         const a = s.assurance;
+        const statutClass = a?.statut_assurance || 'en_attente';
+        const decisionClass = a?.decision || 'en_attente';
         return `
             <tr data-sinistre-id="${s.id}" data-assurance-id="${a?.id || ''}">
-                <td>${s.numero_sinistre || '-'}</td>
+                <td><span class="numero-badge">${s.numero_sinistre || '-'}</span></td>
                 <td>${a?.compagnie_assurance || '-'}</td>
                 <td>${a?.numero_dossier || '-'}</td>
-                <td>${a ? a.decision : '-'}</td>
-                <td>${a ? a.statut_assurance : '-'}</td>
+                <td><span class="pill ${decisionClass}">${a ? formatAssuranceDecision(a.decision) : '-'}</span></td>
                 <td>${formatCurrency(a?.montant_pris_en_charge)}</td>
                 <td>${formatCurrency(a?.franchise)}</td>
-                <td class="row-actions">
-                    <button class="btn secondary xs" data-assurance-action="edit" type="button">${a ? 'Modifier' : 'Déclarer'}</button>
+                <td><span class="pill ${statutClass}">${a ? formatAssuranceStatut(a.statut_assurance) : '-'}</span></td>
+                <td class="action-btns">
+                    <button class="action-btn view" data-assurance-action="view" type="button" title="Voir détails">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button class="action-btn ${a ? 'edit' : 'add'}" data-assurance-action="edit" type="button" title="${a ? 'Modifier' : 'Déclarer'}">
+                        ${a ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`}
+                    </button>
                 </td>
             </tr>
         `;
     }).join('');
-    assuranceTableBody.innerHTML = rows || '<tr><td colspan="8" class="muted">Aucun sinistre à afficher.</td></tr>';
+    assuranceTableBody.innerHTML = rows || '<tr><td colspan="8" class="muted" style="text-align:center;padding:var(--space-6);">Aucun sinistre à afficher.</td></tr>';
+}
+
+function renderAssuranceDetail(sinistre) {
+    const a = sinistre?.assurance;
+    const modal = document.getElementById('assurance-detail-modal');
+    if (!modal) return;
+
+    document.getElementById('assurance-detail-sinistre').textContent = sinistre?.numero_sinistre || 'Sinistre';
+    document.getElementById('assurance-detail-compagnie').textContent = a?.compagnie_assurance || '-';
+    document.getElementById('assurance-detail-dossier').textContent = a?.numero_dossier || '-';
+    document.getElementById('assurance-detail-date-declaration').textContent = formatDate(a?.date_declaration);
+    document.getElementById('assurance-detail-expert').textContent = a?.expert_nom || '-';
+    document.getElementById('assurance-detail-date-expertise').textContent = formatDate(a?.date_expertise);
+    document.getElementById('assurance-detail-decision').innerHTML = `<span class="pill ${a?.decision || 'en_attente'}">${formatAssuranceDecision(a?.decision)}</span>`;
+    document.getElementById('assurance-detail-montant').textContent = formatCurrency(a?.montant_pris_en_charge);
+    document.getElementById('assurance-detail-franchise').textContent = formatCurrency(a?.franchise);
+    document.getElementById('assurance-detail-date-validation').textContent = formatDate(a?.date_validation);
+    document.getElementById('assurance-detail-statut').innerHTML = `<span class="pill ${a?.statut_assurance || 'en_attente'}">${formatAssuranceStatut(a?.statut_assurance)}</span>`;
+
+    modal.classList.remove('hidden');
 }
 
 function renderReparationRows() {
@@ -274,41 +346,131 @@ function renderReparationRows() {
     const list = selectedId ? state.sinistres.filter(s => Number(s.id) === Number(selectedId)) : state.sinistres;
     const rows = list.flatMap(s => (s.reparations || []).map(r => `
         <tr data-sinistre-id="${s.id}" data-reparation-id="${r.id}">
-            <td>${s.numero_sinistre}</td>
+            <td><span class="numero-badge">${s.numero_sinistre}</span></td>
             <td>${r.garage || '-'}</td>
             <td>${formatReparationType(r.type_reparation)}</td>
             <td>${formatDate(r.date_debut)}</td>
             <td>${formatDate(r.date_fin_prevue)}</td>
-            <td>${formatReparationStatut(r.statut_reparation)}</td>
             <td>${formatCurrency(r.cout_reparation)}</td>
-            <td class="row-actions">
-                <button class="btn secondary xs" data-reparation-action="edit" type="button">Modifier</button>
-                <button class="btn danger xs" data-reparation-action="delete" type="button">Supprimer</button>
+            <td><span class="pill ${r.statut_reparation || ''}">${formatReparationStatut(r.statut_reparation)}</span></td>
+            <td class="action-btns">
+                <button class="action-btn view" data-reparation-action="view" type="button" title="Voir détails">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="action-btn edit" data-reparation-action="edit" type="button" title="Modifier">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="action-btn delete" data-reparation-action="delete" type="button" title="Supprimer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
             </td>
         </tr>
     `));
 
-    reparationTableBody.innerHTML = rows.join('') || '<tr><td colspan="8" class="muted">Aucune réparation enregistrée.</td></tr>';
+    reparationTableBody.innerHTML = rows.join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:var(--space-6);">Aucune réparation enregistrée.</td></tr>';
+}
+
+function renderReparationDetail(sinistre, reparation) {
+    const modal = document.getElementById('reparation-detail-modal');
+    if (!modal || !reparation) return;
+
+    document.getElementById('reparation-detail-sinistre').textContent = sinistre?.numero_sinistre || 'Sinistre';
+    document.getElementById('reparation-detail-garage').textContent = reparation.garage || '-';
+    document.getElementById('reparation-detail-type').textContent = formatReparationType(reparation.type_reparation);
+    document.getElementById('reparation-detail-date-debut').textContent = formatDate(reparation.date_debut);
+    document.getElementById('reparation-detail-date-fin-prevue').textContent = formatDate(reparation.date_fin_prevue);
+    document.getElementById('reparation-detail-date-fin-reelle').textContent = formatDate(reparation.date_fin_reelle);
+    document.getElementById('reparation-detail-cout').textContent = formatCurrency(reparation.cout_reparation);
+    document.getElementById('reparation-detail-prise-en-charge').textContent = reparation.prise_en_charge === 'assurance' ? 'Assurance' : 'Société';
+    document.getElementById('reparation-detail-statut').innerHTML = `<span class="pill ${reparation.statut_reparation || ''}">${formatReparationStatut(reparation.statut_reparation)}</span>`;
+    document.getElementById('reparation-detail-facture').textContent = reparation.facture_reference || '-';
+
+    modal.classList.remove('hidden');
+}
+
+function renderTypeChart() {
+    const chartContainer = document.getElementById('stats-type-chart');
+    if (!chartContainer) return;
+    
+    // Count sinistres by type
+    const typeCounts = {};
+    state.sinistres.forEach(s => {
+        const type = s.type_sinistre || 'autre';
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    
+    const typeLabels = {
+        accident: { label: 'Accident', color: '#ef4444' },
+        panne: { label: 'Panne', color: '#f59e0b' },
+        vol: { label: 'Vol', color: '#8b5cf6' },
+        incendie: { label: 'Incendie', color: '#f97316' },
+        autre: { label: 'Autre', color: '#6b7280' }
+    };
+    
+    const total = Object.values(typeCounts).reduce((a, b) => a + b, 0);
+    
+    if (total === 0) {
+        chartContainer.innerHTML = '<div class="chart-empty"><span class="muted-small">Aucune donnée disponible</span></div>';
+        return;
+    }
+    
+    const bars = Object.entries(typeCounts).map(([type, count]) => {
+        const info = typeLabels[type] || { label: type, color: '#6b7280' };
+        const percentage = ((count / total) * 100).toFixed(1);
+        return `
+            <div class="chart-bar-item">
+                <div class="chart-bar-header">
+                    <span class="chart-bar-label">${info.label}</span>
+                    <span class="chart-bar-value">${count} (${percentage}%)</span>
+                </div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill" style="width: ${percentage}%; background: ${info.color};"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    chartContainer.innerHTML = `<div class="chart-bars">${bars}</div>`;
 }
 
 function renderStats() {
     const stats = state.sinistreStats || {};
-    const total = (stats.par_periode || []).reduce((acc, p) => acc + (p.total || 0), 0);
-    statsTotalSinistres.textContent = total || '-';
+    
+    // Calculate total from sinistres data if stats are empty
+    const totalFromStats = (stats.par_periode || []).reduce((acc, p) => acc + (p.total || 0), 0);
+    const total = totalFromStats || state.sinistres.length;
+    statsTotalSinistres.textContent = total || '0';
+    
     const taux = (stats.taux_prise_en_charge_moyen || 0) * 100;
     statsTauxPrise.textContent = `${taux ? taux.toFixed(1) : '0'} %`;
-
-    const vehicules = (stats.vehicules_plus_sinistres || []).map(item => `<div>${item.vehicule.label || 'Véhicule'} · ${item.sinistres} sin.</div>`).join('');
-    statsVehiculesPlus.innerHTML = vehicules || '<span class="muted-small">Pas de données.</span>';
-
-    const chauffeurs = (stats.classement_chauffeurs || []).map(item => `<div>${item.chauffeur.nom || 'Chauffeur'} · ${item.sinistres} sin.</div>`).join('');
-    statsClassementChauffeurs.innerHTML = chauffeurs || '<span class="muted-small">Pas de données.</span>';
-
-    const couts = (stats.cout_par_vehicule || []).map(item => `<div>${item.vehicule.label || 'Véhicule'} · ${formatCurrency(item.cout_total)}</div>`).join('');
-    statsCoutParVehicule.innerHTML = couts || '<span class="muted-small">Pas de données.</span>';
-
-    const periodes = (stats.par_periode || []).map(item => `<div>${item.periode} · ${item.total}</div>`).join('');
-    statsParPeriode.innerHTML = periodes || '<span class="muted-small">Pas de données.</span>';
+    
+    // Calculate total cost
+    const statsCoutTotal = document.getElementById('stats-cout-total');
+    if (statsCoutTotal) {
+        const totalCout = state.sinistres.reduce((acc, s) => acc + (parseFloat(s.cout_total) || 0), 0);
+        statsCoutTotal.textContent = formatCurrency(totalCout);
+    }
+    
+    // Render type distribution chart
+    renderTypeChart();
+    
+    // Calculate most sinistered vehicle from local data
+    const vehicleSinistres = {};
+    state.sinistres.forEach(s => {
+        const vId = s.vehicule_id;
+        const vLabel = s.vehicule?.numero || `Véhicule ${vId}`;
+        if (!vehicleSinistres[vId]) {
+            vehicleSinistres[vId] = { label: vLabel, count: 0 };
+        }
+        vehicleSinistres[vId].count++;
+    });
+    
+    const sortedVehicles = Object.values(vehicleSinistres).sort((a, b) => b.count - a.count);
+    if (sortedVehicles.length > 0 && statsVehiculesPlus) {
+        statsVehiculesPlus.textContent = sortedVehicles[0].label;
+    } else if (statsVehiculesPlus) {
+        statsVehiculesPlus.textContent = '-';
+    }
 }
 
 // Modals helpers
@@ -429,16 +591,7 @@ export async function loadSinistres() {
     renderSinistreRows();
     renderAssuranceRows();
     renderReparationRows();
-
-    if (state.selectedSinistreId) {
-        const found = state.sinistres.find(s => Number(s.id) === Number(state.selectedSinistreId));
-        renderSinistreDetail(found);
-    } else if (state.sinistres.length) {
-        renderSinistreDetail(state.sinistres[0]);
-        state.selectedSinistreId = state.sinistres[0].id;
-    } else {
-        renderSinistreDetail(null);
-    }
+    renderStats();
 }
 
 export async function loadSinistreStats(params = {}) {
@@ -470,13 +623,28 @@ export function initializeSinistreEvents() {
     sinistreFilterVehicule?.addEventListener('change', renderSinistreRows);
     refreshSinistresBtn?.addEventListener('click', loadSinistres);
 
-    sinistreTableBody.addEventListener('click', async (e) => {
+    // Detail modal close handlers
+    closeSinistreDetailModalBtn?.addEventListener('click', () => {
+        sinistreDetailModal?.classList.add('hidden');
+    });
+    sinistreDetailModal?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+        sinistreDetailModal?.classList.add('hidden');
+    });
+
+    sinistreTableBody?.addEventListener('click', async (e) => {
         const row = e.target.closest('tr[data-sinistre-id]');
         if (!row) return;
         const id = row.dataset.sinistreId;
         const sinistre = state.sinistres.find(s => Number(s.id) === Number(id));
-        const action = e.target.dataset.action;
+        const action = e.target.dataset.action || e.target.closest('button')?.dataset?.action;
 
+        if (action === 'view') {
+            e.stopPropagation();
+            state.selectedSinistreId = Number(id);
+            renderSinistreDetail(sinistre);
+            sinistreDetailModal?.classList.remove('hidden');
+            return;
+        }
         if (action === 'edit') {
             e.stopPropagation();
             openSinistreModal('edit', sinistre);
@@ -500,7 +668,7 @@ export function initializeSinistreEvents() {
         renderSinistreDetail(sinistre);
     });
 
-    sinistreForm.addEventListener('submit', async (e) => {
+    sinistreForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
         const payload = Object.fromEntries(new FormData(sinistreForm).entries());
@@ -520,15 +688,32 @@ export function initializeSinistreEvents() {
 
     openSinistreModalBtn?.addEventListener('click', () => openSinistreModal('create'));
     closeSinistreModalBtn?.addEventListener('click', closeSinistreModal);
+    document.getElementById('cancel-sinistre-form')?.addEventListener('click', closeSinistreModal);
     sinistreModal?.addEventListener('click', (e) => {
         if (e.target.dataset.close === 'sinistre-modal') closeSinistreModal();
     });
 
-    assuranceTableBody.addEventListener('click', (e) => {
+    assuranceTableBody?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-assurance-action]');
         if (!btn) return;
         const row = btn.closest('tr[data-sinistre-id]');
+        const sinistreId = row?.dataset.sinistreId;
+        const sinistre = state.sinistres.find(s => Number(s.id) === Number(sinistreId));
+        
+        if (btn.dataset.assuranceAction === 'view') {
+            renderAssuranceDetail(sinistre);
+            return;
+        }
         openAssuranceModal(row?.dataset.sinistreId || '');
+    });
+    
+    // Assurance detail modal close
+    const assuranceDetailModal = document.getElementById('assurance-detail-modal');
+    document.getElementById('close-assurance-detail-modal')?.addEventListener('click', () => {
+        assuranceDetailModal?.classList.add('hidden');
+    });
+    assuranceDetailModal?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+        assuranceDetailModal?.classList.add('hidden');
     });
 
     openAssuranceModalBtn?.addEventListener('click', () => {
@@ -536,11 +721,12 @@ export function initializeSinistreEvents() {
         openAssuranceModal(selected);
     });
     closeAssuranceModalBtn?.addEventListener('click', closeAssuranceModal);
+    document.getElementById('cancel-assurance-form')?.addEventListener('click', closeAssuranceModal);
     assuranceModal?.addEventListener('click', (e) => {
         if (e.target.dataset.close === 'assurance-modal') closeAssuranceModal();
     });
 
-    assuranceForm.addEventListener('submit', async (e) => {
+    assuranceForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
         const payload = Object.fromEntries(new FormData(assuranceForm).entries());
@@ -558,7 +744,7 @@ export function initializeSinistreEvents() {
         }
     });
 
-    reparationTableBody.addEventListener('click', async (e) => {
+    reparationTableBody?.addEventListener('click', async (e) => {
         const btn = e.target.closest('[data-reparation-action]');
         if (!btn) return;
         const row = btn.closest('tr[data-reparation-id]');
@@ -567,6 +753,10 @@ export function initializeSinistreEvents() {
         const sinistre = state.sinistres.find(s => Number(s.id) === Number(sinistreId));
         const repar = sinistre?.reparations?.find(r => Number(r.id) === Number(reparationId));
 
+        if (btn.dataset.reparationAction === 'view') {
+            renderReparationDetail(sinistre, repar);
+            return;
+        }
         if (btn.dataset.reparationAction === 'edit') {
             openReparationModal('edit', sinistreId, repar);
             return;
@@ -589,11 +779,21 @@ export function initializeSinistreEvents() {
         openReparationModal('create', selected);
     });
     closeReparationModalBtn?.addEventListener('click', closeReparationModal);
+    document.getElementById('cancel-reparation-form')?.addEventListener('click', closeReparationModal);
     reparationModal?.addEventListener('click', (e) => {
         if (e.target.dataset.close === 'reparation-modal') closeReparationModal();
     });
+    
+    // Reparation detail modal close
+    const reparationDetailModal = document.getElementById('reparation-detail-modal');
+    document.getElementById('close-reparation-detail-modal')?.addEventListener('click', () => {
+        reparationDetailModal?.classList.add('hidden');
+    });
+    reparationDetailModal?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+        reparationDetailModal?.classList.add('hidden');
+    });
 
-    reparationForm.addEventListener('submit', async (e) => {
+    reparationForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
         const payload = Object.fromEntries(new FormData(reparationForm).entries());
