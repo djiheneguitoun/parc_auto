@@ -257,17 +257,17 @@ nav h4 {
     transition: all var(--transition-fast);
     text-align: left;
     position: relative;
+    list-style: none;
 }
 
-.nav-submenu-btn::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: var(--radius-full);
-    background: var(--gray-300);
+.nav-submenu-btn svg {
     flex-shrink: 0;
-    transition: background var(--transition-fast),
-        transform var(--transition-fast);
+    opacity: 0.6;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-submenu-btn span {
+    flex: 1;
 }
 
 .nav-submenu-btn:hover {
@@ -275,9 +275,9 @@ nav h4 {
     background: var(--primary-50);
 }
 
-.nav-submenu-btn:hover::before {
-    background: var(--accent);
-    transform: scale(1.2);
+.nav-submenu-btn:hover svg {
+    opacity: 1;
+    color: var(--accent);
 }
 
 .nav-submenu-btn.active {
@@ -285,8 +285,9 @@ nav h4 {
     font-weight: var(--font-semibold);
 }
 
-.nav-submenu-btn.active::before {
-    background: var(--accent);
+.nav-submenu-btn.active svg {
+    opacity: 1;
+    color: var(--accent);
 }
 
 /* ─────────────────────────────────────────
