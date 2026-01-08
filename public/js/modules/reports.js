@@ -4,7 +4,7 @@
 // Handles vehicle report export with filters and PDF download
 
 import { ensureAuth } from './auth.js';
-import { showToast, extractErrorMessage } from './state.js';
+import { showToast, extractErrorMessage, state } from './state.js';
 
 const modalTriggers = document.querySelectorAll('[data-report-modal]');
 const closeButtons = document.querySelectorAll('[data-close]');
@@ -18,6 +18,27 @@ const vehiculesSubmit = document.getElementById('vehicules-report-submit');
 const chauffeursSubmit = document.getElementById('chauffeurs-report-submit');
 const chargesSubmit = document.getElementById('charges-report-submit');
 const facturesSubmit = document.getElementById('factures-report-submit');
+
+// Selects de véhicules dans les rapports
+const chargesVehiculeSelect = document.getElementById('charges-report-vehicule');
+const facturesVehiculeSelect = document.getElementById('factures-report-vehicule');
+
+// Populate vehicule selects with data from state
+function populateReportVehiculeSelects() {
+	const vehicules = state.vehicules || [];
+	const defaultOption = '<option value="">Tous les véhicules</option>';
+	const options = vehicules.map(v => {
+		const label = v.numero || v.code || `Véhicule ${v.id}`;
+		return `<option value="${v.id}">${label}</option>`;
+	}).join('');
+	
+	if (chargesVehiculeSelect) {
+		chargesVehiculeSelect.innerHTML = defaultOption + options;
+	}
+	if (facturesVehiculeSelect) {
+		facturesVehiculeSelect.innerHTML = defaultOption + options;
+	}
+}
 
 // All report modals
 const reportModals = [
@@ -112,6 +133,12 @@ async function downloadPdf(endpoint, form, submitBtn, filenamePrefix) {
 export function initializeReportsEvents() {
 	moveModalsToBody();
 	setupModalTriggers();
+	
+	// Populate vehicule selects when reports module initializes
+	populateReportVehiculeSelects();
+	
+	// Also update when vehicules data changes
+	document.addEventListener('data:vehicules:updated', populateReportVehiculeSelects);
 
 	if (vehiculesForm) {
 		vehiculesForm.addEventListener('submit', (e) => {

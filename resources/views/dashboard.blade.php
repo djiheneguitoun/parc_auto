@@ -19,7 +19,7 @@
         <img class="logo-mark" src="/images/logo_elbiometria.png" alt="Parc Auto">
         <div class="brand-text">
             <div>Parc Auto Manager</div>
-            <div>Gestion de flotte</div>
+            <div>Gestion de parc automobile</div>
         </div>
     </div>
     <div class="actions">
@@ -102,10 +102,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                     <span>Statistiques</span>
                 </button>
-                <button class="nav-submenu-btn" data-target="sinistres" data-sinistre-tab="historique">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span>Historique & logs</span>
-                </button>
+            
             </div>
         </div>
         <button class="nav-btn" data-target="utilisateurs">

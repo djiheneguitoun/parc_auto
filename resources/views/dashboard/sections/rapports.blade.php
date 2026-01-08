@@ -227,8 +227,10 @@
             <form id="charges-report-form" autocomplete="off">
                 <div class="form-grid cols-2">
                     <div class="form-group">
-                        <label>Véhicule (ID ou code)</label>
-                        <input name="vehicule" placeholder="ID ou code du véhicule">
+                        <label>Véhicule</label>
+                        <select name="vehicule" id="charges-report-vehicule">
+                            <option value="">Tous les véhicules</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Type de charge</label>
@@ -270,8 +272,10 @@
             <form id="factures-report-form" autocomplete="off">
                 <div class="form-grid cols-3">
                     <div class="form-group">
-                        <label>Véhicule (ID ou code)</label>
-                        <input name="vehicule" placeholder="ID ou code du véhicule">
+                        <label>Véhicule</label>
+                        <select name="vehicule" id="factures-report-vehicule">
+                            <option value="">Tous les véhicules</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Période début</label>

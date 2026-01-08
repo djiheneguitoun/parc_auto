@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles driver CRUD operations, modal interactions, and rendering
 
-import { state, showToast } from './state.js';
+import { state, showToast, showConfirm, extractErrorMessage } from './state.js';
 import { ensureAuth } from './auth.js';
 import { formatComportement, formatComportementBadge, formatDate, formatMention, formatMentionStars, formatStatut } from './utils.js';
 
@@ -184,11 +184,23 @@ export async function showChauffeurDetail(id) {
 
 export async function handleDeleteChauffeur(id) {
     ensureAuth();
-    const confirmed = window.confirm('Supprimer ce chauffeur ?');
+    const chauffeur = state.chauffeurs.find(ch => ch.id === Number(id));
+    const confirmed = await showConfirm({
+        title: 'Supprimer le chauffeur ?',
+        message: `Êtes-vous sûr de vouloir supprimer le chauffeur <strong>${chauffeur?.nom || ''} ${chauffeur?.prenom || ''}</strong> ? Cette action est irréversible.`,
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+        type: 'danger'
+    });
     if (!confirmed) return;
-    await axios.delete(`/api/chauffeurs/${id}`);
-    clearChauffeurDetail();
-    await loadChauffeurs();
+    try {
+        await axios.delete(`/api/chauffeurs/${id}`);
+        clearChauffeurDetail();
+        await loadChauffeurs();
+        showToast('Chauffeur supprimé avec succès.', 'success', { title: 'Suppression effectuée' });
+    } catch (err) {
+        showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
+    }
 }
 
 export async function loadChauffeurs() {
@@ -221,13 +233,19 @@ export function initializeChauffeurEvents() {
         e.preventDefault();
         ensureAuth();
         const payload = Object.fromEntries(new FormData(e.target).entries());
-        if (state.chauffeurEditingId) {
-            await axios.put(`/api/chauffeurs/${state.chauffeurEditingId}`, payload);
-        } else {
-            await axios.post('/api/chauffeurs', payload);
+        const isEdit = Boolean(state.chauffeurEditingId);
+        try {
+            if (isEdit) {
+                await axios.put(`/api/chauffeurs/${state.chauffeurEditingId}`, payload);
+            } else {
+                await axios.post('/api/chauffeurs', payload);
+            }
+            closeChauffeurModal();
+            await loadChauffeurs();
+            showToast(isEdit ? 'Chauffeur mis à jour avec succès.' : 'Chauffeur créé avec succès.', 'success', { title: isEdit ? 'Modification effectuée' : 'Création effectuée' });
+        } catch (err) {
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
         }
-        closeChauffeurModal();
-        await loadChauffeurs();
     });
 
     chauffeurTableBody.addEventListener('click', async (e) => {

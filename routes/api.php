@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('vehicule-images', VehiculeImageController::class)->only(['index', 'store', 'destroy']);
 
     Route::get('sinistres/stats', [SinistreController::class, 'stats']);
+    Route::get('sinistres/{sinistre}/export-pdf', [SinistreController::class, 'exportPdf']);
     Route::apiResource('sinistres', SinistreController::class);
     Route::apiResource('assurance-sinistres', AssuranceSinistreController::class)->only(['store', 'show', 'update', 'destroy']);
     Route::apiResource('reparation-sinistres', ReparationSinistreController::class)->only(['store', 'show', 'update', 'destroy']);

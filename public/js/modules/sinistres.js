@@ -100,6 +100,11 @@ function formatReparationStatut(value) {
     return map[value] || '-';
 }
 
+function formatReparationPriseEnCharge(value) {
+    const map = { assurance: 'Assurance', entreprise: 'Entreprise', chauffeur: 'Chauffeur' };
+    return map[value] || value || '-';
+}
+
 function formatAssuranceDecision(value) {
     const map = { 
         en_attente: 'En attente', 
@@ -134,7 +139,7 @@ function populateVehiculeOptions(selectEl, placeholder = 'Choisir un véhicule')
     // If target is a native select element, populate normally
     if (selectEl.tagName === 'SELECT') {
         const options = state.vehicules.map(v => {
-            const label = v.numero || `Véhicule ${v.id}`;
+            const label = v.numero || v.code || `Véhicule ${v.id}`;
             return `<option value="${v.id}">${label}</option>`;
         }).join('');
         selectEl.innerHTML = `<option value="">${placeholder}</option>${options}`;
@@ -151,7 +156,7 @@ function populateVehiculeOptions(selectEl, placeholder = 'Choisir un véhicule')
         const valueElem = container.querySelector('.custom-select__value');
         // build items
         const items = state.vehicules.map(v => {
-            const label = v.numero || `Véhicule ${v.id}`;
+            const label = v.numero || v.code || `Véhicule ${v.id}`;
             return `<li role="option" data-value="${v.id}">${label}</li>`;
         }).join('');
         // include placeholder as first option, and re-assert it as the selected value so the filter defaults to "tous"
@@ -201,13 +206,43 @@ function populateSinistreSelects() {
 
     const options = state.sinistres.map(s => `<option value="${s.id}">${sinistreLabel(s)}</option>`).join('');
     
-    // For assurance modal - only show sinistres WITHOUT insurance
     const sinistresWithoutAssurance = state.sinistres.filter(s => !s.assurance);
     const optionsWithoutAssurance = sinistresWithoutAssurance.map(s => `<option value="${s.id}">${sinistreLabel(s)}</option>`).join('');
     
-    if (assuranceSinistreSelect) assuranceSinistreSelect.innerHTML = `<option value="">Choisir un sinistre</option>${options}`;
+ 
+    if (assuranceSinistreSelect) {
+        if (assuranceSinistreSelect.tagName === 'SELECT') {
+            assuranceSinistreSelect.innerHTML = `<option value="">Tous les sinistres</option>${options}`;
+        } else if (assuranceSinistreSelect.tagName === 'INPUT') {
+            const container = document.querySelector('.custom-select[data-name="assurance-sinistre-select"]');
+            if (container) {
+                const optionsEl = container.querySelector('.custom-select__options');
+                const trigger = container.querySelector('.custom-select__trigger');
+                const valueElem = container.querySelector('.custom-select__value');
+                optionsEl.innerHTML = `<li role="option" data-value="" aria-selected="true">Tous les sinistres</li>` + state.sinistres.map(s => `<li role="option" data-value="${s.id}">${sinistreLabel(s)}</li>`).join('');
+                assuranceSinistreSelect.value = '';
+                if (valueElem) valueElem.textContent = 'Tous les sinistres';
+                if (trigger) trigger.classList.add('selected');
+            }
+        }
+    }
     if (assuranceSinistreSelectModal) assuranceSinistreSelectModal.innerHTML = `<option value="">- Choisir un sinistre -</option>${optionsWithoutAssurance}`;
-    if (reparationSinistreSelect) reparationSinistreSelect.innerHTML = `<option value="">Choisir un sinistre</option>${options}`;
+    if (reparationSinistreSelect) {
+        if (reparationSinistreSelect.tagName === 'SELECT') {
+            reparationSinistreSelect.innerHTML = `<option value="">Tous les sinistres</option>${options}`;
+        } else if (reparationSinistreSelect.tagName === 'INPUT') {
+            const container = document.querySelector('.custom-select[data-name="reparation-sinistre-select"]');
+            if (container) {
+                const optionsEl = container.querySelector('.custom-select__options');
+                const trigger = container.querySelector('.custom-select__trigger');
+                const valueElem = container.querySelector('.custom-select__value');
+                optionsEl.innerHTML = `<li role="option" data-value="" aria-selected="true">Tous les sinistres</li>` + state.sinistres.map(s => `<li role="option" data-value="${s.id}">${sinistreLabel(s)}</li>`).join('');
+                reparationSinistreSelect.value = '';
+                if (valueElem) valueElem.textContent = 'Tous les sinistres';
+                if (trigger) trigger.classList.add('selected');
+            }
+        }
+    }
     if (reparationSinistreSelectModal) reparationSinistreSelectModal.innerHTML = `<option value="">Choisir un sinistre</option>${options}`;
 }
 
@@ -300,30 +335,63 @@ function renderSinistreDetail(s) {
 
     if (s.assurance) {
         const a = s.assurance;
+        // Horizontal table only (important fields)
         sinistreDetailAssurance.innerHTML = `
-            <div class="assurance-info">
-                <span class="compagnie">${a.compagnie_assurance || 'Compagnie inconnue'}</span>
-                <span class="dossier">Dossier ${a.numero_dossier || '-'}</span>
-            </div>
-            <div class="assurance-status">
-                <span class="pill ${a.decision || 'en_attente'}">${formatAssuranceDecision(a.decision)}</span>
-                <span class="pill ${a.statut_assurance || ''}">${formatAssuranceStatut(a.statut_assurance)}</span>
-            </div>
+            <table class="info-table info-horizontal">
+                <thead>
+                    <tr>
+                        <th>Compagnie</th>
+                        <th>N° Dossier</th>
+                        <th>Décision</th>
+                        <th>Montant PEC</th>
+                        <th>Franchise</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${a.compagnie_assurance || '-'}</td>
+                        <td>${a.numero_dossier || '-'}</td>
+                        <td><span class="pill ${a.decision || 'en_attente'}">${formatAssuranceDecision(a.decision)}</span></td>
+                        <td>${formatCurrency(a.montant_pris_en_charge)}</td>
+                        <td>${formatCurrency(a.franchise)}</td>
+                        <td><span class="pill ${a.statut_assurance || ''}">${formatAssuranceStatut(a.statut_assurance)}</span></td>
+                    </tr>
+                </tbody>
+            </table>
         `;
     } else {
         sinistreDetailAssurance.innerHTML = '<span class="muted-small">Aucune fiche assurance enregistrée.</span>';
     }
 
     if (s.reparations && s.reparations.length) {
-        const reps = s.reparations.map(r => `
-            <div class="reparation-item">
-                <span class="garage">${r.garage || 'Garage'}</span>
-                <span class="type">${formatReparationType(r.type_reparation)}</span>
-                <span class="pill ${r.statut_reparation || ''}">${formatReparationStatut(r.statut_reparation)}</span>
-                <span class="cout">${formatCurrency(r.cout_reparation)}</span>
-            </div>
+        // Horizontal list of reparations (important fields only)
+        const rowsHorizontal = s.reparations.map(r => `
+            <tr>
+                <td>${r.garage || '-'}</td>
+                <td>${formatReparationType(r.type_reparation)}</td>
+                <td>${formatDate(r.date_debut)}</td>
+                <td>${formatDate(r.date_fin_prevue)}</td>
+                <td>${formatCurrency(r.cout_reparation)}</td>
+                <td><span class="pill ${r.statut_reparation || ''}">${formatReparationStatut(r.statut_reparation)}</span></td>
+            </tr>
         `).join('');
-        sinistreDetailReparations.innerHTML = reps;
+
+        sinistreDetailReparations.innerHTML = `
+            <table class="info-table info-horizontal">
+                <thead>
+                    <tr>
+                        <th>Garage</th>
+                        <th>Type</th>
+                        <th>Début</th>
+                        <th>Fin prévue</th>
+                        <th>Coût</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHorizontal}</tbody>
+            </table>
+        `;
     } else {
         sinistreDetailReparations.innerHTML = '<span class="muted-small">Aucune réparation enregistrée.</span>';
     }
@@ -333,8 +401,15 @@ function renderSinistreDetail(s) {
 }
 
 function renderAssuranceRows() {
-    // Only show sinistres that have insurance declared
-    const sinistresWithAssurance = state.sinistres.filter(s => s.assurance);
+    // Get filter value from assurance-sinistre-select
+    const selectedSinistreId = assuranceSinistreSelect?.value || '';
+    
+    // Get sinistres with assurance, then filter if a specific sinistre is selected
+    let sinistresWithAssurance = state.sinistres.filter(s => s.assurance);
+    
+    if (selectedSinistreId) {
+        sinistresWithAssurance = sinistresWithAssurance.filter(s => Number(s.id) === Number(selectedSinistreId));
+    }
     
     const rows = sinistresWithAssurance.map(s => {
         const a = s.assurance;
@@ -1581,6 +1656,9 @@ export function initializeSinistreEvents() {
 
     reparationSinistreSelect?.addEventListener('change', renderReparationRows);
     
+    // Add event listener for assurance filter
+    assuranceSinistreSelect?.addEventListener('change', renderAssuranceRows);
+    
     // Update prise en charge when sinistre changes in reparation modal (for create mode)
     reparationSinistreSelectModal?.addEventListener('change', function() {
         // Only update if we're in create mode (no editing id)
@@ -1608,4 +1686,7 @@ export function initializeSinistreEvents() {
             date_end: statsDateEnd?.value || undefined,
         });
     });
+
+    // ─────────────────────────────────────────
+
 }

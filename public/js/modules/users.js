@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles user CRUD operations, modal interactions, and rendering
 
-import { state, showToast } from './state.js';
+import { state, showToast, showConfirm, extractErrorMessage } from './state.js';
 import { ensureAuth } from './auth.js';
 import { formatUserStatus } from './utils.js';
 
@@ -84,11 +84,22 @@ async function fetchUser(id) {
 
 export async function handleDeleteUser(id) {
     ensureAuth();
-    const confirmed = window.confirm('Supprimer cet utilisateur ?');
+    const user = state.users.find(u => u.id === Number(id));
+    const confirmed = await showConfirm({
+        title: 'Supprimer l\'utilisateur ?',
+        message: `Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>${user?.nom || user?.email || ''}</strong> ? Cette action est irréversible.`,
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+        type: 'danger'
+    });
     if (!confirmed) return;
-    await axios.delete(`/api/utilisateurs/${id}`);
-    await loadUsers();
-    showToast('Utilisateur supprimé.');
+    try {
+        await axios.delete(`/api/utilisateurs/${id}`);
+        await loadUsers();
+        showToast('Utilisateur supprimé avec succès.', 'success', { title: 'Suppression effectuée' });
+    } catch (err) {
+        showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
+    }
 }
 
 export async function loadUsers() {
@@ -110,14 +121,18 @@ export function initializeUserEvents() {
         const payload = Object.fromEntries(new FormData(e.target).entries());
         if (!payload.password) delete payload.password;
         const isEdit = Boolean(state.userEditingId);
-        if (isEdit) {
-            await axios.put(`/api/utilisateurs/${state.userEditingId}`, payload);
-        } else {
-            await axios.post('/api/utilisateurs', payload);
+        try {
+            if (isEdit) {
+                await axios.put(`/api/utilisateurs/${state.userEditingId}`, payload);
+            } else {
+                await axios.post('/api/utilisateurs', payload);
+            }
+            closeUserModal();
+            await loadUsers();
+            showToast(isEdit ? 'Utilisateur mis à jour avec succès.' : 'Utilisateur créé avec succès.', 'success', { title: isEdit ? 'Modification effectuée' : 'Création effectuée' });
+        } catch (err) {
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
         }
-        closeUserModal();
-        await loadUsers();
-        showToast(isEdit ? 'Utilisateur mis à jour.' : 'Utilisateur créé.');
     });
 
     userTableBody.addEventListener('click', async (e) => {

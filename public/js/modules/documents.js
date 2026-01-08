@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles document CRUD operations, modal interactions, and rendering
 
-import { state, showToast } from './state.js';
+import { state, showToast, showConfirm, extractErrorMessage } from './state.js';
 import { ensureAuth } from './auth.js';
 import { formatDate, formatCurrency, toInputDate } from './utils.js';
 
@@ -262,7 +262,7 @@ export const documentVehiculeFilters = {
 
 function renderVehiculeOptions(selectedId = '') {
     const options = state.vehicules.map(v => {
-        const label = [v.code, v.numero, v.marque, v.modele].filter(Boolean).join(' · ') || `Véhicule ${v.id}`;
+        const label = v.numero || v.code || `Véhicule ${v.id}`;
         const selected = Number(selectedId) === Number(v.id) ? 'selected' : '';
         return `<option value="${v.id}" ${selected}>${label}</option>`;
     }).join('');
@@ -449,7 +449,7 @@ export async function loadDocuments() {
 
 function populateVehiculeFilters() {
     const options = state.vehicules.map(v => {
-        const label = [v.code, v.numero, v.marque, v.modele].filter(Boolean).join(' · ') || `Véhicule ${v.id}`;
+        const label = v.numero || v.code || `Véhicule ${v.id}`;
         return `<option value="${v.id}">${label}</option>`;
     }).join('');
     const defaultOption = `<option value="">-- Tous les véhicules --</option>`;
@@ -500,14 +500,18 @@ export function initializeDocumentEvents() {
         const type = state.documentCurrentType;
         payload.type = type;
         const isEdit = Boolean(state.documentEditingId);
-        if (isEdit) {
-            await axios.put(`/api/vehicule-documents/${state.documentEditingId}`, payload);
-        } else {
-            await axios.post('/api/vehicule-documents', payload);
+        try {
+            if (isEdit) {
+                await axios.put(`/api/vehicule-documents/${state.documentEditingId}`, payload);
+            } else {
+                await axios.post('/api/vehicule-documents', payload);
+            }
+            closeDocumentModal();
+            await loadDocuments();
+            showToast(isEdit ? 'Document mis à jour avec succès.' : 'Document ajouté avec succès.', 'success', { title: isEdit ? 'Modification effectuée' : 'Ajout effectué' });
+        } catch (err) {
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
         }
-        closeDocumentModal();
-        await loadDocuments();
-        showToast(isEdit ? 'Document mis à jour.' : 'Document ajouté.');
     });
 
     documentSection.addEventListener('click', async (e) => {
@@ -523,11 +527,21 @@ export function initializeDocumentEvents() {
             return;
         }
         if (actionBtn.dataset.docAction === 'delete') {
-            const confirmed = window.confirm('Supprimer ce document ?');
+            const confirmed = await showConfirm({
+                title: 'Supprimer le document ?',
+                message: `Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.`,
+                confirmText: 'Supprimer',
+                cancelText: 'Annuler',
+                type: 'danger'
+            });
             if (!confirmed) return;
-            await axios.delete(`/api/vehicule-documents/${id}`);
-            await loadDocuments();
-            showToast('Document supprimé.');
+            try {
+                await axios.delete(`/api/vehicule-documents/${id}`);
+                await loadDocuments();
+                showToast('Document supprimé avec succès.', 'success', { title: 'Suppression effectuée' });
+            } catch (err) {
+                showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
+            }
         }
     });
 }

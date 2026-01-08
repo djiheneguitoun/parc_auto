@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles vehicle CRUD operations, modal interactions, rendering, and images
 
-import { state } from './state.js';
+import { state, showToast, showConfirm, extractErrorMessage } from './state.js';
 import { ensureAuth } from './auth.js';
 import { formatDate, formatVehiculeStatut, formatEtatFonctionnel, formatCategorie, formatOptionVehicule, formatEnergie, formatBoite, formatLeasing, formatUtilisation, formatCurrency, resolveVehiculeImageSrc } from './utils.js';
 
@@ -319,14 +319,26 @@ export async function showVehiculeDetail(id, focusImages = false) {
 
 export async function handleDeleteVehicule(id) {
     ensureAuth();
-    const confirmed = window.confirm('Supprimer ce véhicule ?');
+    const vehicule = state.vehicules.find(v => v.id === Number(id));
+    const confirmed = await showConfirm({
+        title: 'Supprimer le véhicule ?',
+        message: `Êtes-vous sûr de vouloir supprimer le véhicule <strong>${vehicule?.numero || vehicule?.code || ''}</strong> ? Cette action est irréversible.`,
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+        type: 'danger'
+    });
     if (!confirmed) return;
-    await axios.delete(`/api/vehicules/${id}`);
-    if (state.selectedVehiculeId === Number(id)) {
-        closeVehiculeDetailModal();
-        state.selectedVehiculeId = null;
+    try {
+        await axios.delete(`/api/vehicules/${id}`);
+        if (state.selectedVehiculeId === Number(id)) {
+            closeVehiculeDetailModal();
+            state.selectedVehiculeId = null;
+        }
+        await loadVehicules();
+        showToast('Véhicule supprimé avec succès.', 'success', { title: 'Suppression effectuée' });
+    } catch (err) {
+        showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
     }
-    await loadVehicules();
 }
 
 export async function loadVehicules() {
@@ -371,21 +383,26 @@ export function initializeVehiculeEvents() {
             formData.append('_method', 'PUT');
         }
 
-        const res = await axios.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        try {
+            const res = await axios.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
-        const vehiculeId = res.data?.id;
-        const files = vehiculeImagesInput?.files || [];
-        if (vehiculeId && files.length) {
-            const uploads = Array.from(files).map(file => {
-                const fd = new FormData();
-                fd.append('vehicule_id', vehiculeId);
-                fd.append('image', file);
-                return axios.post('/api/vehicule-images', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-            });
-            await Promise.all(uploads);
+            const vehiculeId = res.data?.id;
+            const files = vehiculeImagesInput?.files || [];
+            if (vehiculeId && files.length) {
+                const uploads = Array.from(files).map(file => {
+                    const fd = new FormData();
+                    fd.append('vehicule_id', vehiculeId);
+                    fd.append('image', file);
+                    return axios.post('/api/vehicule-images', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                });
+                await Promise.all(uploads);
+            }
+            closeVehiculeModal();
+            await loadVehicules();
+            showToast(isEdit ? 'Véhicule mis à jour avec succès.' : 'Véhicule créé avec succès.', 'success', { title: isEdit ? 'Modification effectuée' : 'Création effectuée' });
+        } catch (err) {
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
         }
-        closeVehiculeModal();
-        await loadVehicules();
     });
 
     vehiculeTableBody.addEventListener('click', async (e) => {
