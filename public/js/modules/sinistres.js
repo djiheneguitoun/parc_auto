@@ -88,15 +88,7 @@ const reparationStatutHidden = document.getElementById('reparation-statut-hidden
 const reparationStatutSelect = document.getElementById('reparation-statut-select');
 const reparationStatutHelp = document.getElementById('reparation-statut-help');
 
-const statsDateStart = document.getElementById('stats-date-start');
-const statsDateEnd = document.getElementById('stats-date-end');
-const refreshStatsBtn = document.getElementById('refresh-sinistre-stats');
-const statsTotalSinistres = document.getElementById('stats-total-sinistres');
-const statsTauxPrise = document.getElementById('stats-taux-prise');
-const statsVehiculesPlus = document.getElementById('stats-vehicules-plus');
-const statsClassementChauffeurs = document.getElementById('stats-classement-chauffeurs');
-const statsCoutParVehicule = document.getElementById('stats-cout-par-vehicule');
-const statsParPeriode = document.getElementById('stats-par-periode');
+// Note: Stats DOM elements are now declared in the NEW STATISTICS section below
 
 function formatReparationType(value) {
     const map = { mecanique: 'Mécanique', carrosserie: 'Carrosserie' };
@@ -441,90 +433,529 @@ function renderReparationDetail(sinistre, reparation) {
     modal.classList.remove('hidden');
 }
 
-function renderTypeChart() {
-    const chartContainer = document.getElementById('stats-type-chart');
-    if (!chartContainer) return;
+// ============================================================================
+// NEW STATISTICS IMPLEMENTATION WITH CHARTS
+// ============================================================================
+
+// Chart instances (to destroy on re-render)
+let chartPeriode = null;
+let chartCoutVehicule = null;
+let chartChauffeur = null;
+let chartAssuranceDonut = null;
+
+// Current stats state
+let currentPeriod = 'week';
+let currentChartType = 'bar';
+let currentTopN = 5;
+let currentChauffeurFilter = '';
+
+// DOM Elements for new stats
+const chartPeriodeCanvas = document.getElementById('chart-sinistres-periode');
+const chartCoutVehiculeCanvas = document.getElementById('chart-cout-vehicule');
+const chartChauffeurCanvas = document.getElementById('chart-sinistres-chauffeur');
+const chartAssuranceCanvas = document.getElementById('chart-assurance-donut');
+const periodBtns = document.querySelectorAll('.period-btn');
+const chartTypeBtns = document.querySelectorAll('.chart-type-btn');
+const topNSelect = document.getElementById('stats-top-n-select');
+const chauffeurFilterSelect = document.getElementById('stats-chauffeur-filter');
+const applyFiltersBtn = document.getElementById('apply-stats-filters');
+const rankingContainer = document.getElementById('ranking-vehicules');
+const statsDateStart = document.getElementById('stats-date-start');
+const statsDateEnd = document.getElementById('stats-date-end');
+const refreshStatsBtn = document.getElementById('refresh-sinistre-stats');
+const statsTotalSinistres = document.getElementById('stats-total-sinistres');
+const statsTauxPrise = document.getElementById('stats-taux-prise');
+const statsVehiculesPlus = document.getElementById('stats-vehicules-plus');
+
+// Chart.js default configuration
+const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: false
+        },
+        tooltip: {
+            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+            titleFont: { size: 13, weight: '600' },
+            bodyFont: { size: 12 },
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: true,
+            boxPadding: 4
+        }
+    }
+};
+
+// Get filtered sinistres based on date range
+function getFilteredSinistres() {
+    const startDate = statsDateStart?.value;
+    const endDate = statsDateEnd?.value;
     
-    // Count sinistres by type
-    const typeCounts = {};
-    state.sinistres.forEach(s => {
-        const type = s.type_sinistre || 'autre';
-        typeCounts[type] = (typeCounts[type] || 0) + 1;
+    return state.sinistres.filter(s => {
+        if (!s.date_sinistre) return true;
+        const sDate = new Date(s.date_sinistre);
+        if (startDate && sDate < new Date(startDate)) return false;
+        if (endDate && sDate > new Date(endDate)) return false;
+        return true;
+    });
+}
+
+// Group sinistres by period
+function groupByPeriod(sinistres, period) {
+    const groups = {};
+    
+    sinistres.forEach(s => {
+        if (!s.date_sinistre) return;
+        const date = new Date(s.date_sinistre);
+        let key;
+        
+        switch (period) {
+            case 'day':
+                key = date.toISOString().split('T')[0];
+                break;
+            case 'week':
+                const startOfWeek = new Date(date);
+                startOfWeek.setDate(date.getDate() - date.getDay());
+                key = startOfWeek.toISOString().split('T')[0];
+                break;
+            case 'month':
+                key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                break;
+            case 'year':
+                key = String(date.getFullYear());
+                break;
+            default:
+                key = date.toISOString().split('T')[0];
+        }
+        
+        groups[key] = (groups[key] || 0) + 1;
     });
     
-    const typeLabels = {
-        accident: { label: 'Accident', color: '#ef4444' },
-        panne: { label: 'Panne', color: '#f59e0b' },
-        vol: { label: 'Vol', color: '#8b5cf6' },
-        incendie: { label: 'Incendie', color: '#f97316' },
-        autre: { label: 'Autre', color: '#6b7280' }
-    };
+    // Sort by date
+    const sortedKeys = Object.keys(groups).sort();
+    const sortedGroups = {};
+    sortedKeys.forEach(k => sortedGroups[k] = groups[k]);
     
-    const total = Object.values(typeCounts).reduce((a, b) => a + b, 0);
+    return sortedGroups;
+}
+
+// Format period label for display
+function formatPeriodLabel(key, period) {
+    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
     
-    if (total === 0) {
-        chartContainer.innerHTML = '<div class="chart-empty"><span class="muted-small">Aucune donnée disponible</span></div>';
+    switch (period) {
+        case 'day':
+            const d = new Date(key);
+            return `${d.getDate()} ${months[d.getMonth()]}`;
+        case 'week':
+            const w = new Date(key);
+            return `Sem. ${w.getDate()}/${w.getMonth() + 1}`;
+        case 'month':
+            const [y, m] = key.split('-');
+            return `${months[parseInt(m) - 1]} ${y}`;
+        case 'year':
+            return key;
+        default:
+            return key;
+    }
+}
+
+// Render sinistres by period chart
+function renderPeriodChart() {
+    // Graphique supprimé : on détruit l'instance éventuelle et on retourne.
+    if (chartPeriode) {
+        chartPeriode.destroy();
+        chartPeriode = null;
+    }
+}
+
+// Render cost per vehicle chart (horizontal bars)
+function renderCoutVehiculeChart() {
+    const sinistres = getFilteredSinistres();
+
+    // Start from all known vehicles so chart shows existing vehicles (even with 0 cost)
+    const vehiculeCosts = {};
+    (state.vehicules || []).forEach(v => {
+        const id = v.id;
+        const label = v.numero || v.immatriculation || `Véhicule ${id}`;
+        vehiculeCosts[id] = { label, cost: 0 };
+    });
+
+    // Aggregate costs from sinistres; fallback to reparations or montant_estime when cout_total missing
+    sinistres.forEach(s => {
+        const vId = s.vehicule_id;
+        const costFromSinistre = parseFloat(s.cout_total) || 0;
+        let total = costFromSinistre;
+        if (!total) {
+            // sum reparations
+            if (s.reparations && Array.isArray(s.reparations) && s.reparations.length) {
+                total = s.reparations.reduce((acc, r) => acc + (parseFloat(r.cout_reparation) || 0), 0);
+            }
+            // fallback to montant_estime
+            if (!total && s.montant_estime) {
+                total = parseFloat(s.montant_estime) || 0;
+            }
+        }
+        if (!vehiculeCosts[vId]) {
+            const label = s.vehicule?.numero || s.vehicule?.immatriculation || `Véhicule ${vId}`;
+            vehiculeCosts[vId] = { label, cost: 0 };
+        }
+        vehiculeCosts[vId].cost += total;
+    });
+
+    const sorted = Object.values(vehiculeCosts).sort((a, b) => b.cost - a.cost);
+    
+    const emptyEl = document.getElementById('chart-cout-empty');
+    const countEl = document.getElementById('cout-vehicule-count');
+    
+    if (countEl) {
+        countEl.textContent = `${sorted.length} véhicule${sorted.length > 1 ? 's' : ''}`;
+    }
+    
+    // Always hide the empty placeholder (UX choice) but still destroy previous chart if any
+    emptyEl?.classList.add('hidden');
+    if (chartCoutVehicule) {
+        chartCoutVehicule.destroy();
+        chartCoutVehicule = null;
+    }
+    
+    if (chartCoutVehicule) {
+        chartCoutVehicule.destroy();
+    }
+    
+    const ctx = chartCoutVehiculeCanvas?.getContext('2d');
+    if (!ctx) return;
+    
+    // Generate gradient colors based on cost (higher = more red)
+    const maxCost = sorted[0]?.cost || 1;
+    const colors = sorted.map((v, i) => {
+        const ratio = v.cost / maxCost;
+        if (ratio > 0.7) return 'rgba(239, 68, 68, 0.85)'; // danger
+        if (ratio > 0.4) return 'rgba(245, 158, 11, 0.85)'; // warning
+        return 'rgba(34, 197, 94, 0.85)'; // success
+    });
+    
+    chartCoutVehicule = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted.map(v => v.label),
+            datasets: [{
+                label: 'Coût total',
+                data: sorted.map(v => Math.round((v.cost || 0) * 100) / 100),
+                backgroundColor: colors,
+                borderRadius: 4,
+                barThickness: 24
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { 
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        color: '#6b7280',
+                        callback: val => formatCurrency(val)
+                    }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { 
+                        font: { size: 11 },
+                        color: '#374151'
+                    }
+                }
+            },
+            plugins: {
+                ...chartDefaults.plugins,
+                tooltip: {
+                    ...chartDefaults.plugins.tooltip,
+                    callbacks: {
+                        label: ctx => formatCurrency(ctx.parsed.x)
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render sinistres by chauffeur chart
+function renderChauffeurChart() {
+    const sinistres = getFilteredSinistres()
+        .filter(s => s.chauffeur_id);
+    
+    const chauffeurCounts = {};
+    
+    sinistres.forEach(s => {
+        const chId = s.chauffeur_id;
+        const ch = s.chauffeur;
+        const label = ch ? `${ch.nom || ''} ${ch.prenom || ''}`.trim() : `Chauffeur ${chId}`;
+        if (!chauffeurCounts[chId]) {
+            chauffeurCounts[chId] = { id: chId, label, count: 0 };
+        }
+        chauffeurCounts[chId].count++;
+    });
+    
+    let data = Object.values(chauffeurCounts).sort((a, b) => b.count - a.count);
+    
+    // Apply filter if selected
+    if (currentChauffeurFilter) {
+        data = data.filter(c => String(c.id) === String(currentChauffeurFilter));
+    }
+    
+    const emptyEl = document.getElementById('chart-chauffeur-empty');
+    const totalEl = document.getElementById('chauffeur-total');
+    
+    const totalCount = data.reduce((acc, c) => acc + c.count, 0);
+    if (totalEl) {
+        totalEl.innerHTML = `Total : <strong>${totalCount}</strong> sinistre${totalCount > 1 ? 's' : ''}`;
+    }
+    
+    // Si aucune donnée, on évite d'afficher le message d'erreur visuel
+    if (data.length === 0) {
+        emptyEl?.classList.add('hidden');
+        if (chartChauffeur) {
+            chartChauffeur.destroy();
+            chartChauffeur = null;
+        }
         return;
     }
     
-    const bars = Object.entries(typeCounts).map(([type, count]) => {
-        const info = typeLabels[type] || { label: type, color: '#6b7280' };
-        const percentage = ((count / total) * 100).toFixed(1);
+    emptyEl?.classList.add('hidden');
+    
+    if (chartChauffeur) {
+        chartChauffeur.destroy();
+    }
+    
+    const ctx = chartChauffeurCanvas?.getContext('2d');
+    if (!ctx) return;
+    
+    chartChauffeur = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(c => c.label),
+            datasets: [{
+                label: 'Sinistres',
+                data: data.map(c => c.count),
+                backgroundColor: 'rgba(139, 92, 246, 0.85)',
+                borderRadius: 6,
+                barThickness: 32
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { 
+                        font: { size: 11 },
+                        color: '#374151'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { 
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        font: { size: 11 },
+                        color: '#6b7280',
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                ...chartDefaults.plugins,
+                tooltip: {
+                    ...chartDefaults.plugins.tooltip,
+                    callbacks: {
+                        label: ctx => `${ctx.parsed.y} sinistre${ctx.parsed.y > 1 ? 's' : ''}`
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render insurance coverage donut chart
+function renderAssuranceDonutChart() {
+    // Graphique supprimé : on détruit l'instance éventuelle et on retourne.
+    if (chartAssuranceDonut) {
+        chartAssuranceDonut.destroy();
+        chartAssuranceDonut = null;
+    }
+}
+
+// Render top sinistered vehicles ranking
+function renderVehiclesRanking() {
+    const sinistres = getFilteredSinistres();
+    const vehicleCounts = {};
+    
+    sinistres.forEach(s => {
+        const vId = s.vehicule_id;
+        const label = s.vehicule?.numero || s.vehicule?.immatriculation || `Véhicule ${vId}`;
+        if (!vehicleCounts[vId]) {
+            vehicleCounts[vId] = { label, count: 0 };
+        }
+        vehicleCounts[vId].count++;
+    });
+    
+    const sorted = Object.values(vehicleCounts)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, currentTopN);
+    
+    const emptyEl = document.getElementById('chart-ranking-empty');
+    
+    if (sorted.length === 0) {
+        emptyEl?.classList.remove('hidden');
+        if (rankingContainer) rankingContainer.innerHTML = '';
+        return;
+    }
+    
+    emptyEl?.classList.add('hidden');
+    
+    const maxCount = sorted[0]?.count || 1;
+    
+    const html = sorted.map((v, i) => {
+        const position = i + 1;
+        const percentage = (v.count / maxCount) * 100;
+        let rankClass = 'rank-other';
+        if (position === 1) rankClass = 'rank-1';
+        else if (position === 2) rankClass = 'rank-2';
+        else if (position === 3) rankClass = 'rank-3';
+        
         return `
-            <div class="chart-bar-item">
-                <div class="chart-bar-header">
-                    <span class="chart-bar-label">${info.label}</span>
-                    <span class="chart-bar-value">${count} (${percentage}%)</span>
+            <div class="ranking-item">
+                <div class="ranking-position ${rankClass}">${position}</div>
+                <div class="ranking-info">
+                    <div class="ranking-label">${v.label}</div>
+                    <div class="ranking-bar">
+                        <div class="ranking-bar-fill" style="width: ${percentage}%"></div>
+                    </div>
                 </div>
-                <div class="chart-bar-track">
-                    <div class="chart-bar-fill" style="width: ${percentage}%; background: ${info.color};"></div>
-                </div>
+                <div class="ranking-count">${v.count}<small>sinistre${v.count > 1 ? 's' : ''}</small></div>
             </div>
         `;
     }).join('');
     
-    chartContainer.innerHTML = `<div class="chart-bars">${bars}</div>`;
+    if (rankingContainer) {
+        rankingContainer.innerHTML = html;
+    }
 }
 
+// Populate chauffeur filter dropdown
+function populateChauffeurFilterOptions() {
+    if (!chauffeurFilterSelect) return;
+    
+    const chauffeurs = state.chauffeurs || [];
+    const options = chauffeurs.map(ch => {
+        const label = `${ch.nom || ''} ${ch.prenom || ''}`.trim() || `Chauffeur ${ch.id}`;
+        return `<option value="${ch.id}">${label}</option>`;
+    }).join('');
+    
+    chauffeurFilterSelect.innerHTML = `<option value="">Tous les chauffeurs</option>${options}`;
+}
+
+// Main stats render function
 function renderStats() {
-    const stats = state.sinistreStats || {};
+    const sinistres = getFilteredSinistres();
     
-    // Calculate total from sinistres data if stats are empty
-    const totalFromStats = (stats.par_periode || []).reduce((acc, p) => acc + (p.total || 0), 0);
-    const total = totalFromStats || state.sinistres.length;
-    statsTotalSinistres.textContent = total || '0';
+    // Update KPIs
+    if (statsTotalSinistres) {
+        statsTotalSinistres.textContent = sinistres.length;
+    }
     
-    const taux = (stats.taux_prise_en_charge_moyen || 0) * 100;
-    statsTauxPrise.textContent = `${taux ? taux.toFixed(1) : '0'} %`;
+    // Calculate insurance coverage rate
+    let totalCost = 0;
+    let totalCovered = 0;
+    sinistres.forEach(s => {
+        // prefer explicit cout_total, else sum reparations, else montant_estime
+        let cost = parseFloat(s.cout_total) || 0;
+        if (!cost) {
+            if (s.reparations && Array.isArray(s.reparations) && s.reparations.length) {
+                cost = s.reparations.reduce((acc, r) => acc + (parseFloat(r.cout_reparation) || 0), 0);
+            }
+            if (!cost && s.montant_estime) {
+                cost = parseFloat(s.montant_estime) || 0;
+            }
+        }
+        totalCost += cost;
+        if (s.assurance && s.assurance.montant_pris_en_charge) {
+            totalCovered += parseFloat(s.assurance.montant_pris_en_charge) || 0;
+        }
+    });
+    
+    // Guard against NaN/invalid values and handle cases where only assurance amounts exist
+    if (!Number.isFinite(totalCost)) totalCost = 0;
+    if (!Number.isFinite(totalCovered)) totalCovered = 0;
+
+    // If there is coverage but no cost captured, use coverage as baseline so rate is meaningful
+    if (totalCost === 0 && totalCovered > 0) {
+        totalCost = totalCovered;
+    }
+
+    const tauxPrise = totalCost > 0 ? ((totalCovered / totalCost) * 100) : 0;
+    if (statsTauxPrise) {
+        statsTauxPrise.textContent = `${tauxPrise.toFixed(1)}%`;
+    }
     
     // Calculate total cost
     const statsCoutTotal = document.getElementById('stats-cout-total');
     if (statsCoutTotal) {
-        const totalCout = state.sinistres.reduce((acc, s) => acc + (parseFloat(s.cout_total) || 0), 0);
-        statsCoutTotal.textContent = formatCurrency(totalCout);
+        statsCoutTotal.textContent = formatCurrency(totalCost);
     }
     
-    // Render type distribution chart
-    renderTypeChart();
+    // Populate chauffeur filter
+    populateChauffeurFilterOptions();
     
-    // Calculate most sinistered vehicle from local data
-    const vehicleSinistres = {};
-    state.sinistres.forEach(s => {
-        const vId = s.vehicule_id;
-        const vLabel = s.vehicule?.numero || `Véhicule ${vId}`;
-        if (!vehicleSinistres[vId]) {
-            vehicleSinistres[vId] = { label: vLabel, count: 0 };
-        }
-        vehicleSinistres[vId].count++;
+    // Render all charts
+    renderCoutVehiculeChart();
+    renderChauffeurChart();
+    renderVehiclesRanking();
+}
+
+// Initialize stats event listeners
+function initializeStatsEvents() {
+    // Top N selector
+    topNSelect?.addEventListener('change', (e) => {
+        currentTopN = parseInt(e.target.value) || 5;
+        renderVehiclesRanking();
     });
     
-    const sortedVehicles = Object.values(vehicleSinistres).sort((a, b) => b.count - a.count);
-    if (sortedVehicles.length > 0 && statsVehiculesPlus) {
-        statsVehiculesPlus.textContent = sortedVehicles[0].label;
-    } else if (statsVehiculesPlus) {
-        statsVehiculesPlus.textContent = '-';
-    }
+    // Chauffeur filter
+    chauffeurFilterSelect?.addEventListener('change', (e) => {
+        currentChauffeurFilter = e.target.value;
+        renderChauffeurChart();
+    });
+    
+    // Apply filters button
+    applyFiltersBtn?.addEventListener('click', () => {
+        renderStats();
+    });
+    
+    // Refresh button
+    refreshStatsBtn?.addEventListener('click', async () => {
+        await loadSinistreStats({
+            date_start: statsDateStart?.value || '',
+            date_end: statsDateEnd?.value || ''
+        });
+    });
+    
+    // Date inputs - apply on change
+    statsDateStart?.addEventListener('change', renderStats);
+    statsDateEnd?.addEventListener('change', renderStats);
 }
+
+// ============================================================================
+// END NEW STATISTICS IMPLEMENTATION
+// ============================================================================
 
 // Modals helpers
 function openSinistreModal(mode = 'create', sinistre = null) {
@@ -825,6 +1256,9 @@ export function initializeSinistreEvents() {
     sinistreFilterStatut?.addEventListener('change', renderSinistreRows);
     sinistreFilterVehicule?.addEventListener('change', renderSinistreRows);
     refreshSinistresBtn?.addEventListener('click', loadSinistres);
+
+    // Initialize stats event listeners
+    initializeStatsEvents();
 
     // Detail modal close handlers
     closeSinistreDetailModalBtn?.addEventListener('click', () => {

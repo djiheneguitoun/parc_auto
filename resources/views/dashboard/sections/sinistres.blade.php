@@ -211,7 +211,7 @@
                     </span>
                     Statistiques Sinistres
                 </h2>
-                <p>Analysez les données et tendances des sinistres.</p>
+                <p>Analysez les données et tendances des sinistres de votre flotte.</p>
             </div>
             <div class="section-actions">
                 <button class="btn secondary" id="refresh-sinistre-stats" type="button">
@@ -221,66 +221,127 @@
             </div>
         </div>
 
-        <div class="stats-filters">
-            <div class="form-row">
-                <div class="form-group">
+        <!-- Filtres globaux -->
+        <div class="stats-filters-bar">
+            <div class="stats-filters-group">
+                <div class="filter-item">
                     <label>Du</label>
-                    <input type="date" id="stats-date-start">
+                    <input type="date" id="stats-date-start" class="stats-date-input">
                 </div>
-                <div class="form-group">
+                <div class="filter-item">
                     <label>au</label>
-                    <input type="date" id="stats-date-end">
+                    <input type="date" id="stats-date-end" class="stats-date-input">
                 </div>
             </div>
+            <button class="btn primary sm" id="apply-stats-filters" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Appliquer
+            </button>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--accent-soft); color: var(--accent);">
+        <!-- KPIs Cards -->
+        <div class="stats-kpi-grid">
+            <div class="kpi-card kpi-accent">
+                <div class="kpi-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
                 </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="stats-total-sinistres">0</span>
-                    <span class="stat-label">Total sinistres</span>
+                <div class="kpi-content">
+                    <span class="kpi-value" id="stats-total-sinistres">0</span>
+                    <span class="kpi-label">Total sinistres</span>
                 </div>
+                <div class="kpi-trend" id="stats-trend-sinistres"></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--success-100); color: var(--success-600);">
+            <div class="kpi-card kpi-success">
+                <div class="kpi-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="stats-taux-prise">0%</span>
-                    <span class="stat-label">Taux prise en charge</span>
+                <div class="kpi-content">
+                    <span class="kpi-value" id="stats-taux-prise">0%</span>
+                    <span class="kpi-label">Taux prise en charge</span>
                 </div>
+                <div class="kpi-trend" id="stats-trend-taux"></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--warning-100); color: var(--warning-600);">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="stats-vehicules-plus">-</span>
-                    <span class="stat-label">Véhicule le + sinistré</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--danger-100); color: var(--danger-600);">
+            <div class="kpi-card kpi-danger">
+                <div class="kpi-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="stats-cout-total">0 DH</span>
-                    <span class="stat-label">Coût total</span>
+                <div class="kpi-content">
+                    <span class="kpi-value" id="stats-cout-total">0 DH</span>
+                    <span class="kpi-label">Coût total</span>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="section-subheader">
-                <h3>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                    Répartition par type
-                </h3>
+        <!-- Graphiques principaux -->
+        <div class="stats-charts-grid">
+            <!-- Coût total par véhicule (Barres horizontales) -->
+            <div class="chart-card chart-medium">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        <h3>Coût total par véhicule</h3>
+                    </div>
+                    <span class="chart-badge" id="cout-vehicule-count">0 véhicules</span>
+                </div>
+                <div class="chart-body chart-body-scroll">
+                    <canvas id="chart-cout-vehicule"></canvas>
+                </div>
+                <div class="chart-empty hidden" id="chart-cout-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><circle cx="5.5" cy="18.5" r="2.5"/></svg>
+                    <p>Aucun coût enregistré</p>
+                </div>
             </div>
-            <div class="stats-chart" id="stats-type-chart"></div>
+
+            <!-- 3. Sinistres par chauffeur (Barres) -->
+            <div class="chart-card chart-medium">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        <h3>Sinistres par chauffeur</h3>
+                    </div>
+                    <div class="chart-controls">
+                        <select id="stats-chauffeur-filter" class="chart-select">
+                            <option value="">Tous les chauffeurs</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-body chart-body-scroll">
+                    <canvas id="chart-sinistres-chauffeur"></canvas>
+                </div>
+                <div class="chart-footer">
+                    <span class="chart-total" id="chauffeur-total">Total : <strong>0</strong> sinistres</span>
+                </div>
+                <div class="chart-empty hidden" id="chart-chauffeur-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <p>Aucun sinistre avec chauffeur</p>
+                </div>
+            </div>
+
+            <!-- Véhicules les plus sinistrés (Classement) -->
+            <div class="chart-card chart-small">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                        <h3>Véhicules les plus sinistrés</h3>
+                    </div>
+                    <div class="chart-controls">
+                        <select id="stats-top-n-select" class="chart-select chart-select-sm">
+                            <option value="5">Top 5</option>
+                            <option value="10">Top 10</option>
+                            <option value="15">Top 15</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="ranking-list" id="ranking-vehicules">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="chart-empty hidden" id="chart-ranking-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><circle cx="5.5" cy="18.5" r="2.5"/></svg>
+                    <p>Aucun véhicule sinistré</p>
+                </div>
+            </div>
         </div>
     </div>
 
