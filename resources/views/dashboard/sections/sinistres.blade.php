@@ -443,7 +443,7 @@
                         <option value="en_reparation">En réparation</option>
                         <option value="clos">Clos</option>
                     </select>
-                    <p class="muted-small">Défini automatiquement à la création et non modifiable.</p>
+                    <p class="muted-small">Non modifiable.</p>
                 </div>
             </div>
             <div class="form-group full-width">
