@@ -108,6 +108,8 @@ export async function loadUsers() {
     const list = res.data.data || res.data || [];
     state.users = list;
     renderUserRows();
+    // Notify other modules (e.g., dashboard) that users data changed
+    document.dispatchEvent(new CustomEvent('data:users:updated'));
 }
 
 // ============================================================================

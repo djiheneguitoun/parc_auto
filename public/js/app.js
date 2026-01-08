@@ -215,8 +215,29 @@ function initializeApp() {
     // Activate the first document tab
     activateDocumentTab(state.documentCurrentType);
 
+    // Re-render charts when underlying data updates
     document.addEventListener('data:vehicules:updated', renderDashboardCharts);
     document.addEventListener('data:documents:updated', renderDashboardCharts);
+
+    // Keep dashboard metrics in sync without requiring manual refresh
+    const refreshBtn = document.getElementById('refresh-metrics');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            loadMetrics().catch(err => console.error('Error refreshing metrics:', err));
+        });
+    }
+    document.addEventListener('data:chauffeurs:updated', () => {
+        loadMetrics().catch(err => console.error('Error updating metrics (chauffeurs):', err));
+    });
+    document.addEventListener('data:vehicules:updated', () => {
+        loadMetrics().catch(err => console.error('Error updating metrics (vehicules):', err));
+    });
+    document.addEventListener('data:documents:updated', () => {
+        loadMetrics().catch(err => console.error('Error updating metrics (documents):', err));
+    });
+    document.addEventListener('data:users:updated', () => {
+        loadMetrics().catch(err => console.error('Error updating metrics (users):', err));
+    });
 }
 
 // ============================================================================
