@@ -31,6 +31,10 @@ const closeSinistreModalBtn = document.getElementById('close-sinistre-modal');
 const sinistreVehiculeSelect = document.getElementById('sinistre-vehicule-select');
 const sinistreChauffeurSelect = document.getElementById('sinistre-chauffeur-select');
 const sinistreStatutSelect = document.getElementById('sinistre-statut-select');
+const sinistreStatutHidden = document.getElementById('sinistre-statut-hidden');
+const sinistreNumeroInput = document.getElementById('sinistre-numero');
+const sinistreDateInput = document.querySelector('#sinistre-form [name="date_sinistre"]');
+const sinistreHeureInput = document.querySelector('#sinistre-form [name="heure_sinistre"]');
 
 const sinistreDetailCard = document.getElementById('sinistre-detail-card');
 const sinistreDetailEmpty = document.getElementById('sinistre-detail-empty');
@@ -479,11 +483,34 @@ function openSinistreModal(mode = 'create', sinistre = null) {
     sinistreForm.reset();
     populateVehiculeOptions(sinistreVehiculeSelect);
     populateChauffeurOptions(sinistreChauffeurSelect);
+    if (sinistreStatutHidden) sinistreStatutHidden.value = 'declare';
+    if (sinistreStatutSelect) sinistreStatutSelect.value = 'declare';
+    if (sinistreNumeroInput) sinistreNumeroInput.value = 'Génération...';
+    if (sinistreDateInput) sinistreDateInput.value = toInputDate(new Date());
+    if (sinistreHeureInput) {
+        const now = new Date();
+        sinistreHeureInput.value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    }
+    // generate numero locally based on current year and existing sinistres
+    try {
+        const year = new Date().getFullYear();
+        const matches = (state.sinistres || []).map(s => s.numero_sinistre || '').filter(Boolean);
+        let maxIndex = 0;
+        matches.forEach(n => {
+            const m = n.match(/(\d{4})-(\d{3,})$/);
+            if (m && Number(m[1]) === year) maxIndex = Math.max(maxIndex, Number(m[2]));
+        });
+        const next = String(maxIndex + 1).padStart(3, '0');
+        const generated = `SIN-${year}-${next}`;
+        if (sinistreNumeroInput) sinistreNumeroInput.value = generated;
+    } catch (e) {
+        if (sinistreNumeroInput) sinistreNumeroInput.value = '';
+    }
 
     if (mode === 'edit' && sinistre) {
         sinistreFormTitle.textContent = 'Modifier un sinistre';
         sinistreFormSubmit.textContent = 'Mettre à jour';
-        sinistreForm.numero_sinistre.value = sinistre.numero_sinistre || '';
+        if (sinistreNumeroInput) sinistreNumeroInput.value = sinistre.numero_sinistre || '';
         sinistreForm.vehicule_id.value = sinistre.vehicule_id || '';
         sinistreForm.chauffeur_id.value = sinistre.chauffeur_id || '';
         sinistreForm.date_sinistre.value = toInputDate(sinistre.date_sinistre);
@@ -495,7 +522,8 @@ function openSinistreModal(mode = 'create', sinistre = null) {
         sinistreForm.montant_estime.value = sinistre.montant_estime || '';
         sinistreForm.description.value = sinistre.description || '';
         if (sinistre.statut_sinistre) {
-            sinistreStatutSelect.value = sinistre.statut_sinistre;
+            if (sinistreStatutSelect) sinistreStatutSelect.value = sinistre.statut_sinistre;
+            if (sinistreStatutHidden) sinistreStatutHidden.value = sinistre.statut_sinistre;
         }
     } else {
         sinistreFormTitle.textContent = 'Déclarer un sinistre';
@@ -503,7 +531,8 @@ function openSinistreModal(mode = 'create', sinistre = null) {
         sinistreForm.gravite.value = 'mineur';
         sinistreForm.type_sinistre.value = 'accident';
         sinistreForm.responsable.value = 'inconnu';
-        sinistreStatutSelect.value = 'declare';
+        if (sinistreStatutSelect) sinistreStatutSelect.value = 'declare';
+        if (sinistreStatutHidden) sinistreStatutHidden.value = 'declare';
     }
 
     sinistreModal.classList.remove('hidden');
@@ -672,6 +701,23 @@ export function initializeSinistreEvents() {
         e.preventDefault();
         ensureAuth();
         const payload = Object.fromEntries(new FormData(sinistreForm).entries());
+        if (sinistreStatutHidden) {
+            payload.statut_sinistre = sinistreStatutHidden.value || 'declare';
+        }
+        if (!state.sinistreEditingId) {
+            // If frontend generated a number, include it; otherwise let backend generate
+            if (sinistreNumeroInput && sinistreNumeroInput.value && sinistreNumeroInput.value.trim() !== '' && sinistreNumeroInput.value.trim() !== 'Génération...') {
+                payload.numero_sinistre = sinistreNumeroInput.value.trim();
+            } else {
+                delete payload.numero_sinistre;
+            }
+            if (!payload.date_sinistre && sinistreDateInput) {
+                payload.date_sinistre = toInputDate(new Date());
+            }
+            if (!payload.heure_sinistre && sinistreHeureInput) {
+                payload.heure_sinistre = sinistreHeureInput.value || '';
+            }
+        }
         try {
             if (state.sinistreEditingId) {
                 await axios.put(`/api/sinistres/${state.sinistreEditingId}`, payload);

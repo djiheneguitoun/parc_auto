@@ -376,8 +376,9 @@
         <form id="sinistre-form">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Numéro de dossier *</label>
-                    <input name="numero_sinistre" required placeholder="SIN-2026-001">
+                    <label>Numéro de dossier</label>
+                    <input name="numero_sinistre" id="sinistre-numero" placeholder="Généré automatiquement" readonly aria-readonly="true">
+                    <p class="muted-small">Généré automatiquement et non modifiable.</p>
                 </div>
                 <div class="form-group">
                     <label>Véhicule *</label>
@@ -394,6 +395,7 @@
                 <div class="form-group">
                     <label>Date *</label>
                     <input type="date" name="date_sinistre" required>
+                    <p class="muted-small">Pré-remplie avec la date du jour et modifiable si besoin.</p>
                 </div>
                 <div class="form-group">
                     <label>Heure</label>
@@ -434,12 +436,14 @@
                 </div>
                 <div class="form-group">
                     <label>Statut</label>
-                    <select name="statut_sinistre" id="sinistre-statut-select">
+                    <input type="hidden" name="statut_sinistre" id="sinistre-statut-hidden" value="declare">
+                    <select id="sinistre-statut-select" disabled aria-disabled="true">
                         <option value="declare">Déclaré</option>
                         <option value="en_cours">En cours</option>
                         <option value="en_reparation">En réparation</option>
                         <option value="clos">Clos</option>
                     </select>
+                    <p class="muted-small">Défini automatiquement à la création et non modifiable.</p>
                 </div>
             </div>
             <div class="form-group full-width">
