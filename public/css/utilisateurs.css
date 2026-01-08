@@ -1,0 +1,509 @@
+/* ============================================
+   PARC AUTO - UTILISATEURS & PARAMETRES STYLES
+   Professional User & Settings Management
+   ============================================ */
+
+/* ─────────────────────────────────────────
+   UTILISATEURS SECTION
+   ───────────────────────────────────────── */
+#utilisateurs {
+    animation: fadeIn 0.3s ease;
+}
+
+#utilisateurs .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+#utilisateurs .section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+#utilisateurs .section-header h2 .icon-box {
+    width: 40px;
+    height: 40px;
+    background: var(--info-600);
+    color: white;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4);
+}
+
+#utilisateurs .section-header p {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin: 0;
+    padding-left: calc(40px + var(--space-3));
+}
+
+/* Table Card */
+#utilisateurs .table-card {
+    border-left: 4px solid var(--info-500);
+    margin-bottom: var(--space-4);
+    transition: all 0.2s ease;
+}
+
+#utilisateurs .table-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Section subheader */
+#utilisateurs .section-subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+#utilisateurs .section-subheader h3 {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+#utilisateurs .subheader-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+/* Search Box */
+#utilisateurs .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#utilisateurs .search-box svg {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+}
+
+#utilisateurs .search-box input {
+    padding-left: var(--space-9);
+    min-width: 260px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+#utilisateurs .search-box input:focus {
+    background: var(--bg-secondary);
+    border-color: var(--info-400);
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+
+/* Stat Badge */
+#utilisateurs .stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    background: var(--info-600);
+    color: white;
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 6px rgba(8, 145, 178, 0.3);
+}
+
+/* Table */
+#utilisateurs .table-wrapper {
+    overflow-x: auto;
+}
+
+#utilisateurs table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#utilisateurs th,
+#utilisateurs td {
+    padding: var(--space-2-5) var(--space-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+#utilisateurs th {
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#utilisateurs td {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+}
+
+#utilisateurs th:last-child,
+#utilisateurs td:last-child {
+    text-align: center;
+}
+
+#utilisateurs tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+#utilisateurs tbody tr:hover {
+    background: rgba(8, 145, 178, 0.08);
+}
+
+/* Role badges */
+#utilisateurs .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-2xs);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+    text-transform: capitalize;
+}
+
+#utilisateurs .role-badge.administratif {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+
+#utilisateurs .role-badge.responsable {
+    background: var(--warning-100);
+    color: var(--warning-700);
+}
+
+#utilisateurs .role-badge.agent {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+/* Status badges */
+#utilisateurs .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-2xs);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+}
+
+#utilisateurs .status-badge.actif {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+#utilisateurs .status-badge.inactif {
+    background: var(--danger-100);
+    color: var(--danger-700);
+}
+
+/* Modal styling */
+#user-modal .modal-dialog {
+    max-width: 600px;
+}
+
+#user-modal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: var(--space-4);
+}
+
+#user-modal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+#user-modal .modal-header h3 svg {
+    color: var(--info-600);
+}
+
+#user-modal .close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+#user-modal .close-btn:hover {
+    background: var(--danger-100);
+    color: var(--danger-600);
+}
+
+/* ─────────────────────────────────────────
+   PARAMETRES SECTION
+   ───────────────────────────────────────── */
+#parametres {
+    animation: fadeIn 0.3s ease;
+}
+
+#parametres .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+#parametres .section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+#parametres .section-header h2 .icon-box {
+    width: 40px;
+    height: 40px;
+    background: var(--gray-700);
+    color: white;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(55, 65, 81, 0.4);
+}
+
+#parametres .section-header p {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin: 0;
+    padding-left: calc(40px + var(--space-3));
+}
+
+/* Settings card */
+#parametres .table-card {
+    border-left: 4px solid var(--gray-500);
+    margin-bottom: var(--space-4);
+    transition: all 0.2s ease;
+}
+
+#parametres .table-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+#parametres .section-subheader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#parametres .section-subheader h3 {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+#parametres .section-subheader h3 svg {
+    color: var(--gray-500);
+}
+
+/* Form container */
+#parametres .form-container {
+    padding: var(--space-5);
+}
+
+/* ─────────────────────────────────────────
+   SHARED FORM STYLES
+   ───────────────────────────────────────── */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1-5);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.form-group label svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.form-group input,
+.form-group select {
+    padding: var(--space-2-5) var(--space-3);
+    font-size: var(--text-sm);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
+    transition: all var(--transition-fast);
+}
+
+.form-group input:hover,
+.form-group select:hover {
+    border-color: var(--border-medium);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    background: var(--bg-secondary);
+    border-color: var(--primary-400);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-light);
+}
+
+.form-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ─────────────────────────────────────────
+   ACTION BUTTONS IN TABLE
+   ───────────────────────────────────────── */
+#utilisateurs .action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+}
+
+#utilisateurs .action-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+#utilisateurs .action-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+#utilisateurs .action-btn.edit:hover {
+    background: var(--primary-100);
+    color: var(--primary-600);
+}
+
+#utilisateurs .action-btn.delete:hover {
+    background: var(--danger-100);
+    color: var(--danger-600);
+}
+
+#utilisateurs .action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────── */
+@media (max-width: 768px) {
+    #utilisateurs .section-subheader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #utilisateurs .subheader-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #utilisateurs .search-box input {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
