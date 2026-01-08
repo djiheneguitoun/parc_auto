@@ -497,6 +497,22 @@
     color: white;
 }
 
+/* Disabled action buttons */
+#sinistres .action-btn.disabled,
+#sinistres .action-btn:disabled {
+    background: var(--gray-100) !important;
+    color: var(--gray-400) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
+#sinistres .action-btn.disabled:hover,
+#sinistres .action-btn:disabled:hover {
+    background: var(--gray-100) !important;
+    color: var(--gray-400) !important;
+    transform: none;
+}
+
 /* ─────────────────────────────────────────
    MODALS - Following vehicules.css pattern
    ───────────────────────────────────────── */

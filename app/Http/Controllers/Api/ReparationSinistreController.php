@@ -17,8 +17,39 @@ class ReparationSinistreController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateData($request);
+        
+        // Get the sinistre to check assurance status
+        $sinistre = Sinistre::with('assurance')->find($data['sinistre_id']);
+        
+        // RÈGLE: Vérifier que l'assurance a une décision (acceptée ou refusée) avant de créer une réparation
+        if ($sinistre && $sinistre->assurance) {
+            $assuranceDecision = $sinistre->assurance->decision;
+            if ($assuranceDecision === 'en_attente') {
+                return response()->json([
+                    'message' => 'Impossible de créer une réparation : veuillez attendre la décision de l\'assurance.'
+                ], 422);
+            }
+        }
+        
+        // Use provided status or fall back to default "En cours"
+        $data['statut_reparation'] = $data['statut_reparation'] ?? 'en_cours';
+        
+        // Determine default prise_en_charge only if not provided
+        if (!isset($data['prise_en_charge'])) {
+            $assurance = $sinistre?->assurance;
+            if (!$assurance || $assurance->decision === 'refuse') {
+                $data['prise_en_charge'] = 'societe';
+            } else {
+                $data['prise_en_charge'] = 'assurance';
+            }
+        }
+        
         $reparation = ReparationSinistre::create($data);
-        $this->syncSinistreStatut($reparation->sinistre, $reparation);
+        
+        // RÈGLE: Création réparation -> sinistre passe à "en_reparation"
+        if ($sinistre) {
+            $sinistre->update(['statut_sinistre' => 'en_reparation']);
+        }
 
         return response()->json($reparation->load('sinistre'), 201);
     }
@@ -33,7 +64,7 @@ class ReparationSinistreController extends Controller
         $data = $this->validateData($request, true);
         $reparationSinistre->update($data);
 
-        $this->syncSinistreStatut($reparationSinistre->sinistre, $reparationSinistre);
+        $this->syncSinistreStatut($reparationSinistre->sinistre);
 
         return $reparationSinistre->load('sinistre');
     }
@@ -43,11 +74,25 @@ class ReparationSinistreController extends Controller
         $sinistre = $reparationSinistre->sinistre;
         $reparationSinistre->delete();
 
-        if ($sinistre && $sinistre->statut_sinistre !== 'clos') {
-            $hasActiveRep = $sinistre->reparations()->whereIn('statut_reparation', ['en_attente', 'en_cours'])->exists();
-            $sinistre->update([
-                'statut_sinistre' => $hasActiveRep ? 'en_reparation' : 'en_cours',
-            ]);
+        if ($sinistre) {
+            // Recharger les réparations restantes
+            $sinistre->load('reparations');
+            $reparations = $sinistre->reparations;
+            
+            if ($reparations->isEmpty()) {
+                // Plus de réparations -> retour à "en_cours" s'il y a une assurance, sinon "declare"
+                $sinistre->load('assurance');
+                $newStatus = $sinistre->assurance ? 'en_cours' : 'declare';
+                $sinistre->update(['statut_sinistre' => $newStatus]);
+            } else {
+                $hasUnfinishedRepairs = $reparations->where('statut_reparation', '!=', 'termine')->isNotEmpty();
+                if ($hasUnfinishedRepairs) {
+                    $sinistre->update(['statut_sinistre' => 'en_reparation']);
+                } else {
+                    // Toutes les réparations restantes sont terminées -> clos
+                    $sinistre->update(['statut_sinistre' => 'clos']);
+                }
+            }
         }
 
         return response()->noContent();
@@ -69,26 +114,29 @@ class ReparationSinistreController extends Controller
         ]);
     }
 
-    private function syncSinistreStatut(?Sinistre $sinistre, ReparationSinistre $reparation): void
+    private function syncSinistreStatut(?Sinistre $sinistre): void
     {
         if (!$sinistre) {
             return;
         }
 
-        $statutReparation = $reparation->statut_reparation;
-
-        if ($statutReparation === 'termine') {
-            $sinistre->update(['statut_sinistre' => 'clos']);
+        // Reload reparations to get fresh data
+        $sinistre->load('reparations');
+        $reparations = $sinistre->reparations;
+        
+        if ($reparations->isEmpty()) {
             return;
         }
-
-        if ($reparation->date_debut || $statutReparation === 'en_cours') {
+        
+        // Check if there are any non-finished repairs
+        $hasUnfinishedRepairs = $reparations->where('statut_reparation', '!=', 'termine')->isNotEmpty();
+        
+        if ($hasUnfinishedRepairs) {
+            // RÈGLE: Il reste des réparations non terminées -> "en_reparation"
             $sinistre->update(['statut_sinistre' => 'en_reparation']);
-            return;
-        }
-
-        if ($sinistre->assurance) {
-            $sinistre->update(['statut_sinistre' => 'en_cours']);
+        } else {
+            // RÈGLE: Toutes les réparations sont terminées -> "clos"
+            $sinistre->update(['statut_sinistre' => 'clos']);
         }
     }
 }

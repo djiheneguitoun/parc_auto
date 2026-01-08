@@ -93,8 +93,8 @@
             </div>
             <div class="section-actions">
                 <button class="btn primary" id="open-assurance-modal" type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-                    Nouvelle déclaration
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Déclarer Assurance
                 </button>
             </div>
         </div>
@@ -378,7 +378,7 @@
                 <div class="form-group">
                     <label>Numéro de dossier</label>
                     <input name="numero_sinistre" id="sinistre-numero" placeholder="Généré automatiquement" readonly aria-readonly="true">
-                    <p class="muted-small">Généré automatiquement et non modifiable.</p>
+                    <p class="muted-small">Généré automatiquement </p>
                 </div>
                 <div class="form-group">
                     <label>Véhicule *</label>
@@ -395,7 +395,6 @@
                 <div class="form-group">
                     <label>Date *</label>
                     <input type="date" name="date_sinistre" required>
-                    <p class="muted-small">Pré-remplie avec la date du jour et modifiable si besoin.</p>
                 </div>
                 <div class="form-group">
                     <label>Heure</label>
@@ -475,12 +474,19 @@
             <input type="hidden" name="sinistre_id" id="assurance-sinistre-input">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Compagnie</label>
-                    <input name="compagnie_assurance" placeholder="Nom de la compagnie">
+                    <label>Sinistre *</label>
+                    <select name="sinistre_id_select" id="assurance-sinistre-select-modal" required>
+                        <option value="">- Choisir un sinistre -</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Numéro dossier</label>
-                    <input name="numero_dossier" placeholder="N° dossier assurance">
+                    <input name="numero_dossier" id="assurance-numero-dossier" placeholder="Généré automatiquement" readonly>
+                    <p class="muted-small">Généré automatiquement</p>
+                </div>
+                <div class="form-group">
+                    <label>Compagnie</label>
+                    <input name="compagnie_assurance" placeholder="Nom de la compagnie">
                 </div>
                 <div class="form-group">
                     <label>Date déclaration</label>
@@ -495,8 +501,8 @@
                     <input type="date" name="date_expertise">
                 </div>
                 <div class="form-group">
-                    <label>Décision *</label>
-                    <select name="decision" required>
+                    <label>Décision</label>
+                    <select name="decision" id="assurance-decision-select">
                         <option value="en_attente">En attente</option>
                         <option value="accepte">Accepté</option>
                         <option value="refuse">Refusé</option>
@@ -515,12 +521,14 @@
                     <input type="date" name="date_validation">
                 </div>
                 <div class="form-group">
-                    <label>Statut *</label>
-                    <select name="statut_assurance" required>
+                    <label>Statut</label>
+                    <input type="hidden" name="statut_assurance" id="assurance-statut-hidden" value="en_cours">
+                    <select id="assurance-statut-select" disabled>
                         <option value="en_cours">En cours</option>
                         <option value="valide">Validé</option>
                         <option value="refuse">Refusé</option>
                     </select>
+                    <p class="muted-small">Mis à jour automatiquement selon la décision.</p>
                 </div>
             </div>
             <div class="form-actions">
@@ -582,18 +590,22 @@
                 </div>
                 <div class="form-group">
                     <label>Prise en charge</label>
-                    <select name="prise_en_charge">
-                        <option value="societe">Société</option>
+                    <input type="hidden" name="prise_en_charge" id="reparation-prise-en-charge-hidden" value="societe">
+                    <select id="reparation-prise-en-charge-select" name="prise_en_charge_display">
+                        <option value="societe">Société (sans assurance)</option>
                         <option value="assurance">Assurance</option>
                     </select>
+                    <p class="muted-small" id="reparation-prise-en-charge-help">Valeur par défaut selon le statut de l'assurance.</p>
                 </div>
                 <div class="form-group">
                     <label>Statut</label>
-                    <select name="statut_reparation">
+                    <input type="hidden" name="statut_reparation" id="reparation-statut-hidden" value="en_cours">
+                    <select id="reparation-statut-select" name="statut_reparation_display">
                         <option value="en_attente">En attente</option>
                         <option value="en_cours">En cours</option>
                         <option value="termine">Terminé</option>
                     </select>
+                    <p class="muted-small" id="reparation-statut-help">Valeur par défaut : En cours.</p>
                 </div>
                 <div class="form-group">
                     <label>Facture / référence</label>

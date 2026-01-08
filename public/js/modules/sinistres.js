@@ -2,7 +2,7 @@
 // Sinistres Management (Suivi, Assurance, Réparations, Statistiques)
 // ============================================================================
 
-import { state, showToast, extractErrorMessage } from './state.js';
+import { state, showToast, showConfirm, extractErrorMessage } from './state.js';
 import { ensureAuth } from './auth.js';
 import {
     formatDate,
@@ -65,6 +65,12 @@ const assuranceForm = document.getElementById('assurance-form');
 const assuranceFormTitle = document.getElementById('assurance-form-title');
 const assuranceFormSubmit = document.getElementById('assurance-form-submit');
 const assuranceSinistreInput = document.getElementById('assurance-sinistre-input');
+const assuranceSinistreSelectModal = document.getElementById('assurance-sinistre-select-modal');
+const assuranceNumeroDossier = document.getElementById('assurance-numero-dossier');
+const assuranceDecisionSelect = document.getElementById('assurance-decision-select');
+const assuranceDecisionHelp = document.getElementById('assurance-decision-help');
+const assuranceStatutHidden = document.getElementById('assurance-statut-hidden');
+const assuranceStatutSelect = document.getElementById('assurance-statut-select');
 
 const reparationSinistreSelect = document.getElementById('reparation-sinistre-select');
 const reparationTableBody = document.getElementById('reparation-rows');
@@ -75,6 +81,12 @@ const reparationForm = document.getElementById('reparation-form');
 const reparationFormTitle = document.getElementById('reparation-form-title');
 const reparationFormSubmit = document.getElementById('reparation-form-submit');
 const reparationSinistreSelectModal = document.getElementById('reparation-sinistre-select-modal');
+const reparationPriseEnChargeHidden = document.getElementById('reparation-prise-en-charge-hidden');
+const reparationPriseEnChargeSelect = document.getElementById('reparation-prise-en-charge-select');
+const reparationPriseEnChargeHelp = document.getElementById('reparation-prise-en-charge-help');
+const reparationStatutHidden = document.getElementById('reparation-statut-hidden');
+const reparationStatutSelect = document.getElementById('reparation-statut-select');
+const reparationStatutHelp = document.getElementById('reparation-statut-help');
 
 const statsDateStart = document.getElementById('stats-date-start');
 const statsDateEnd = document.getElementById('stats-date-end');
@@ -110,6 +122,8 @@ function formatAssuranceStatut(value) {
     const map = { 
         en_attente: 'En attente', 
         en_cours: 'En cours', 
+        valide: 'Validé',
+        refuse: 'Refusé',
         cloture: 'Clôturé', 
         termine: 'Terminé'
     };
@@ -194,7 +208,13 @@ function populateSinistreSelects() {
     populateVehiculeOptions(sinistreFilterVehicule, 'Tous les véhicules');
 
     const options = state.sinistres.map(s => `<option value="${s.id}">${sinistreLabel(s)}</option>`).join('');
+    
+    // For assurance modal - only show sinistres WITHOUT insurance
+    const sinistresWithoutAssurance = state.sinistres.filter(s => !s.assurance);
+    const optionsWithoutAssurance = sinistresWithoutAssurance.map(s => `<option value="${s.id}">${sinistreLabel(s)}</option>`).join('');
+    
     if (assuranceSinistreSelect) assuranceSinistreSelect.innerHTML = `<option value="">Choisir un sinistre</option>${options}`;
+    if (assuranceSinistreSelectModal) assuranceSinistreSelectModal.innerHTML = `<option value="">- Choisir un sinistre -</option>${optionsWithoutAssurance}`;
     if (reparationSinistreSelect) reparationSinistreSelect.innerHTML = `<option value="">Choisir un sinistre</option>${options}`;
     if (reparationSinistreSelectModal) reparationSinistreSelectModal.innerHTML = `<option value="">Choisir un sinistre</option>${options}`;
 }
@@ -219,6 +239,39 @@ function renderSinistreRows() {
     const rows = filtered.map(s => {
         const vehicule = s.vehicule;
         const vehiculeLabel = vehicule ? (vehicule.numero || `Véhicule ${vehicule.id}`) : '-';
+        const isClosed = s.statut_sinistre === 'clos';
+        
+        // RÈGLE: Le bouton clôturer n'est plus nécessaire car le sinistre se clôture automatiquement
+        // quand toutes les réparations sont terminées
+        
+        // Build action buttons - close option always visible
+        const editDisabledClass = isClosed ? ' disabled' : '';
+        const editDisabledAttr = isClosed ? 'disabled' : '';
+        const closeDisabledClass = isClosed ? ' disabled' : '';
+        const closeDisabledAttr = isClosed ? 'disabled' : '';
+
+        let actionButtons = `
+            <button class="action-btn view" data-action="view" type="button" title="Voir détails">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>`;
+        
+        actionButtons += `
+            <button class="action-btn edit${editDisabledClass}" data-action="edit" type="button" title="Modifier" ${editDisabledAttr}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>`;
+
+        // Always show close button (no conditions)
+        actionButtons += `
+            <button class="action-btn close-sinistre${closeDisabledClass}" data-action="close" type="button" title="Clôturer" ${closeDisabledAttr}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </button>`;
+        
+        // Always show delete button
+        actionButtons += `
+            <button class="action-btn delete" data-action="delete" type="button" title="Supprimer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>`;
+        
         return `
             <tr data-sinistre-id="${s.id}">
                 <td><span class="numero-badge">${s.numero_sinistre || '-'}</span></td>
@@ -228,17 +281,7 @@ function renderSinistreRows() {
                 <td><span class="pill ${s.gravite || ''}">${formatSinistreGravite(s.gravite)}</span></td>
                 <td><span class="pill ${s.statut_sinistre || ''}">${formatSinistreStatut(s.statut_sinistre)}</span></td>
                 <td>${formatCurrency(s.cout_total)}</td>
-                <td class="action-btns">
-                    <button class="action-btn view" data-action="view" type="button" title="Voir détails">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                    <button class="action-btn edit" data-action="edit" type="button" title="Modifier">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="action-btn close-sinistre" data-action="close" type="button" title="Clôturer">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    </button>
-                </td>
+                <td class="action-btns">${actionButtons}</td>
             </tr>
         `;
     }).join('');
@@ -298,7 +341,10 @@ function renderSinistreDetail(s) {
 }
 
 function renderAssuranceRows() {
-    const rows = state.sinistres.map(s => {
+    // Only show sinistres that have insurance declared
+    const sinistresWithAssurance = state.sinistres.filter(s => s.assurance);
+    
+    const rows = sinistresWithAssurance.map(s => {
         const a = s.assurance;
         const statutClass = a?.statut_assurance || 'en_attente';
         const decisionClass = a?.decision || 'en_attente';
@@ -307,22 +353,25 @@ function renderAssuranceRows() {
                 <td><span class="numero-badge">${s.numero_sinistre || '-'}</span></td>
                 <td>${a?.compagnie_assurance || '-'}</td>
                 <td>${a?.numero_dossier || '-'}</td>
-                <td><span class="pill ${decisionClass}">${a ? formatAssuranceDecision(a.decision) : '-'}</span></td>
+                <td><span class="pill ${decisionClass}">${formatAssuranceDecision(a.decision)}</span></td>
                 <td>${formatCurrency(a?.montant_pris_en_charge)}</td>
                 <td>${formatCurrency(a?.franchise)}</td>
-                <td><span class="pill ${statutClass}">${a ? formatAssuranceStatut(a.statut_assurance) : '-'}</span></td>
+                <td><span class="pill ${statutClass}">${formatAssuranceStatut(a.statut_assurance)}</span></td>
                 <td class="action-btns">
                     <button class="action-btn view" data-assurance-action="view" type="button" title="Voir détails">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
-                    <button class="action-btn ${a ? 'edit' : 'add'}" data-assurance-action="edit" type="button" title="${a ? 'Modifier' : 'Déclarer'}">
-                        ${a ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`}
+                    <button class="action-btn edit" data-assurance-action="edit" type="button" title="Modifier">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="action-btn delete" data-assurance-action="delete" type="button" title="Supprimer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
                 </td>
             </tr>
         `;
     }).join('');
-    assuranceTableBody.innerHTML = rows || '<tr><td colspan="8" class="muted" style="text-align:center;padding:var(--space-6);">Aucun sinistre à afficher.</td></tr>';
+    assuranceTableBody.innerHTML = rows || '<tr><td colspan="8" class="muted" style="text-align:center;padding:var(--space-6);">Aucune assurance déclarée.</td></tr>';
 }
 
 function renderAssuranceDetail(sinistre) {
@@ -543,31 +592,94 @@ function closeSinistreModal() {
     sinistreModal.classList.add('hidden');
 }
 
-function openAssuranceModal(sinistreId = '') {
+function openAssuranceModal(sinistreId = '', isEdit = false) {
     state.assuranceEditingId = null;
     assuranceForm.reset();
-    assuranceSinistreInput.value = sinistreId || '';
     populateSinistreSelects();
+    
+    // Generate numero dossier for new insurance
+    const generateNumeroDossier = () => {
+        const year = new Date().getFullYear();
+        const existingNumbers = state.sinistres
+            .filter(s => s.assurance?.numero_dossier)
+            .map(s => s.assurance.numero_dossier);
+        let maxIndex = 0;
+        existingNumbers.forEach(n => {
+            const m = n.match(/ASS-(\d{4})-(\d+)$/);
+            if (m && Number(m[1]) === year) {
+                maxIndex = Math.max(maxIndex, Number(m[2]));
+            }
+        });
+        return `ASS-${year}-${String(maxIndex + 1).padStart(3, '0')}`;
+    };
 
     const sinistre = state.sinistres.find(s => Number(s.id) === Number(sinistreId));
+    
     if (sinistre?.assurance) {
+        // Edit mode
         const a = sinistre.assurance;
         state.assuranceEditingId = a.id;
         assuranceFormTitle.textContent = 'Mettre à jour l\'assurance';
+        
+        // In edit mode, show sinistre but disable select
+        if (assuranceSinistreSelectModal) {
+            assuranceSinistreSelectModal.innerHTML = `<option value="${sinistre.id}" selected>${sinistreLabel(sinistre)}</option>`;
+            assuranceSinistreSelectModal.disabled = true;
+        }
+        if (assuranceSinistreInput) assuranceSinistreInput.value = sinistreId;
+        
+        // Fill form values
         assuranceForm.compagnie_assurance.value = a.compagnie_assurance || '';
-        assuranceForm.numero_dossier.value = a.numero_dossier || '';
+        if (assuranceNumeroDossier) assuranceNumeroDossier.value = a.numero_dossier || '';
         assuranceForm.date_declaration.value = toInputDate(a.date_declaration);
         assuranceForm.expert_nom.value = a.expert_nom || '';
         assuranceForm.date_expertise.value = toInputDate(a.date_expertise);
-        assuranceForm.decision.value = a.decision || 'en_attente';
+        
+        // Decision is editable in edit mode
+        if (assuranceDecisionSelect) {
+            assuranceDecisionSelect.value = a.decision || 'en_attente';
+            assuranceDecisionSelect.disabled = false;
+        }
+        if (assuranceDecisionHelp) assuranceDecisionHelp.style.display = 'none';
+        
         assuranceForm.montant_pris_en_charge.value = a.montant_pris_en_charge || '';
         assuranceForm.franchise.value = a.franchise || '';
         assuranceForm.date_validation.value = toInputDate(a.date_validation);
-        assuranceForm.statut_assurance.value = a.statut_assurance || 'en_cours';
+        
+        // Status is auto-updated based on decision
+        if (assuranceStatutSelect) assuranceStatutSelect.value = a.statut_assurance || 'en_cours';
+        if (assuranceStatutHidden) assuranceStatutHidden.value = a.statut_assurance || 'en_cours';
     } else {
-        assuranceFormTitle.textContent = 'Déclaration assurance';
-        assuranceForm.decision.value = 'en_attente';
-        assuranceForm.statut_assurance.value = 'en_cours';
+        // Create mode
+        assuranceFormTitle.textContent = 'Déclarer Assurance';
+        
+        // Enable sinistre selection
+        if (assuranceSinistreSelectModal) {
+            assuranceSinistreSelectModal.disabled = false;
+            if (sinistreId) {
+                assuranceSinistreSelectModal.value = sinistreId;
+            }
+        }
+        if (assuranceSinistreInput) assuranceSinistreInput.value = sinistreId || '';
+        
+        // Auto-generate numero dossier
+        if (assuranceNumeroDossier) assuranceNumeroDossier.value = generateNumeroDossier();
+        
+        // Auto-fill date déclaration with today's date
+        if (assuranceForm.date_declaration) {
+            assuranceForm.date_declaration.value = toInputDate(new Date());
+        }
+        
+        // Decision defaults to "En attente" but is editable
+        if (assuranceDecisionSelect) {
+            assuranceDecisionSelect.value = 'en_attente';
+            assuranceDecisionSelect.disabled = false;
+        }
+        if (assuranceDecisionHelp) assuranceDecisionHelp.style.display = '';
+        
+        // Status is locked to "En cours" at creation
+        if (assuranceStatutSelect) assuranceStatutSelect.value = 'en_cours';
+        if (assuranceStatutHidden) assuranceStatutHidden.value = 'en_cours';
     }
 
     assuranceModal.classList.remove('hidden');
@@ -585,6 +697,32 @@ function openReparationModal(mode = 'create', sinistreId = '', reparation = null
     if (sinistreId) {
         reparationSinistreSelectModal.value = sinistreId;
     }
+    
+    // RÈGLE: En mode création, vérifier que l'assurance a une décision (acceptée ou refusée)
+    if (mode === 'create' && sinistreId) {
+        const sinistre = state.sinistres.find(s => Number(s.id) === Number(sinistreId));
+        if (sinistre && sinistre.assurance && sinistre.assurance.decision === 'en_attente') {
+            showToast('Veuillez attendre la décision de l\'assurance avant de créer une réparation.', 'warning', { title: 'Action impossible' });
+            return;
+        }
+    }
+    
+    // Function to determine prise en charge based on sinistre's assurance decision
+    const determinePriseEnCharge = (sId) => {
+        const sinistre = state.sinistres.find(s => Number(s.id) === Number(sId));
+        if (!sinistre) return 'societe';
+        
+        const assurance = sinistre.assurance;
+        // If no assurance, or assurance is refused -> societe
+        if (!assurance || assurance.decision === 'refuse') {
+            return 'societe';
+        }
+        // If assurance is accepted -> assurance
+        if (assurance.decision === 'accepte') {
+            return 'assurance';
+        }
+        return 'societe';
+    };
 
     if (mode === 'edit' && reparation) {
         reparationFormTitle.textContent = 'Mettre à jour la réparation';
@@ -594,13 +732,49 @@ function openReparationModal(mode = 'create', sinistreId = '', reparation = null
         reparationForm.date_fin_prevue.value = toInputDate(reparation.date_fin_prevue);
         reparationForm.date_fin_reelle.value = toInputDate(reparation.date_fin_reelle);
         reparationForm.cout_reparation.value = reparation.cout_reparation || '';
-        reparationForm.prise_en_charge.value = reparation.prise_en_charge || 'societe';
-        reparationForm.statut_reparation.value = reparation.statut_reparation || 'en_attente';
         reparationForm.facture_reference.value = reparation.facture_reference || '';
+        
+        // In edit mode, fields are editable
+        if (reparationPriseEnChargeSelect) {
+            reparationPriseEnChargeSelect.value = reparation.prise_en_charge || 'societe';
+            reparationPriseEnChargeSelect.disabled = false;
+            reparationPriseEnChargeSelect.name = 'prise_en_charge';
+        }
+        if (reparationPriseEnChargeHidden) reparationPriseEnChargeHidden.disabled = true;
+        if (reparationPriseEnChargeHelp) reparationPriseEnChargeHelp.style.display = 'none';
+        
+        if (reparationStatutSelect) {
+            reparationStatutSelect.value = reparation.statut_reparation || 'en_cours';
+            reparationStatutSelect.disabled = false;
+            reparationStatutSelect.name = 'statut_reparation';
+        }
+        if (reparationStatutHidden) reparationStatutHidden.disabled = true;
+        if (reparationStatutHelp) reparationStatutHelp.style.display = 'none';
     } else {
         reparationFormTitle.textContent = 'Ajouter une réparation';
-        reparationForm.prise_en_charge.value = 'societe';
-        reparationForm.statut_reparation.value = 'en_attente';
+        
+        // Status defaults to "En cours" but is editable
+        if (reparationStatutSelect) {
+            reparationStatutSelect.value = 'en_cours';
+            reparationStatutSelect.disabled = false;
+            reparationStatutSelect.name = 'statut_reparation';
+        }
+        if (reparationStatutHidden) {
+            reparationStatutHidden.disabled = true;
+        }
+        if (reparationStatutHelp) reparationStatutHelp.style.display = '';
+        
+        // Prise en charge defaults based on assurance status but is editable
+        const priseEnCharge = determinePriseEnCharge(sinistreId);
+        if (reparationPriseEnChargeSelect) {
+            reparationPriseEnChargeSelect.value = priseEnCharge;
+            reparationPriseEnChargeSelect.disabled = false;
+            reparationPriseEnChargeSelect.name = 'prise_en_charge';
+        }
+        if (reparationPriseEnChargeHidden) {
+            reparationPriseEnChargeHidden.disabled = true;
+        }
+        if (reparationPriseEnChargeHelp) reparationPriseEnChargeHelp.style.display = '';
     }
 
     reparationModal.classList.remove('hidden');
@@ -663,9 +837,11 @@ export function initializeSinistreEvents() {
     sinistreTableBody?.addEventListener('click', async (e) => {
         const row = e.target.closest('tr[data-sinistre-id]');
         if (!row) return;
+        const btn = e.target.closest('button');
+        if (btn && (btn.disabled || btn.classList.contains('disabled'))) return;
         const id = row.dataset.sinistreId;
         const sinistre = state.sinistres.find(s => Number(s.id) === Number(id));
-        const action = e.target.dataset.action || e.target.closest('button')?.dataset?.action;
+        const action = e.target.dataset.action || btn?.dataset?.action;
 
         if (action === 'view') {
             e.stopPropagation();
@@ -676,19 +852,54 @@ export function initializeSinistreEvents() {
         }
         if (action === 'edit') {
             e.stopPropagation();
+            // Prevent editing closed sinistres
+            if (sinistre.statut_sinistre === 'clos') {
+                showToast('Ce sinistre est clôturé et ne peut plus être modifié.', 'warning', { title: 'Modification impossible' });
+                return;
+            }
             openSinistreModal('edit', sinistre);
             return;
         }
+        
+        if (action === 'delete') {
+            e.stopPropagation();
+            const hasRelated = sinistre.assurance || (sinistre.reparations && sinistre.reparations.length > 0);
+            const confirmed = await showConfirm({
+                title: 'Supprimer le sinistre ?',
+                message: hasRelated 
+                    ? `Êtes-vous sûr de vouloir supprimer le sinistre <strong>${sinistre.numero_sinistre || ''}</strong> ? Cela supprimera également l'assurance et les réparations associées.`
+                    : `Êtes-vous sûr de vouloir supprimer le sinistre <strong>${sinistre.numero_sinistre || ''}</strong> ?`,
+                confirmText: 'Supprimer',
+                cancelText: 'Annuler',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+            try {
+                await axios.delete(`/api/sinistres/${id}`);
+                await loadSinistres();
+                showToast(`Le sinistre ${sinistre.numero_sinistre || ''} a été supprimé avec succès.`, 'success', { title: 'Sinistre supprimé' });
+            } catch (err) {
+                showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
+            }
+            return;
+        }
+
         if (action === 'close') {
             e.stopPropagation();
-            const confirmed = window.confirm('Clôturer ce sinistre ?');
+            const confirmed = await showConfirm({
+                title: 'Clôturer le sinistre ?',
+                message: `Confirmez-vous la clôture du sinistre <strong>${sinistre.numero_sinistre || ''}</strong> ?`,
+                confirmText: 'Clôturer',
+                cancelText: 'Annuler',
+                type: 'info'
+            });
             if (!confirmed) return;
             try {
                 await axios.put(`/api/sinistres/${id}`, { statut_sinistre: 'clos' });
                 await loadSinistres();
-                showToast('Sinistre clôturé.');
+                showToast('Sinistre clôturé avec succès.', 'success', { title: 'Clôture effectuée' });
             } catch (err) {
-                showToast(extractErrorMessage(err), 'error');
+                showToast(extractErrorMessage(err), 'error', { title: 'Échec de la clôture' });
             }
             return;
         }
@@ -724,11 +935,13 @@ export function initializeSinistreEvents() {
             } else {
                 await axios.post('/api/sinistres', payload);
             }
-            closeSinistreModal();
             await loadSinistres();
-            showToast('Sinistre enregistré.');
+            const action = state.sinistreEditingId ? 'mis à jour' : 'créé';
+            showToast(`Le sinistre a été ${action} avec succès.`, 'success', { title: state.sinistreEditingId ? 'Sinistre modifié' : 'Sinistre créé' });
         } catch (err) {
-            showToast(extractErrorMessage(err), 'error');
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
+        } finally {
+            closeSinistreModal();
         }
     });
 
@@ -739,18 +952,40 @@ export function initializeSinistreEvents() {
         if (e.target.dataset.close === 'sinistre-modal') closeSinistreModal();
     });
 
-    assuranceTableBody?.addEventListener('click', (e) => {
+    assuranceTableBody?.addEventListener('click', async (e) => {
         const btn = e.target.closest('[data-assurance-action]');
         if (!btn) return;
         const row = btn.closest('tr[data-sinistre-id]');
         const sinistreId = row?.dataset.sinistreId;
+        const assuranceId = row?.dataset.assuranceId;
         const sinistre = state.sinistres.find(s => Number(s.id) === Number(sinistreId));
         
         if (btn.dataset.assuranceAction === 'view') {
             renderAssuranceDetail(sinistre);
             return;
         }
-        openAssuranceModal(row?.dataset.sinistreId || '');
+        if (btn.dataset.assuranceAction === 'edit') {
+            openAssuranceModal(sinistreId, true);
+            return;
+        }
+        if (btn.dataset.assuranceAction === 'delete') {
+            const confirmed = await showConfirm({
+                title: 'Supprimer l\'assurance ?',
+                message: 'Êtes-vous sûr de vouloir supprimer cette déclaration d\'assurance ? Cette action est irréversible.',
+                confirmText: 'Supprimer',
+                cancelText: 'Annuler',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+            try {
+                await axios.delete(`/api/assurance-sinistres/${assuranceId}`);
+                await loadSinistres();
+                showToast('La déclaration d\'assurance a été supprimée avec succès.', 'success', { title: 'Assurance supprimée' });
+            } catch (err) {
+                showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
+            }
+            return;
+        }
     });
     
     // Assurance detail modal close
@@ -763,30 +998,56 @@ export function initializeSinistreEvents() {
     });
 
     openAssuranceModalBtn?.addEventListener('click', () => {
-        const selected = assuranceSinistreSelect?.value || '';
-        openAssuranceModal(selected);
+        openAssuranceModal('', false);
     });
     closeAssuranceModalBtn?.addEventListener('click', closeAssuranceModal);
     document.getElementById('cancel-assurance-form')?.addEventListener('click', closeAssuranceModal);
     assuranceModal?.addEventListener('click', (e) => {
         if (e.target.dataset.close === 'assurance-modal') closeAssuranceModal();
     });
+    
+    // Sync assurance sinistre select with hidden input
+    assuranceSinistreSelectModal?.addEventListener('change', function() {
+        if (assuranceSinistreInput) assuranceSinistreInput.value = this.value;
+    });
 
     assuranceForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
-        const payload = Object.fromEntries(new FormData(assuranceForm).entries());
+        const formData = new FormData(assuranceForm);
+        const payload = {};
+        
+        // Get sinistre_id from the modal select or hidden input
+        const sinistreIdFromSelect = assuranceSinistreSelectModal?.value;
+        const sinistreIdFromHidden = assuranceSinistreInput?.value;
+        payload.sinistre_id = sinistreIdFromSelect || sinistreIdFromHidden;
+        
+        // Add other form fields
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'sinistre_id' && key !== 'sinistre_id_select') {
+                payload[key] = value;
+            }
+        }
+        
+        // For new assurances, don't send decision and statut (they are auto-set by backend)
+        if (!state.assuranceEditingId) {
+            delete payload.decision;
+            delete payload.statut_assurance;
+        }
+        
         try {
             if (state.assuranceEditingId) {
                 await axios.put(`/api/assurance-sinistres/${state.assuranceEditingId}`, payload);
             } else {
                 await axios.post('/api/assurance-sinistres', payload);
             }
-            closeAssuranceModal();
             await loadSinistres();
-            showToast('Dossier assurance enregistré.');
+            const action = state.assuranceEditingId ? 'mis à jour' : 'créé';
+            showToast(`Le dossier assurance a été ${action} avec succès.`, 'success', { title: state.assuranceEditingId ? 'Assurance modifiée' : 'Assurance créée' });
         } catch (err) {
-            showToast(extractErrorMessage(err), 'error');
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
+        } finally {
+            closeAssuranceModal();
         }
     });
 
@@ -808,14 +1069,20 @@ export function initializeSinistreEvents() {
             return;
         }
         if (btn.dataset.reparationAction === 'delete') {
-            const confirmed = window.confirm('Supprimer cette réparation ?');
+            const confirmed = await showConfirm({
+                title: 'Supprimer la réparation ?',
+                message: 'Êtes-vous sûr de vouloir supprimer cette réparation ? Cette action est irréversible.',
+                confirmText: 'Supprimer',
+                cancelText: 'Annuler',
+                type: 'danger'
+            });
             if (!confirmed) return;
             try {
                 await axios.delete(`/api/reparation-sinistres/${reparationId}`);
                 await loadSinistres();
-                showToast('Réparation supprimée.');
+                showToast('La réparation a été supprimée avec succès.', 'success', { title: 'Réparation supprimée' });
             } catch (err) {
-                showToast(extractErrorMessage(err), 'error');
+                showToast(extractErrorMessage(err), 'error', { title: 'Échec de la suppression' });
             }
         }
     });
@@ -842,22 +1109,64 @@ export function initializeSinistreEvents() {
     reparationForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         ensureAuth();
-        const payload = Object.fromEntries(new FormData(reparationForm).entries());
+        const formData = new FormData(reparationForm);
+        const payload = {};
+        
+        // Build payload, excluding display-only fields
+        for (const [key, value] of formData.entries()) {
+            if (!key.endsWith('_display')) {
+                payload[key] = value;
+            }
+        }
+        
+        // For new reparations, ensure statut and prise_en_charge come from hidden inputs
+        if (!state.reparationEditingId) {
+            if (reparationStatutHidden && !reparationStatutHidden.disabled) {
+                payload.statut_reparation = reparationStatutHidden.value;
+            }
+            if (reparationPriseEnChargeHidden && !reparationPriseEnChargeHidden.disabled) {
+                payload.prise_en_charge = reparationPriseEnChargeHidden.value;
+            }
+        }
+        
         try {
             if (state.reparationEditingId) {
                 await axios.put(`/api/reparation-sinistres/${state.reparationEditingId}`, payload);
             } else {
                 await axios.post('/api/reparation-sinistres', payload);
             }
-            closeReparationModal();
             await loadSinistres();
-            showToast('Réparation enregistrée.');
+            const action = state.reparationEditingId ? 'mise à jour' : 'créée';
+            showToast(`La réparation a été ${action} avec succès.`, 'success', { title: state.reparationEditingId ? 'Réparation modifiée' : 'Réparation créée' });
         } catch (err) {
-            showToast(extractErrorMessage(err), 'error');
+            showToast(extractErrorMessage(err), 'error', { title: 'Échec de l\'enregistrement' });
+        } finally {
+            closeReparationModal();
         }
     });
 
     reparationSinistreSelect?.addEventListener('change', renderReparationRows);
+    
+    // Update prise en charge when sinistre changes in reparation modal (for create mode)
+    reparationSinistreSelectModal?.addEventListener('change', function() {
+        // Only update if we're in create mode (no editing id)
+        if (!state.reparationEditingId) {
+            const sId = this.value;
+            const sinistre = state.sinistres.find(s => Number(s.id) === Number(sId));
+            let priseEnCharge = 'societe';
+            
+            if (sinistre) {
+                const assurance = sinistre.assurance;
+                // If no assurance, or assurance is refused, or assurance is en_cours -> societe
+                if (assurance && assurance.statut_assurance === 'valide') {
+                    priseEnCharge = 'assurance';
+                }
+            }
+            
+            if (reparationPriseEnChargeSelect) reparationPriseEnChargeSelect.value = priseEnCharge;
+            if (reparationPriseEnChargeHidden) reparationPriseEnChargeHidden.value = priseEnCharge;
+        }
+    });
 
     refreshStatsBtn?.addEventListener('click', () => {
         loadSinistreStats({

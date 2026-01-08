@@ -59,6 +59,7 @@ class SinistreController extends Controller
     public function update(Request $request, Sinistre $sinistre)
     {
         $data = $this->validateData($request, $sinistre->id, true);
+        
         $sinistre->update($data);
 
         return $sinistre->load(['vehicule', 'chauffeur', 'assurance', 'reparations']);
@@ -66,6 +67,15 @@ class SinistreController extends Controller
 
     public function destroy(Sinistre $sinistre)
     {
+        // Delete associated assurance if exists
+        if ($sinistre->assurance) {
+            $sinistre->assurance->delete();
+        }
+        
+        // Delete associated reparations
+        $sinistre->reparations()->delete();
+        
+        // Delete the sinistre
         $sinistre->delete();
 
         return response()->noContent();
@@ -156,7 +166,8 @@ class SinistreController extends Controller
             'vehicule_id' => [$isUpdate ? 'sometimes' : 'required', 'exists:vehicules,id'],
             'chauffeur_id' => ['nullable', 'exists:chauffeurs,id'],
             'date_sinistre' => [$isUpdate ? 'sometimes' : 'required', 'date'],
-            'heure_sinistre' => ['nullable', 'date_format:H:i'],
+            // Accept HH:MM or HH:MM:SS to avoid 422 on seconds
+            'heure_sinistre' => ['nullable', 'regex:/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/'],
             'lieu_sinistre' => ['nullable', 'string', 'max:255'],
             'type_sinistre' => [$isUpdate ? 'sometimes' : 'required', Rule::in(self::TYPES)],
             'description' => ['nullable', 'string'],
