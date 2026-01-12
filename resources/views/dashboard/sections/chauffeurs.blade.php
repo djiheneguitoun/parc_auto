@@ -20,9 +20,32 @@
     <div class="card table-card">
         <div class="section-subheader">
             <h3>Liste des chauffeurs</h3>
-            <span class="stat-badge" id="chauffeurs-count">
-                <span class="count">0</span> chauffeurs
-            </span>
+            <div class="subheader-actions">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+                    <input id="chauffeur-search" type="search" placeholder="Matricule ou nom">
+                </div>
+                <div class="filters">
+                    <select id="chauffeur-statut-filter">
+                        <option value="all">Tous statuts</option>
+                        <option value="contractuel">Contractuel</option>
+                        <option value="permanent">Permanent</option>
+                    </select>
+                    <select id="chauffeur-comportement-filter">
+                        <option value="all">Tous comportements</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="tres_bon">Très bon</option>
+                        <option value="satisfaisant">Satisfaisant</option>
+                        <option value="a_ameliorer">À améliorer</option>
+                        <option value="insuffisant">Insuffisant</option>
+                        <option value="non_conforme">Non conforme</option>
+                        <option value="a_risque">À risque</option>
+                    </select>
+                </div>
+                <span class="stat-badge" id="chauffeurs-count">
+                    <span class="count">0</span> chauffeurs
+                </span>
+            </div>
         </div>
         <div class="table-wrapper">
             <table>

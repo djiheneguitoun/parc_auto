@@ -29,6 +29,9 @@ export const chauffeurDetailModal = document.getElementById('chauffeur-detail-mo
 export const openChauffeurModalBtn = document.getElementById('open-chauffeur-modal');
 export const closeChauffeurModalBtn = document.getElementById('close-chauffeur-modal');
 export const closeChauffeurDetailModalBtn = document.getElementById('close-chauffeur-detail-modal');
+export const chauffeurSearchInput = document.getElementById('chauffeur-search');
+export const chauffeurStatutFilter = document.getElementById('chauffeur-statut-filter');
+export const chauffeurComportementFilter = document.getElementById('chauffeur-comportement-filter');
 
 export function setChauffeurFormMode(mode, chauffeur = null) {
     if (mode === 'edit' && chauffeur) {
@@ -68,8 +71,23 @@ export function closeChauffeurModal() {
     setChauffeurFormMode('create');
 }
 
+function filteredChauffeurs() {
+    const search = (state.chauffeurSearch || '').trim().toLowerCase();
+    const statut = state.chauffeurStatutFilter || 'all';
+    const comportement = state.chauffeurComportementFilter || 'all';
+    return state.chauffeurs.filter(ch => {
+        const matchesSearch = !search || [ch.matricule, ch.nom, ch.prenom]
+            .filter(Boolean)
+            .some(value => String(value).toLowerCase().includes(search));
+        const matchesStatut = statut === 'all' || ch.statut === statut;
+        const matchesComportement = comportement === 'all' || ch.comportement === comportement;
+        return matchesSearch && matchesStatut && matchesComportement;
+    });
+}
+
 export function renderChauffeurRows() {
-    const rows = state.chauffeurs.map(ch => `
+    const chauffeursToRender = filteredChauffeurs();
+    const rows = chauffeursToRender.map(ch => `
         <tr data-id="${ch.id}">
             <td><span class="matricule-badge">${ch.matricule}</span></td>
             <td>
@@ -117,7 +135,7 @@ export function renderChauffeurRows() {
     // Update count display
     const countEl = document.querySelector('#chauffeurs-count .count');
     if (countEl) {
-        countEl.textContent = state.chauffeurs.length;
+        countEl.textContent = chauffeursToRender.length;
     }
 }
 
@@ -307,4 +325,25 @@ export function initializeChauffeurEvents() {
             closeChauffeurModal();
         }
     });
+
+    if (chauffeurSearchInput) {
+        chauffeurSearchInput.addEventListener('input', (e) => {
+            state.chauffeurSearch = e.target.value;
+            renderChauffeurRows();
+        });
+    }
+
+    if (chauffeurStatutFilter) {
+        chauffeurStatutFilter.addEventListener('change', (e) => {
+            state.chauffeurStatutFilter = e.target.value || 'all';
+            renderChauffeurRows();
+        });
+    }
+
+    if (chauffeurComportementFilter) {
+        chauffeurComportementFilter.addEventListener('change', (e) => {
+            state.chauffeurComportementFilter = e.target.value || 'all';
+            renderChauffeurRows();
+        });
+    }
 }
