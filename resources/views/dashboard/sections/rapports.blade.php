@@ -45,7 +45,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <div class="report-content">
-                <h3>Charges véhicules</h3>
+                <h3>Liste des charges</h3>
                 <p>Filtrer par véhicule et type de charge (assurance, vignettes, contrôles, entretiens, réparations, bons d'essence).</p>
             </div>
             <button class="btn primary" data-report-modal="modal-charges-report" type="button">
@@ -59,7 +59,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <div class="report-content">
-                <h3>Factures véhicule</h3>
+                <h3>Liste des factures</h3>
                 <p>Filtrer par véhicule et période (date facture).</p>
             </div>
             <button class="btn primary" data-report-modal="modal-factures-report" type="button">
@@ -179,7 +179,7 @@
                 </button>
             </div>
             <form id="chauffeurs-report-form" autocomplete="off">
-                <div class="form-grid cols-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Statut</label>
                         <select name="statut">
@@ -218,14 +218,14 @@
             <div class="modal-header">
                 <h3>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    Rapport · Charges véhicules
+                    Rapport · Liste des charges
                 </h3>
                 <button class="close-btn" data-close="modal-charges-report" type="button">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
                 </button>
             </div>
             <form id="charges-report-form" autocomplete="off">
-                <div class="form-grid cols-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Véhicule</label>
                         <select name="vehicule" id="charges-report-vehicule">
@@ -263,14 +263,14 @@
             <div class="modal-header">
                 <h3>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-                    Rapport · Factures véhicule
+                    Rapport · Liste des factures
                 </h3>
                 <button class="close-btn" data-close="modal-factures-report" type="button">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
                 </button>
             </div>
             <form id="factures-report-form" autocomplete="off">
-                <div class="form-grid cols-3">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Véhicule</label>
                         <select name="vehicule" id="factures-report-vehicule">

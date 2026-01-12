@@ -319,6 +319,19 @@
     margin-bottom: 14px !important;
 }
 
+/* Stack filters vertically for all reports except véhicules */
+#modal-chauffeurs-report .form-grid,
+#modal-charges-report .form-grid,
+#modal-factures-report .form-grid,
+#modal-chauffeurs-report .form-grid.cols-2,
+#modal-charges-report .form-grid.cols-2,
+#modal-factures-report .form-grid.cols-2,
+#modal-chauffeurs-report .form-grid.cols-3,
+#modal-charges-report .form-grid.cols-3,
+#modal-factures-report .form-grid.cols-3 {
+    grid-template-columns: 1fr !important;
+}
+
 #modal-vehicules-report .form-grid.cols-2,
 #modal-chauffeurs-report .form-grid.cols-2,
 #modal-charges-report .form-grid.cols-2,
