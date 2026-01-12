@@ -27,22 +27,20 @@
         <div class="table-wrapper">
             <table>
                 <colgroup>
-                    <col style="width: 10%">
                     <col style="width: 12%">
-                    <col style="width: 18%">
+                    <col style="width: 14%">
+                    <col style="width: 20%">
+                    <col style="width: 16%">
                     <col style="width: 14%">
                     <col style="width: 12%">
-                    <col style="width: 12%">
-                    <col style="width: 10%">
                     <col style="width: 12%">
                 </colgroup>
                 <thead>
                     <tr>
                         <th>Code</th>
-                        <th>Numéro</th>
+                        <th>Matricule</th>
                         <th>Marque / Modèle</th>
                         <th>Chauffeur</th>
-                        <th>État</th>
                         <th>Statut</th>
                         <th>Catégorie</th>
                         <th>Actions</th>
@@ -80,7 +78,7 @@
                 </div>
                 <div class="detail-grid">
                     <div class="detail-item"><label>Code</label><span id="detail-code">-</span></div>
-                    <div class="detail-item"><label>Numéro</label><span id="detail-numero">-</span></div>
+                    <div class="detail-item"><label>Matricule</label><span id="detail-numero">-</span></div>
                     <div class="detail-item"><label>Marque / Modèle</label><span id="detail-modele">-</span></div>
                     <div class="detail-item"><label>Année</label><span id="detail-annee">-</span></div>
                     <div class="detail-item"><label>Couleur</label><span id="detail-couleur">-</span></div>
@@ -138,7 +136,7 @@
             </div>
             <form id="vehicule-form">
                 <div class="form-grid">
-                    <div class="form-group"><label>Numéro *</label><input name="numero" required placeholder="ABC-123"></div>
+                    <div class="form-group"><label>Matricule *</label><input name="numero" required placeholder="ABC-123"></div>
                     <div class="form-group"><label>Code *</label><input name="code" required placeholder="VH-001"></div>
                     <div class="form-group"><label>Marque</label><input name="marque" placeholder="Toyota"></div>
                     <div class="form-group"><label>Modèle</label><input name="modele" placeholder="Corolla"></div>

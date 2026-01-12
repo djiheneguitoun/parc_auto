@@ -208,7 +208,6 @@ export function renderVehiculeRows() {
                 </div>
             </td>
             <td><span class="chauffeur-cell ${v.chauffeur ? '' : 'empty'}">${v.chauffeur ? `${v.chauffeur.nom || ''} ${v.chauffeur.prenom || ''}`.trim() : 'Non affecté'}</span></td>
-            <td><span class="badge ${v.etat_fonctionnel || 'default'}">${formatEtatFonctionnel(v.etat_fonctionnel)}</span></td>
             <td><span class="badge ${v.statut || 'default'}">${formatVehiculeStatut(v.statut)}</span></td>
             <td>${formatCategorie(v.categorie)}</td>
             <td class="row-actions">
