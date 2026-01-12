@@ -29,7 +29,7 @@ class ReportController extends Controller
         'a_risque' => 'À risque',
     ];
 
-    public function exportVehicules(Request $request)
+    private function getVehiculesQuery(Request $request)
     {
         $query = Vehicule::with('chauffeur');
 
@@ -64,7 +64,12 @@ class ReportController extends Controller
             $query->whereDate('date_acquisition', '<=', $end);
         }
 
-        $vehicules = $query->orderBy('marque')->orderBy('modele')->get();
+        return $query->orderBy('marque')->orderBy('modele')->get();
+    }
+
+    public function exportVehicules(Request $request)
+    {
+        $vehicules = $this->getVehiculesQuery($request);
 
         $mpdf = new Mpdf(['format' => 'A4-L']);
         $mpdf->SetTitle('Rapport des véhicules');
@@ -78,7 +83,14 @@ class ReportController extends Controller
         ]);
     }
 
-    public function exportChauffeurs(Request $request)
+    public function previewVehicules(Request $request)
+    {
+        $vehicules = $this->getVehiculesQuery($request);
+        $html = $this->buildHtml($vehicules, $request, true);
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    private function getChauffeursQuery(Request $request)
     {
         $query = Chauffeur::query();
         if ($request->filled('statut')) {
@@ -88,7 +100,12 @@ class ReportController extends Controller
             $query->where('mention', $request->input('mention'));
         }
 
-        $chauffeurs = $query->orderBy('nom')->orderBy('prenom')->get();
+        return $query->orderBy('nom')->orderBy('prenom')->get();
+    }
+
+    public function exportChauffeurs(Request $request)
+    {
+        $chauffeurs = $this->getChauffeursQuery($request);
 
         $mpdf = new Mpdf(['format' => 'A4']);
         $mpdf->SetTitle('Rapport des chauffeurs');
@@ -101,7 +118,14 @@ class ReportController extends Controller
         ]);
     }
 
-    public function exportCharges(Request $request)
+    public function previewChauffeurs(Request $request)
+    {
+        $chauffeurs = $this->getChauffeursQuery($request);
+        $html = $this->buildChauffeursHtml($chauffeurs, $request, true);
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    private function getChargesQuery(Request $request)
     {
         $query = VehiculeDocument::with('vehicule');
 
@@ -118,7 +142,12 @@ class ReportController extends Controller
             $query->where('type', $request->input('type'));
         }
 
-        $charges = $query->orderBy('type')->orderByDesc('created_at')->get();
+        return $query->orderBy('type')->orderByDesc('created_at')->get();
+    }
+
+    public function exportCharges(Request $request)
+    {
+        $charges = $this->getChargesQuery($request);
 
         $mpdf = new Mpdf(['format' => 'A4-L']);
         $mpdf->SetTitle('Rapport des charges véhicules');
@@ -131,7 +160,14 @@ class ReportController extends Controller
         ]);
     }
 
-    public function exportFactures(Request $request)
+    public function previewCharges(Request $request)
+    {
+        $charges = $this->getChargesQuery($request);
+        $html = $this->buildChargesHtml($charges, $request, true);
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    private function getFacturesQuery(Request $request)
     {
         $query = VehiculeDocument::with('vehicule');
 
@@ -151,7 +187,12 @@ class ReportController extends Controller
             $query->whereDate('date_facture', '<=', $request->input('end'));
         }
 
-        $factures = $query->whereNotNull('date_facture')->orderBy('date_facture', 'desc')->get();
+        return $query->whereNotNull('date_facture')->orderBy('date_facture', 'desc')->get();
+    }
+
+    public function exportFactures(Request $request)
+    {
+        $factures = $this->getFacturesQuery($request);
 
         $mpdf = new Mpdf(['format' => 'A4']);
         $mpdf->SetTitle('Rapport des factures véhicule');
@@ -164,7 +205,14 @@ class ReportController extends Controller
         ]);
     }
 
-    private function buildHtml($vehicules, Request $request)
+    public function previewFactures(Request $request)
+    {
+        $factures = $this->getFacturesQuery($request);
+        $html = $this->buildFacturesHtml($factures, $request, true);
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    private function buildHtml($vehicules, Request $request, bool $isPreview = false)
     {
         $date = now()->format('d/m/Y H:i');
         $filters = $this->formatFilters($request);
@@ -202,6 +250,13 @@ class ReportController extends Controller
 
         $filtersHtml = $filters ? '<div class="filters">Filtres : ' . e($filters) . '</div>' : '';
 
+        $previewStyles = $isPreview ? '
+        body { padding: 20px; max-width: 100%; margin: 0 auto; }
+        @media print {
+            body { padding: 0; }
+        }
+        ' : '';
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="fr">
@@ -216,6 +271,7 @@ class ReportController extends Controller
         th, td { border: 1px solid #ddd; padding: 6px 8px; }
         th { background: #f2f4f8; text-align: left; }
         tr:nth-child(even) { background: #fafbfc; }
+        {$previewStyles}
     </style>
 </head>
 <body>
@@ -246,7 +302,7 @@ class ReportController extends Controller
 HTML;
     }
 
-    private function buildChauffeursHtml($chauffeurs, Request $request)
+    private function buildChauffeursHtml($chauffeurs, Request $request, bool $isPreview = false)
     {
         $date = now()->format('d/m/Y H:i');
         $filters = $this->formatFilters($request, [
@@ -279,6 +335,13 @@ HTML;
             $rows = '<tr><td colspan="6" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
         }
 
+        $previewStyles = $isPreview ? '
+        body { padding: 20px; max-width: 100%; margin: 0 auto; }
+        @media print {
+            body { padding: 0; }
+        }
+        ' : '';
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="fr">
@@ -293,6 +356,7 @@ HTML;
         th, td { border: 1px solid #ddd; padding: 6px 8px; }
         th { background: #f2f4f8; text-align: left; }
         tr:nth-child(even) { background: #fafbfc; }
+        {$previewStyles}
     </style>
 </head>
 <body>
@@ -319,7 +383,7 @@ HTML;
 HTML;
     }
 
-    private function buildChargesHtml($charges, Request $request)
+    private function buildChargesHtml($charges, Request $request, bool $isPreview = false)
     {
         $date = now()->format('d/m/Y H:i');
         $filters = $this->formatFilters($request, [
@@ -350,6 +414,13 @@ HTML;
             $rows = '<tr><td colspan="6" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
         }
 
+        $previewStyles = $isPreview ? '
+        body { padding: 20px; max-width: 100%; margin: 0 auto; }
+        @media print {
+            body { padding: 0; }
+        }
+        ' : '';
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="fr">
@@ -364,6 +435,7 @@ HTML;
         th, td { border: 1px solid #ddd; padding: 6px 8px; }
         th { background: #f2f4f8; text-align: left; }
         tr:nth-child(even) { background: #fafbfc; }
+        {$previewStyles}
     </style>
 </head>
 <body>
@@ -390,7 +462,7 @@ HTML;
 HTML;
     }
 
-    private function buildFacturesHtml($factures, Request $request)
+    private function buildFacturesHtml($factures, Request $request, bool $isPreview = false)
     {
         $date = now()->format('d/m/Y H:i');
         $filters = $this->formatFilters($request, [
@@ -420,6 +492,13 @@ HTML;
             $rows = '<tr><td colspan="5" style="text-align:center; padding:12px;">Aucune donnée trouvée pour ces filtres.</td></tr>';
         }
 
+        $previewStyles = $isPreview ? '
+        body { padding: 20px; max-width: 100%; margin: 0 auto; }
+        @media print {
+            body { padding: 0; }
+        }
+        ' : '';
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="fr">
@@ -434,6 +513,7 @@ HTML;
         th, td { border: 1px solid #ddd; padding: 6px 8px; }
         th { background: #f2f4f8; text-align: left; }
         tr:nth-child(even) { background: #fafbfc; }
+        {$previewStyles}
     </style>
 </head>
 <body>

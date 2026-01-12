@@ -156,6 +156,10 @@
                 <div class="form-hint">Seuls les champs renseignés seront utilisés comme filtres.</div>
                 <div class="form-actions">
                     <button class="btn secondary" type="reset">Réinitialiser</button>
+                    <button class="btn outline" id="vehicules-report-preview" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Aperçu
+                    </button>
                     <button class="btn primary" id="vehicules-report-submit" type="submit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
                         Exporter en PDF
@@ -202,6 +206,10 @@
                 </div>
                 <div class="form-actions">
                     <button class="btn secondary" type="reset">Réinitialiser</button>
+                    <button class="btn outline" id="chauffeurs-report-preview" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Aperçu
+                    </button>
                     <button class="btn primary" id="chauffeurs-report-submit" type="submit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
                         Exporter en PDF
@@ -247,6 +255,10 @@
                 </div>
                 <div class="form-actions">
                     <button class="btn secondary" type="reset">Réinitialiser</button>
+                    <button class="btn outline" id="charges-report-preview" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Aperçu
+                    </button>
                     <button class="btn primary" id="charges-report-submit" type="submit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
                         Exporter en PDF
@@ -288,12 +300,49 @@
                 </div>
                 <div class="form-actions">
                     <button class="btn secondary" type="reset">Réinitialiser</button>
+                    <button class="btn outline" id="factures-report-preview" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Aperçu
+                    </button>
                     <button class="btn primary" id="factures-report-submit" type="submit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
                         Exporter en PDF
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: Report Preview -->
+    <div class="modal hidden" id="modal-report-preview">
+        <div class="modal-backdrop" data-close="modal-report-preview"></div>
+        <div class="modal-dialog modal-dialog-preview">
+            <div class="modal-header">
+                <h3>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span id="preview-title">Aperçu du rapport</span>
+                </h3>
+                <div class="modal-header-actions">
+                    <button class="btn outline btn-sm" id="preview-print-btn" type="button" title="Imprimer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Imprimer
+                    </button>
+                    <button class="btn primary btn-sm" id="preview-download-btn" type="button" title="Télécharger PDF">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Télécharger PDF
+                    </button>
+                    <button class="close-btn" data-close="modal-report-preview" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body preview-body">
+                <div class="preview-loading hidden" id="preview-loading">
+                    <div class="spinner"></div>
+                    <span>Chargement de l'aperçu...</span>
+                </div>
+                <iframe id="preview-iframe" class="preview-iframe" title="Aperçu du rapport"></iframe>
+            </div>
         </div>
     </div>
 </section>

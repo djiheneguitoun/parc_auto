@@ -53,7 +53,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('reparation-sinistres', ReparationSinistreController::class)->only(['store', 'show', 'update', 'destroy']);
 
     Route::get('reports/vehicules/export', [ReportController::class, 'exportVehicules']);
+    Route::get('reports/vehicules/preview', [ReportController::class, 'previewVehicules']);
     Route::get('reports/chauffeurs/export', [ReportController::class, 'exportChauffeurs']);
+    Route::get('reports/chauffeurs/preview', [ReportController::class, 'previewChauffeurs']);
     Route::get('reports/charges/export', [ReportController::class, 'exportCharges']);
+    Route::get('reports/charges/preview', [ReportController::class, 'previewCharges']);
     Route::get('reports/factures/export', [ReportController::class, 'exportFactures']);
+    Route::get('reports/factures/preview', [ReportController::class, 'previewFactures']);
 });
