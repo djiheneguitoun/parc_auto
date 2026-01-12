@@ -37,10 +37,6 @@ class AssuranceSinistreController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateData($request);
-        
-        // Use provided values or fall back to defaults
-        $data['statut_assurance'] = $data['statut_assurance'] ?? 'en_cours';
-        $data['decision'] = $data['decision'] ?? 'en_attente';
         $data['numero_dossier'] = $this->generateNumeroDossier(); // Auto-generate dossier number
 
         $assurance = AssuranceSinistre::create($data);
@@ -102,11 +98,11 @@ class AssuranceSinistreController extends Controller
             'date_declaration' => ['nullable', 'date'],
             'expert_nom' => ['nullable', 'string', 'max:255'],
             'date_expertise' => ['nullable', 'date'],
-            'decision' => [$isUpdate ? 'sometimes' : 'nullable', Rule::in(self::DECISIONS)],
+            'decision' => [$isUpdate ? 'sometimes' : 'nullable', 'string', 'max:255'],
             'montant_pris_en_charge' => ['nullable', 'numeric', 'min:0'],
             'franchise' => ['nullable', 'numeric', 'min:0'],
             'date_validation' => ['nullable', 'date'],
-            'statut_assurance' => [$isUpdate ? 'sometimes' : 'nullable', Rule::in(self::STATUTS)],
+            'statut_assurance' => [$isUpdate ? 'sometimes' : 'nullable', 'string', 'max:255'],
         ];
 
         return $request->validate($rules);

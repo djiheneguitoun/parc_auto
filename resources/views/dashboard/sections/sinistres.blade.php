@@ -583,13 +583,11 @@
                 </div>
                 <div class="form-group">
                     <label>Statut</label>
-                    <input type="hidden" name="statut_assurance" id="assurance-statut-hidden" value="en_cours">
-                    <select id="assurance-statut-select" disabled>
+                    <select name="statut_assurance" id="assurance-statut-select">
                         <option value="en_cours">En cours</option>
                         <option value="valide">Validé</option>
                         <option value="refuse">Refusé</option>
                     </select>
-                    <p class="muted-small">Mis à jour automatiquement selon la décision.</p>
                 </div>
             </div>
             <div class="form-actions">

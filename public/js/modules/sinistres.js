@@ -69,7 +69,6 @@ const assuranceSinistreSelectModal = document.getElementById('assurance-sinistre
 const assuranceNumeroDossier = document.getElementById('assurance-numero-dossier');
 const assuranceDecisionSelect = document.getElementById('assurance-decision-select');
 const assuranceDecisionHelp = document.getElementById('assurance-decision-help');
-const assuranceStatutHidden = document.getElementById('assurance-statut-hidden');
 const assuranceStatutSelect = document.getElementById('assurance-statut-select');
 
 const reparationSinistreSelect = document.getElementById('reparation-sinistre-select');
@@ -1154,7 +1153,6 @@ function openAssuranceModal(sinistreId = '', isEdit = false) {
         
         // Status is auto-updated based on decision
         if (assuranceStatutSelect) assuranceStatutSelect.value = a.statut_assurance || 'en_cours';
-        if (assuranceStatutHidden) assuranceStatutHidden.value = a.statut_assurance || 'en_cours';
     } else {
         // Create mode
         assuranceFormTitle.textContent = 'Déclarer Assurance';
@@ -1183,9 +1181,8 @@ function openAssuranceModal(sinistreId = '', isEdit = false) {
         }
         if (assuranceDecisionHelp) assuranceDecisionHelp.style.display = '';
         
-        // Status is locked to "En cours" at creation
+        // Status defaults to "En cours" but is editable
         if (assuranceStatutSelect) assuranceStatutSelect.value = 'en_cours';
-        if (assuranceStatutHidden) assuranceStatutHidden.value = 'en_cours';
     }
 
     assuranceModal.classList.remove('hidden');
@@ -1538,11 +1535,7 @@ export function initializeSinistreEvents() {
             }
         }
         
-        // For new assurances, don't send decision and statut (they are auto-set by backend)
-        if (!state.assuranceEditingId) {
-            delete payload.decision;
-            delete payload.statut_assurance;
-        }
+        // Keep decision and statut_assurance - they are sent as provided
         
         try {
             if (state.assuranceEditingId) {
