@@ -206,6 +206,9 @@ class InterventionController extends Controller
         
         $intervention = InterventionVehicule::create($data);
 
+        // Met à jour ou crée le suivi périodique si applicable
+        $this->syncSuivi($intervention);
+
         return response()->json($intervention->load(['vehicule', 'operation.type', 'operation.categorie']), 201);
     }
 
@@ -222,9 +225,13 @@ class InterventionController extends Controller
      */
     public function update(Request $request, InterventionVehicule $intervention)
     {
+        $original = $intervention->only(['vehicule_id', 'operation_id']);
         $data = $this->validateData($request, $intervention->id);
         
         $intervention->update($data);
+
+        // Recalcule le suivi périodique (et nettoie l'ancien en cas de changement d'opération/véhicule)
+        $this->syncSuivi($intervention, $original);
 
         return $intervention->load(['vehicule', 'operation.type', 'operation.categorie']);
     }
@@ -265,9 +272,7 @@ class InterventionController extends Controller
         return $query->orderBy('prochaine_echeance_date')->get();
     }
 
-    /**
-     * Alertes à venir (échéances proches ou dépassées)
-     */
+   
     public function alertes(Request $request)
     {
         $joursAvant = $request->get('jours', 30);
@@ -297,13 +302,7 @@ class InterventionController extends Controller
         ];
     }
 
-    // ========================================================================
-    // STATISTIQUES
-    // ========================================================================
 
-    /**
-     * Statistiques globales des interventions
-     */
     public function stats(Request $request)
     {
         $self = $this;
@@ -372,7 +371,6 @@ class InterventionController extends Controller
                 ];
             })->values()->sortBy('periode')->values();
 
-        // Opérations les plus fréquentes
         $operationsFrequentes = $interventions->groupBy('operation_id')
             ->map(function($group) use ($self) {
                 $operation = $group->first()->operation;
@@ -388,7 +386,6 @@ class InterventionController extends Controller
                 ];
             })->values()->sortByDesc('total')->take(10)->values();
 
-        // Alertes (échéances proches)
         $alertes = InterventionSuivi::with(['vehicule', 'operation'])
             ->echeancesProches(30)
             ->count();
@@ -413,10 +410,6 @@ class InterventionController extends Controller
         ];
     }
 
-    // ========================================================================
-    // HELPERS
-    // ========================================================================
-
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
@@ -429,5 +422,48 @@ class InterventionController extends Controller
             'prestataire' => 'nullable|string|max:255',
             'immobilisation_jours' => 'nullable|integer|min:0',
         ]);
+    }
+
+    
+    private function syncSuivi(InterventionVehicule $intervention, ?array $original = null): void
+    {
+        if ($original) {
+            $oldVehiculeId = $original['vehicule_id'];
+            $oldOperationId = $original['operation_id'];
+            if ($oldVehiculeId != $intervention->vehicule_id || $oldOperationId != $intervention->operation_id) {
+                InterventionSuivi::where('vehicule_id', $oldVehiculeId)
+                    ->where('operation_id', $oldOperationId)
+                    ->delete();
+            }
+        }
+
+        $operation = InterventionOperation::with('type')->find($intervention->operation_id);
+
+        if (!$operation || !$operation->isEntretien() || !$operation->hasPeriodicity()) {
+            InterventionSuivi::where('vehicule_id', $intervention->vehicule_id)
+                ->where('operation_id', $intervention->operation_id)
+                ->delete();
+            return;
+        }
+
+        $suivi = InterventionSuivi::firstOrNew([
+            'vehicule_id' => $intervention->vehicule_id,
+            'operation_id' => $intervention->operation_id,
+        ]);
+
+        $suivi->dernier_km = $intervention->kilometrage;
+        $suivi->derniere_date = $intervention->date_intervention;
+
+        $suivi->prochaine_echeance_km = ($operation->periodicite_km !== null && $intervention->kilometrage !== null)
+            ? $intervention->kilometrage + $operation->periodicite_km
+            : null;
+
+        $suivi->prochaine_echeance_date = $operation->periodicite_mois !== null
+            ? Carbon::parse($intervention->date_intervention)->addMonths($operation->periodicite_mois)
+            : null;
+
+        $suivi->alerte_envoyee = false;
+
+        $suivi->save();
     }
 }

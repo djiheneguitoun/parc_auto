@@ -26,7 +26,7 @@
                     Liste des interventions
                 </h3>
                 <div class="filter-actions">
-                    <div class="custom-select intervention-filter" data-name="intervention-filter-type">
+                    <div class="custom-select intervention-filter" data-name="intervention-filter-type" data-default-label="Tous les types">
                         <button type="button" class="custom-select__trigger selected" aria-haspopup="listbox" aria-expanded="false">
                             <span class="custom-select__value">Tous les types</span>
                             <span class="custom-select__arrow">
@@ -40,7 +40,7 @@
                         </ul>
                         <input type="hidden" id="intervention-filter-type" name="intervention_filter_type" value="">
                     </div>
-                    <div class="custom-select intervention-filter" data-name="intervention-filter-vehicule">
+                    <div class="custom-select intervention-filter" data-name="intervention-filter-vehicule" data-default-label="Tous les véhicules">
                         <button type="button" class="custom-select__trigger selected" aria-haspopup="listbox" aria-expanded="false">
                             <span class="custom-select__value">Tous les véhicules</span>
                             <span class="custom-select__arrow">
@@ -52,7 +52,7 @@
                         </ul>
                         <input type="hidden" id="intervention-filter-vehicule" name="intervention_filter_vehicule" value="">
                     </div>
-                    <div class="custom-select intervention-filter" data-name="intervention-filter-categorie">
+                    <div class="custom-select intervention-filter" data-name="intervention-filter-categorie" data-default-label="Toutes catégories">
                         <button type="button" class="custom-select__trigger selected" aria-haspopup="listbox" aria-expanded="false">
                             <span class="custom-select__value">Toutes catégories</span>
                             <span class="custom-select__arrow">
@@ -180,16 +180,7 @@
                 </h2>
                 <p>Gérez les types d'opérations d'entretien et de réparation.</p>
             </div>
-            <div class="section-actions">
-                <button class="btn secondary" id="open-categorie-modal" type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-                    Nouvelle catégorie
-                </button>
-                <button class="btn primary" id="open-operation-modal" type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-                    Nouvelle opération
-                </button>
-            </div>
+          
         </div>
 
         <!-- Catégories -->
@@ -199,9 +190,14 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                     Catégories techniques
                 </h3>
-                <span class="stat-badge" id="categories-count">
-                    <span class="count">0</span> catégories
-                </span>
+                <div class="filter-actions">
+                    <span class="stat-badge" id="categories-count">
+                        <span class="count">0</span> catégories
+                    </span>
+                    <button class="action-btn add" id="add-categorie-quick-btn" type="button" title="Nouvelle catégorie">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="table-wrapper">
                 <table>
@@ -216,6 +212,19 @@
                     </thead>
                     <tbody id="categories-rows"></tbody>
                 </table>
+            </div>
+            <!-- Pagination Catégories -->
+            <div class="table-pagination" id="categories-pagination">
+                <span class="pagination-info" id="categories-pagination-info">Affichage 1-5 sur 0</span>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="categories-prev" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <span class="pagination-pages" id="categories-pages"></span>
+                    <button class="pagination-btn" id="categories-next" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -244,6 +253,9 @@
                     <span class="stat-badge" id="operations-count">
                         <span class="count">0</span> opérations
                     </span>
+                    <button class="action-btn add" id="add-operation-quick-btn" type="button" title="Nouvelle opération">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    </button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -262,6 +274,19 @@
                     </thead>
                     <tbody id="operations-rows"></tbody>
                 </table>
+            </div>
+            <!-- Pagination Opérations -->
+            <div class="table-pagination" id="operations-pagination">
+                <span class="pagination-info" id="operations-pagination-info">Affichage 1-5 sur 0</span>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="operations-prev" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <span class="pagination-pages" id="operations-pages"></span>
+                    <button class="pagination-btn" id="operations-next" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -415,64 +440,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-    // Custom select init for intervention filters
-    ;(function(){
-        function setupCustomSelect(root){
-            var trigger = root.querySelector('.custom-select__trigger');
-            var options = root.querySelector('.custom-select__options');
-            var valueElem = root.querySelector('.custom-select__value');
-            var hidden = root.querySelector('input[type="hidden"]');
-
-            var pre = options.querySelector('li[aria-selected="true"]') || options.querySelector('li');
-            if (pre) {
-                var pv = pre.getAttribute('data-value') || '';
-                hidden.value = pv;
-                valueElem.textContent = pre.textContent.trim();
-                options.querySelectorAll('li').forEach(function(x){ x.setAttribute('aria-selected','false'); });
-                pre.setAttribute('aria-selected','true');
-                trigger.classList.add('selected');
-            }
-
-            function open(){
-                root.classList.add('open');
-                trigger.setAttribute('aria-expanded','true');
-            }
-            function close(){
-                root.classList.remove('open');
-                trigger.setAttribute('aria-expanded','false');
-            }
-
-            trigger.addEventListener('click', function(e){
-                e.stopPropagation();
-                if(root.classList.contains('open')) close(); else open();
-            });
-
-            options.addEventListener('click', function(e){
-                var li = e.target.closest('li');
-                if(!li) return;
-                var v = li.getAttribute('data-value') || '';
-                var text = li.textContent.trim();
-                hidden.value = v;
-                valueElem.textContent = text;
-                options.querySelectorAll('li').forEach(function(x){ x.setAttribute('aria-selected','false'); });
-                li.setAttribute('aria-selected','true');
-                close();
-                var nativeEv = new Event('change', { bubbles: true });
-                hidden.dispatchEvent(nativeEv);
-            });
-
-            document.addEventListener('click', function(){ close(); });
-            document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
-        }
-
-        document.addEventListener('DOMContentLoaded', function(){
-            var elems = document.querySelectorAll('#interventions .custom-select');
-            elems.forEach(setupCustomSelect);
-        });
-    })();
-    </script>
 </section>
 
 <!-- Modal Intervention -->

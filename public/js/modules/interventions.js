@@ -15,9 +15,10 @@ const interventionPanels = document.querySelectorAll('[data-intervention-panel]'
 
 // Table
 const interventionTableBody = document.getElementById('intervention-rows');
-const interventionFilterType = document.getElementById('intervention-filter-type');
-const interventionFilterVehicule = document.getElementById('intervention-filter-vehicule');
-const interventionFilterCategorie = document.getElementById('intervention-filter-categorie');
+// Filter elements - will be initialized later when DOM is ready
+let interventionFilterType = null;
+let interventionFilterVehicule = null;
+let interventionFilterCategorie = null;
 
 // Modal Intervention
 const interventionModal = document.getElementById('intervention-modal');
@@ -55,7 +56,8 @@ const closeInterventionDetailModalBtn = document.getElementById('close-intervent
 // Tables catalogue
 const categoriesRows = document.getElementById('categories-rows');
 const operationsRows = document.getElementById('operations-rows');
-const catalogueFilterType = document.getElementById('catalogue-filter-type');
+// Catalogue filter - will be initialized later when DOM is ready
+let catalogueFilterType = null;
 
 // Alertes
 const alertesRows = document.getElementById('alertes-rows');
@@ -106,6 +108,132 @@ function vehiculeLabel(v) {
     return v.numero || v.code || `${v.marque || ''} ${v.modele || ''}`.trim() || `Véhicule ${v.id}`;
 }
 
+function getDefaultLabel(inputEl, fallback = '') {
+    if (!inputEl) return fallback;
+    const container = document.querySelector(`.custom-select[data-name="${inputEl.id}"]`);
+    return container?.dataset.defaultLabel || fallback;
+}
+
+function updateCustomSelectDisplay(inputEl, fallback = '') {
+    if (!inputEl) return;
+    const container = document.querySelector(`.custom-select[data-name="${inputEl.id}"]`);
+    if (!container) return;
+
+    const valueEl = container.querySelector('.custom-select__value');
+    const options = Array.from(container.querySelectorAll('.custom-select__options li[role="option"]'));
+    const defaultLabel = getDefaultLabel(inputEl, fallback);
+
+    let label = defaultLabel;
+
+    if (inputEl.value) {
+        const match = options.find(li => String(li.dataset.value) === String(inputEl.value));
+        if (match) {
+            label = match.textContent.trim();
+        }
+    }
+
+    // Met à jour l'état aria-selected pour refléter la sélection actuelle
+    options.forEach((li, idx) => {
+        const selected = inputEl.value ? String(li.dataset.value) === String(inputEl.value) : (idx === 0 && li.dataset.value === '');
+        li.setAttribute('aria-selected', selected ? 'true' : 'false');
+    });
+
+    if (valueEl) valueEl.textContent = label || defaultLabel;
+}
+
+function refreshFilterSummary() {
+    // Synchronise l'affichage des custom-selects
+    updateCustomSelectDisplay(interventionFilterType, 'Tous les types');
+    updateCustomSelectDisplay(interventionFilterVehicule, 'Tous les véhicules');
+    updateCustomSelectDisplay(interventionFilterCategorie, 'Toutes catégories');
+}
+
+// ============================================================================
+// Custom Select Initialization
+// ============================================================================
+
+const initializedSelects = new WeakMap();
+
+function setupCustomSelect(root, forceReinit = false) {
+    const optionsList = root.querySelector('.custom-select__options');
+    if (!optionsList) return;
+    
+    const optionCount = optionsList.querySelectorAll('li').length;
+    const prevCount = initializedSelects.get(root);
+    
+    // Skip if already initialized with same options (unless forced)
+    if (!forceReinit && prevCount !== undefined && prevCount === optionCount) return;
+    initializedSelects.set(root, optionCount);
+    
+    let trigger = root.querySelector('.custom-select__trigger');
+    const valueElem = root.querySelector('.custom-select__value');
+    const hidden = root.querySelector('input[type="hidden"]');
+    let options = optionsList;
+
+    function syncValue() {
+        const pre = options.querySelector('li[aria-selected="true"]') || options.querySelector('li');
+        if (pre) {
+            const pv = pre.getAttribute('data-value') || '';
+            hidden.value = pv;
+            valueElem.textContent = pre.textContent.trim();
+            options.querySelectorAll('li').forEach(x => x.setAttribute('aria-selected', 'false'));
+            pre.setAttribute('aria-selected', 'true');
+            trigger.classList.add('selected');
+        }
+    }
+    
+    syncValue();
+
+    function open() {
+        root.classList.add('open');
+        trigger.setAttribute('aria-expanded', 'true');
+    }
+    
+    function close() {
+        root.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    // Remove old listeners by cloning
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+    trigger = newTrigger;
+    
+    const newOptions = options.cloneNode(true);
+    options.parentNode.replaceChild(newOptions, options);
+    options = newOptions;
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (root.classList.contains('open')) close(); else open();
+    });
+
+    options.addEventListener('click', (e) => {
+        const li = e.target.closest('li[role="option"]');
+        if (!li) return;
+        const v = li.getAttribute('data-value') || '';
+        const text = li.textContent.trim();
+        hidden.value = v;
+        valueElem.textContent = text;
+        options.querySelectorAll('li').forEach(x => x.setAttribute('aria-selected', 'false'));
+        li.setAttribute('aria-selected', 'true');
+        close();
+        hidden.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    document.addEventListener('click', () => close());
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+}
+
+function initInterventionCustomSelects() {
+    const elems = document.querySelectorAll('#interventions .custom-select');
+    elems.forEach(el => setupCustomSelect(el, true));
+}
+
+// Expose globally for dynamic initialization
+window.setupInterventionCustomSelect = setupCustomSelect;
+window.initInterventionCustomSelects = initInterventionCustomSelects;
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -147,10 +275,15 @@ async function fetchOperations(typeCode = null) {
 async function fetchInterventions() {
     try {
         const params = {};
-        if (interventionFilterType?.value) params.type_code = interventionFilterType.value;
-        if (interventionFilterVehicule?.value) params.vehicule_id = interventionFilterVehicule.value;
-        if (interventionFilterCategorie?.value) params.categorie_id = interventionFilterCategorie.value;
-        
+        // Get current filter values from DOM (in case they weren't initialized or were re-created)
+        const filterType = document.getElementById('intervention-filter-type');
+        const filterVehicule = document.getElementById('intervention-filter-vehicule');
+        const filterCategorie = document.getElementById('intervention-filter-categorie');
+
+        if (filterType?.value) params.type_code = filterType.value;
+        if (filterVehicule?.value) params.vehicule_id = filterVehicule.value;
+        if (filterCategorie?.value) params.categorie_id = filterCategorie.value;
+
         const res = await axios.get('/api/interventions', { params });
         interventions = res.data.data || res.data;
         return interventions;
@@ -186,7 +319,7 @@ async function fetchStats(dateStart = null, dateEnd = null) {
         const params = {};
         if (dateStart) params.date_start = dateStart;
         if (dateEnd) params.date_end = dateEnd;
-        
+
         const res = await axios.get('/api/interventions/stats', { params });
         return res.data;
     } catch (err) {
@@ -201,10 +334,10 @@ async function fetchStats(dateStart = null, dateEnd = null) {
 
 function renderInterventionsTable() {
     if (!interventionTableBody) return;
-    
+
     const countEl = document.querySelector('#interventions-count .count');
     if (countEl) countEl.textContent = interventions.length;
-    
+
     if (!interventions.length) {
         interventionTableBody.innerHTML = `
             <tr><td colspan="8" class="empty-state">
@@ -212,13 +345,13 @@ function renderInterventionsTable() {
             </td></tr>`;
         return;
     }
-    
+
     interventionTableBody.innerHTML = interventions.map(i => {
         const op = i.operation || {};
         const type = op.type || {};
         const cat = op.categorie || {};
         const v = i.vehicule || {};
-        
+
         return `
             <tr data-id="${i.id}">
                 <td>${formatDate(i.date_intervention)}</td>
@@ -245,18 +378,34 @@ function renderInterventionsTable() {
     }).join('');
 }
 
+// Pagination state
+const ITEMS_PER_PAGE = 5;
+let categoriesPage = 1;
+let operationsPage = 1;
+
 function renderCategoriesTable() {
     if (!categoriesRows) return;
-    
+
     const countEl = document.querySelector('#categories-count .count');
     if (countEl) countEl.textContent = categories.length;
-    
+
     if (!categories.length) {
         categoriesRows.innerHTML = `<tr><td colspan="5" class="empty-state">Aucune catégorie</td></tr>`;
+        updateCategoriesPagination(0);
         return;
     }
-    
-    categoriesRows.innerHTML = categories.map(c => {
+
+    // Pagination logic
+    const totalItems = categories.length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    if (categoriesPage > totalPages) categoriesPage = totalPages;
+    if (categoriesPage < 1) categoriesPage = 1;
+
+    const start = (categoriesPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const paginatedCategories = categories.slice(start, end);
+
+    categoriesRows.innerHTML = paginatedCategories.map(c => {
         const opCount = operations.filter(o => o.categorie_id === c.id).length;
         return `
             <tr data-id="${c.id}">
@@ -273,25 +422,57 @@ function renderCategoriesTable() {
                 </td>
             </tr>`;
     }).join('');
+
+    updateCategoriesPagination(totalItems);
+}
+
+function updateCategoriesPagination(totalItems) {
+    const infoEl = document.getElementById('categories-pagination-info');
+    const pagesEl = document.getElementById('categories-pages');
+    const prevBtn = document.getElementById('categories-prev');
+    const nextBtn = document.getElementById('categories-next');
+
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+    const start = totalItems === 0 ? 0 : ((categoriesPage - 1) * ITEMS_PER_PAGE) + 1;
+    const end = Math.min(categoriesPage * ITEMS_PER_PAGE, totalItems);
+
+    if (infoEl) infoEl.textContent = `Affichage ${start}-${end} sur ${totalItems}`;
+    if (pagesEl) pagesEl.textContent = `Page ${categoriesPage} / ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = categoriesPage <= 1;
+    if (nextBtn) nextBtn.disabled = categoriesPage >= totalPages;
 }
 
 function renderOperationsTable() {
     if (!operationsRows) return;
-    
+
+    // Get current filter value from DOM
+    const filterType = document.getElementById('catalogue-filter-type');
+
     let filtered = operations;
-    if (catalogueFilterType?.value) {
-        filtered = operations.filter(o => o.type?.code === catalogueFilterType.value);
+    if (filterType?.value) {
+        filtered = operations.filter(o => o.type?.code === filterType.value);
     }
-    
+
     const countEl = document.querySelector('#operations-count .count');
     if (countEl) countEl.textContent = filtered.length;
-    
+
     if (!filtered.length) {
         operationsRows.innerHTML = `<tr><td colspan="8" class="empty-state">Aucune opération</td></tr>`;
+        updateOperationsPagination(0);
         return;
     }
-    
-    operationsRows.innerHTML = filtered.map(o => {
+
+    // Pagination logic
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    if (operationsPage > totalPages) operationsPage = totalPages;
+    if (operationsPage < 1) operationsPage = 1;
+
+    const start = (operationsPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const paginatedOperations = filtered.slice(start, end);
+
+    operationsRows.innerHTML = paginatedOperations.map(o => {
         const type = o.type || {};
         const cat = o.categorie || {};
         return `
@@ -312,18 +493,36 @@ function renderOperationsTable() {
                 </td>
             </tr>`;
     }).join('');
+
+    updateOperationsPagination(totalItems);
+}
+
+function updateOperationsPagination(totalItems) {
+    const infoEl = document.getElementById('operations-pagination-info');
+    const pagesEl = document.getElementById('operations-pages');
+    const prevBtn = document.getElementById('operations-prev');
+    const nextBtn = document.getElementById('operations-next');
+
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+    const start = totalItems === 0 ? 0 : ((operationsPage - 1) * ITEMS_PER_PAGE) + 1;
+    const end = Math.min(operationsPage * ITEMS_PER_PAGE, totalItems);
+
+    if (infoEl) infoEl.textContent = `Affichage ${start}-${end} sur ${totalItems}`;
+    if (pagesEl) pagesEl.textContent = `Page ${operationsPage} / ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = operationsPage <= 1;
+    if (nextBtn) nextBtn.disabled = operationsPage >= totalPages;
 }
 
 function renderAlertesTable(alertes) {
     if (!alertesRows) return;
-    
+
     const depasseesEl = document.getElementById('alertes-depassees');
     const prochesEl = document.getElementById('alertes-proches');
     const okEl = document.getElementById('alertes-ok');
-    
+
     if (depasseesEl) depasseesEl.textContent = alertes.depassees?.length || 0;
     if (prochesEl) prochesEl.textContent = alertes.proches?.length || 0;
-    
+
     // Calculer véhicules à jour (tous - avec alertes)
     const vehiculesAvecAlertes = new Set([
         ...(alertes.depassees || []).map(a => a.suivi?.vehicule_id),
@@ -331,12 +530,12 @@ function renderAlertesTable(alertes) {
     ]);
     const totalVehicules = state.vehicules?.length || 0;
     if (okEl) okEl.textContent = Math.max(0, totalVehicules - vehiculesAvecAlertes.size);
-    
+
     const allItems = [
         ...(alertes.depassees || []).map(a => ({ ...a, alertType: 'depassee' })),
         ...(alertes.proches || []).map(a => ({ ...a, alertType: 'proche' }))
     ];
-    
+
     if (!allItems.length) {
         alertesRows.innerHTML = `
             <tr><td colspan="8" class="empty-state">
@@ -345,16 +544,16 @@ function renderAlertesTable(alertes) {
             </td></tr>`;
         return;
     }
-    
+
     alertesRows.innerHTML = allItems.map(item => {
         const s = item.suivi || {};
         const v = s.vehicule || {};
         const op = s.operation || {};
         const isDepassee = item.alertType === 'depassee';
-        
+
         const statutClass = isDepassee ? 'pill-danger' : 'pill-warning';
         const statutLabel = isDepassee ? `${item.jours_retard}j de retard` : `Dans ${item.jours_restants}j`;
-        
+
         return `
             <tr>
                 <td>${vehiculeLabel(v)}</td>
@@ -381,37 +580,37 @@ function renderAlertesTable(alertes) {
 async function loadAndRenderStats() {
     const dateStart = interventionStatsDateStart?.value || null;
     const dateEnd = interventionStatsDateEnd?.value || null;
-    
+
     const stats = await fetchStats(dateStart, dateEnd);
     if (!stats) return;
-    
+
     // KPIs
     const totalEl = document.getElementById('stats-total-interventions');
     const entretiensEl = document.getElementById('stats-total-entretiens');
     const reparationsEl = document.getElementById('stats-total-reparations');
     const coutEl = document.getElementById('stats-cout-total-interv');
-    
+
     if (totalEl) totalEl.textContent = stats.totaux?.interventions || 0;
-    
+
     const entretienData = stats.par_type?.find(t => t.code === 'ENT');
     const reparationData = stats.par_type?.find(t => t.code === 'REP');
-    
+
     if (entretiensEl) entretiensEl.textContent = entretienData?.total || 0;
     if (reparationsEl) reparationsEl.textContent = reparationData?.total || 0;
     if (coutEl) coutEl.textContent = formatCurrency(stats.totaux?.cout_global);
-    
+
     // Chart: Répartition par type
     renderTypeChart(stats.par_type || []);
-    
+
     // Chart: Coût par catégorie
     renderCategorieChart(stats.par_categorie || []);
-    
+
     // Chart: Coût par véhicule
     renderVehiculeChart(stats.cout_par_vehicule || []);
-    
+
     // Chart: Évolution mensuelle
     renderEvolutionChart(stats.par_periode || []);
-    
+
     // Ranking opérations
     renderOperationsRanking(stats.operations_frequentes || []);
 }
@@ -419,12 +618,12 @@ async function loadAndRenderStats() {
 function renderTypeChart(data) {
     const canvas = document.getElementById('chart-intervention-type');
     if (!canvas) return;
-    
+
     if (chartInterventionType) chartInterventionType.destroy();
-    
+
     const labels = data.map(d => d.libelle);
     const values = data.map(d => d.total);
-    
+
     chartInterventionType = new Chart(canvas, {
         type: 'doughnut',
         data: {
@@ -448,13 +647,13 @@ function renderTypeChart(data) {
 function renderCategorieChart(data) {
     const canvas = document.getElementById('chart-cout-categorie');
     if (!canvas) return;
-    
+
     if (chartCoutCategorie) chartCoutCategorie.destroy();
-    
+
     const sorted = data.slice().sort((a, b) => b.cout_total - a.cout_total).slice(0, 10);
     const labels = sorted.map(d => d.categorie?.libelle || 'Inconnu');
     const values = sorted.map(d => d.cout_total);
-    
+
     chartCoutCategorie = new Chart(canvas, {
         type: 'bar',
         data: {
@@ -481,17 +680,17 @@ function renderCategorieChart(data) {
 function renderVehiculeChart(data) {
     const canvas = document.getElementById('chart-cout-vehicule-interv');
     if (!canvas) return;
-    
+
     const countEl = document.getElementById('cout-vehicule-interv-count');
     if (countEl) countEl.textContent = `${data.length} véhicules`;
-    
+
     if (chartCoutVehiculeInterv) chartCoutVehiculeInterv.destroy();
-    
+
     const sorted = data.slice().sort((a, b) => b.cout_total - a.cout_total).slice(0, 10);
     const labels = sorted.map(d => d.vehicule?.label || 'Inconnu');
     const entretiensData = sorted.map(d => d.cout_entretien || 0);
     const reparationsData = sorted.map(d => d.cout_reparation || 0);
-    
+
     chartCoutVehiculeInterv = new Chart(canvas, {
         type: 'bar',
         data: {
@@ -527,13 +726,13 @@ function renderVehiculeChart(data) {
 function renderEvolutionChart(data) {
     const canvas = document.getElementById('chart-evolution-mensuelle');
     if (!canvas) return;
-    
+
     if (chartEvolutionMensuelle) chartEvolutionMensuelle.destroy();
-    
+
     const labels = data.map(d => d.periode);
     const entretiensData = data.map(d => d.entretiens || 0);
     const reparationsData = data.map(d => d.reparations || 0);
-    
+
     chartEvolutionMensuelle = new Chart(canvas, {
         type: 'line',
         data: {
@@ -571,12 +770,12 @@ function renderEvolutionChart(data) {
 function renderOperationsRanking(data) {
     const container = document.getElementById('ranking-operations');
     if (!container) return;
-    
+
     if (!data.length) {
         container.innerHTML = '<p class="empty-state">Aucune donnée</p>';
         return;
     }
-    
+
     container.innerHTML = data.slice(0, 5).map((item, idx) => `
         <div class="ranking-item">
             <span class="ranking-position">${idx + 1}</span>
@@ -594,30 +793,30 @@ function renderOperationsRanking(data) {
 
 function openInterventionModal(intervention = null) {
     if (!interventionModal) return;
-    
+
     editingInterventionId = intervention?.id || null;
-    interventionFormTitle.innerHTML = intervention 
+    interventionFormTitle.innerHTML = intervention
         ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Modifier l'intervention`
         : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Nouvelle intervention`;
-    
+
     interventionForm.reset();
-    
+
     // Populate véhicules
     populateVehiculeSelect(interventionVehiculeSelect);
-    
+
     // Populate type select
     populateTypeSelect(interventionTypeSelect);
-    
+
     if (intervention) {
         interventionVehiculeSelect.value = intervention.vehicule_id || '';
         const typeCode = intervention.operation?.type?.code || '';
         interventionTypeSelect.value = typeCode;
-        
+
         // Load operations for this type then set value
         loadOperationsForType(typeCode).then(() => {
             interventionOperationSelect.value = intervention.operation_id || '';
         });
-        
+
         document.getElementById('intervention-date').value = toInputDate(intervention.date_intervention);
         document.getElementById('intervention-km').value = intervention.kilometrage || '';
         document.getElementById('intervention-cout').value = intervention.cout || '';
@@ -628,7 +827,7 @@ function openInterventionModal(intervention = null) {
         interventionOperationSelect.innerHTML = '<option value="">- Sélectionnez d\'abord un type -</option>';
         document.getElementById('intervention-date').value = toInputDate(new Date());
     }
-    
+
     interventionModal.classList.remove('hidden');
 }
 
@@ -639,20 +838,20 @@ function closeInterventionModal() {
 
 function openCategorieModal(categorie = null) {
     if (!categorieModal) return;
-    
+
     editingCategorieId = categorie?.id || null;
-    categorieFormTitle.innerHTML = categorie 
+    categorieFormTitle.innerHTML = categorie
         ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Modifier la catégorie`
         : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Nouvelle catégorie`;
-    
+
     categorieForm.reset();
-    
+
     if (categorie) {
         document.getElementById('categorie-code').value = categorie.code || '';
         document.getElementById('categorie-libelle').value = categorie.libelle || '';
         document.getElementById('categorie-actif').checked = categorie.actif !== false;
     }
-    
+
     categorieModal.classList.remove('hidden');
 }
 
@@ -663,18 +862,18 @@ function closeCategorieModal() {
 
 function openOperationModal(operation = null) {
     if (!operationModal) return;
-    
+
     editingOperationId = operation?.id || null;
-    operationFormTitle.innerHTML = operation 
+    operationFormTitle.innerHTML = operation
         ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Modifier l'opération`
         : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Nouvelle opération`;
-    
+
     operationForm.reset();
-    
+
     // Populate type and categorie selects
     populateTypeSelect(operationTypeSelect, true);
     populateCategorieSelect(operationCategorieSelect);
-    
+
     if (operation) {
         document.getElementById('operation-code').value = operation.code || '';
         document.getElementById('operation-libelle').value = operation.libelle || '';
@@ -683,10 +882,10 @@ function openOperationModal(operation = null) {
         document.getElementById('operation-periodicite-km').value = operation.periodicite_km || '';
         document.getElementById('operation-periodicite-mois').value = operation.periodicite_mois || '';
         document.getElementById('operation-actif').checked = operation.actif !== false;
-        
+
         updatePeriodiciteVisibility(operation.type?.code);
     }
-    
+
     operationModal.classList.remove('hidden');
 }
 
@@ -697,12 +896,12 @@ function closeOperationModal() {
 
 function openInterventionDetailModal(intervention) {
     if (!interventionDetailModal || !intervention) return;
-    
+
     const op = intervention.operation || {};
     const type = op.type || {};
     const cat = op.categorie || {};
     const v = intervention.vehicule || {};
-    
+
     document.getElementById('intervention-detail-operation').textContent = op.libelle || '-';
     document.getElementById('intervention-detail-type-badge').textContent = formatInterventionType(type.code);
     document.getElementById('intervention-detail-type-badge').className = `pill ${getTypeClass(type.code)}`;
@@ -714,15 +913,15 @@ function openInterventionDetailModal(intervention) {
     document.getElementById('intervention-detail-prestataire').textContent = intervention.prestataire || '-';
     document.getElementById('intervention-detail-immob').textContent = intervention.immobilisation_jours ? intervention.immobilisation_jours + ' jours' : '-';
     document.getElementById('intervention-detail-description').textContent = intervention.description || 'Aucune description.';
-    
-    
+
+
     // Update avatar color based on type
     const avatar = document.getElementById('intervention-detail-avatar');
     if (avatar) {
         avatar.style.background = type.code === 'ENT' ? 'var(--success-100)' : 'var(--warning-100)';
         avatar.style.color = type.code === 'ENT' ? 'var(--success-600)' : 'var(--warning-600)';
     }
-    
+
     interventionDetailModal.classList.remove('hidden');
 }
 
@@ -760,14 +959,14 @@ function populateCategorieSelect(selectEl) {
 
 async function loadOperationsForType(typeCode) {
     if (!interventionOperationSelect) return;
-    
+
     if (!typeCode) {
         interventionOperationSelect.innerHTML = '<option value="">- Sélectionnez d\'abord un type -</option>';
         return;
     }
-    
+
     await fetchOperations(typeCode);
-    
+
     const options = operations.map(o => `<option value="${o.id}">${o.libelle}</option>`).join('');
     interventionOperationSelect.innerHTML = `<option value="">- Choisir une opération -</option>${options}`;
 }
@@ -775,15 +974,15 @@ async function loadOperationsForType(typeCode) {
 function updatePeriodiciteVisibility(typeCode) {
     const kmGroup = document.getElementById('periodicite-km-group');
     const moisGroup = document.getElementById('periodicite-mois-group');
-    
+
     if (!kmGroup || !moisGroup) return;
-    
+
     // Afficher périodicité uniquement pour Entretien
     const isEntretien = typeCode === 'ENT' || types.find(t => t.id == typeCode)?.code === 'ENT';
-    
+
     kmGroup.style.opacity = isEntretien ? '1' : '0.5';
     moisGroup.style.opacity = isEntretien ? '1' : '0.5';
-    
+
     if (!isEntretien) {
         document.getElementById('operation-periodicite-km').value = '';
         document.getElementById('operation-periodicite-mois').value = '';
@@ -791,22 +990,33 @@ function updatePeriodiciteVisibility(typeCode) {
 }
 
 function populateFilterSelects() {
-    // Véhicules filter
+    // Véhicules filter - fetch from state or re-query DOM
     const vehFilterEl = document.querySelector('.custom-select[data-name="intervention-filter-vehicule"] .custom-select__options');
-    if (vehFilterEl && state.vehicules) {
-        const items = state.vehicules.map(v => {
-            const label = v.numero || v.code || `${v.marque || ''} ${v.modele || ''}`.trim() || `Véhicule ${v.id}`;
-            return `<li role="option" data-value="${v.id}">${label}</li>`;
-        }).join('');
-        vehFilterEl.innerHTML = `<li role="option" data-value="" aria-selected="true">Tous les véhicules</li>${items}`;
+    if (vehFilterEl) {
+        // Check if vehicules are loaded in state
+        const vehicules = state.vehicules || [];
+        if (vehicules.length > 0) {
+            const items = vehicules.map(v => {
+                const label = v.numero || v.code || `${v.marque || ''} ${v.modele || ''}`.trim() || `Véhicule ${v.id}`;
+                return `<li role="option" data-value="${v.id}">${label}</li>`;
+            }).join('');
+            vehFilterEl.innerHTML = `<li role="option" data-value="" aria-selected="true">Tous les véhicules</li>${items}`;
+        }
     }
-    
+
     // Catégories filter
     const catFilterEl = document.querySelector('.custom-select[data-name="intervention-filter-categorie"] .custom-select__options');
     if (catFilterEl && categories.length) {
         const items = categories.map(c => `<li role="option" data-value="${c.id}">${c.libelle}</li>`).join('');
         catFilterEl.innerHTML = `<li role="option" data-value="" aria-selected="true">Toutes catégories</li>${items}`;
     }
+
+    // Re-initialize custom selects after populating options
+    if (typeof window.initInterventionCustomSelects === 'function') {
+        window.initInterventionCustomSelects();
+    }
+
+    refreshFilterSummary();
 }
 
 // ============================================================================
@@ -815,15 +1025,15 @@ function populateFilterSelects() {
 
 async function handleInterventionSubmit(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(interventionForm);
     const data = Object.fromEntries(formData.entries());
-    
+
     // Convert empty strings to null for numeric fields
     if (data.kilometrage === '') data.kilometrage = null;
     if (data.cout === '') data.cout = null;
     if (data.immobilisation_jours === '') data.immobilisation_jours = 0;
-    
+
     try {
         if (editingInterventionId) {
             await axios.put(`/api/interventions/${editingInterventionId}`, data);
@@ -832,7 +1042,7 @@ async function handleInterventionSubmit(e) {
             await axios.post('/api/interventions', data);
             showToast('Intervention créée avec succès', 'success');
         }
-        
+
         closeInterventionModal();
         await loadInterventions();
         await loadAlertes();
@@ -843,14 +1053,14 @@ async function handleInterventionSubmit(e) {
 
 async function handleCategorieSubmit(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(categorieForm);
     const data = {
         code: formData.get('code'),
         libelle: formData.get('libelle'),
         actif: formData.get('actif') === 'on'
     };
-    
+
     try {
         if (editingCategorieId) {
             await axios.put(`/api/interventions/categories/${editingCategorieId}`, data);
@@ -859,7 +1069,7 @@ async function handleCategorieSubmit(e) {
             await axios.post('/api/interventions/categories', data);
             showToast('Catégorie créée avec succès', 'success');
         }
-        
+
         closeCategorieModal();
         await loadCatalogue();
     } catch (err) {
@@ -869,7 +1079,7 @@ async function handleCategorieSubmit(e) {
 
 async function handleOperationSubmit(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(operationForm);
     const data = {
         code: formData.get('code'),
@@ -880,7 +1090,7 @@ async function handleOperationSubmit(e) {
         periodicite_mois: formData.get('periodicite_mois') || null,
         actif: formData.get('actif') === 'on'
     };
-    
+
     try {
         if (editingOperationId) {
             await axios.put(`/api/interventions/operations/${editingOperationId}`, data);
@@ -889,7 +1099,7 @@ async function handleOperationSubmit(e) {
             await axios.post('/api/interventions/operations', data);
             showToast('Opération créée avec succès', 'success');
         }
-        
+
         closeOperationModal();
         await loadCatalogue();
     } catch (err) {
@@ -900,7 +1110,7 @@ async function handleOperationSubmit(e) {
 async function handleDeleteIntervention(id) {
     const confirmed = await showConfirm('Êtes-vous sûr de vouloir supprimer cette intervention ?');
     if (!confirmed) return;
-    
+
     try {
         await axios.delete(`/api/interventions/${id}`);
         showToast('Intervention supprimée', 'success');
@@ -917,6 +1127,7 @@ async function handleDeleteIntervention(id) {
 export async function loadInterventions() {
     await ensureAuth();
     await fetchInterventions();
+    refreshFilterSummary();
     renderInterventionsTable();
 }
 
@@ -942,7 +1153,7 @@ function switchInterventionPanel(panelName) {
     interventionPanels.forEach(panel => {
         panel.classList.toggle('active', panel.dataset.interventionPanel === panelName);
     });
-    
+
     // Load data for specific panels
     if (panelName === 'stats') {
         loadAndRenderStats();
@@ -958,53 +1169,116 @@ function switchInterventionPanel(panelName) {
 // ============================================================================
 
 export function initializeInterventionEvents() {
+    // Initialize filter elements now that DOM is ready
+    interventionFilterType = document.getElementById('intervention-filter-type');
+    interventionFilterVehicule = document.getElementById('intervention-filter-vehicule');
+    interventionFilterCategorie = document.getElementById('intervention-filter-categorie');
+    catalogueFilterType = document.getElementById('catalogue-filter-type');
+
     // Open/Close modals
     openInterventionModalBtn?.addEventListener('click', () => openInterventionModal());
     closeInterventionModalBtn?.addEventListener('click', closeInterventionModal);
     cancelInterventionFormBtn?.addEventListener('click', closeInterventionModal);
-    
+
     openCategorieModalBtn?.addEventListener('click', () => openCategorieModal());
     closeCategorieModalBtn?.addEventListener('click', closeCategorieModal);
     cancelCategorieFormBtn?.addEventListener('click', closeCategorieModal);
-    
+
     openOperationModalBtn?.addEventListener('click', () => openOperationModal());
     closeOperationModalBtn?.addEventListener('click', closeOperationModal);
     cancelOperationFormBtn?.addEventListener('click', closeOperationModal);
-    
+
     closeInterventionDetailModalBtn?.addEventListener('click', closeInterventionDetailModal);
-    
+
     // Form submissions
     interventionForm?.addEventListener('submit', handleInterventionSubmit);
     categorieForm?.addEventListener('submit', handleCategorieSubmit);
     operationForm?.addEventListener('submit', handleOperationSubmit);
-    
+
     // Type selection change (for operations filter)
     interventionTypeSelect?.addEventListener('change', (e) => {
         loadOperationsForType(e.target.value);
     });
-    
+
     // Operation type change (show/hide periodicite)
     operationTypeSelect?.addEventListener('change', (e) => {
         const typeId = e.target.value;
         const type = types.find(t => t.id == typeId);
         updatePeriodiciteVisibility(type?.code);
     });
-    
-    // Table filters
-    interventionFilterType?.addEventListener('change', loadInterventions);
-    interventionFilterVehicule?.addEventListener('change', loadInterventions);
-    interventionFilterCategorie?.addEventListener('change', loadInterventions);
-    catalogueFilterType?.addEventListener('change', renderOperationsTable);
-    
+
+    // Table filters - attach event listeners to the hidden inputs
+    interventionFilterType?.addEventListener('change', () => {
+        refreshFilterSummary();
+        loadInterventions();
+    });
+    interventionFilterVehicule?.addEventListener('change', () => {
+        refreshFilterSummary();
+        loadInterventions();
+    });
+    interventionFilterCategorie?.addEventListener('change', () => {
+        refreshFilterSummary();
+        loadInterventions();
+    });
+    catalogueFilterType?.addEventListener('change', () => {
+        updateCustomSelectDisplay(catalogueFilterType, 'Tous les types');
+        operationsPage = 1; // Reset to first page on filter change
+        renderOperationsTable();
+    });
+
+    // Initialize custom selects for interventions section
+    initInterventionCustomSelects();
+
+    // Quick add buttons
+    document.getElementById('add-categorie-quick-btn')?.addEventListener('click', () => openCategorieModal());
+    document.getElementById('add-operation-quick-btn')?.addEventListener('click', () => openOperationModal());
+
+    // Pagination buttons - Categories
+    document.getElementById('categories-prev')?.addEventListener('click', () => {
+        if (categoriesPage > 1) {
+            categoriesPage--;
+            renderCategoriesTable();
+        }
+    });
+    document.getElementById('categories-next')?.addEventListener('click', () => {
+        const totalPages = Math.ceil(categories.length / ITEMS_PER_PAGE);
+        if (categoriesPage < totalPages) {
+            categoriesPage++;
+            renderCategoriesTable();
+        }
+    });
+
+    // Pagination buttons - Operations
+    document.getElementById('operations-prev')?.addEventListener('click', () => {
+        if (operationsPage > 1) {
+            operationsPage--;
+            renderOperationsTable();
+        }
+    });
+    document.getElementById('operations-next')?.addEventListener('click', () => {
+        const filterType = document.getElementById('catalogue-filter-type');
+        let filtered = operations;
+        if (filterType?.value) {
+            filtered = operations.filter(o => o.type?.code === filterType.value);
+        }
+        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+        if (operationsPage < totalPages) {
+            operationsPage++;
+            renderOperationsTable();
+        }
+    });
+
+    refreshFilterSummary();
+
     // Table actions (delegation)
     interventionTableBody?.addEventListener('click', async (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
-        
+
         const action = btn.dataset.action;
         const id = parseInt(btn.dataset.id);
         const intervention = interventions.find(i => i.id === id);
-        
+
         if (action === 'view' && intervention) {
             openInterventionDetailModal(intervention);
         } else if (action === 'edit' && intervention) {
@@ -1013,32 +1287,32 @@ export function initializeInterventionEvents() {
             await handleDeleteIntervention(id);
         }
     });
-    
+
     // Categories table actions
     categoriesRows?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action="edit-categorie"]');
         if (!btn) return;
-        
+
         const id = parseInt(btn.dataset.id);
         const categorie = categories.find(c => c.id === id);
         if (categorie) openCategorieModal(categorie);
     });
-    
+
     // Operations table actions
     operationsRows?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action="edit-operation"]');
         if (!btn) return;
-        
+
         const id = parseInt(btn.dataset.id);
         const operation = operations.find(o => o.id === id);
         if (operation) openOperationModal(operation);
     });
-    
+
     // Refresh buttons
     refreshAlertesBtn?.addEventListener('click', loadAlertes);
     refreshInterventionStatsBtn?.addEventListener('click', loadAndRenderStats);
     applyInterventionStatsFiltersBtn?.addEventListener('click', loadAndRenderStats);
-    
+
     // Panel navigation (submenu)
     document.querySelectorAll('[data-intervention-tab]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1046,19 +1320,19 @@ export function initializeInterventionEvents() {
             if (tab) switchInterventionPanel(tab);
         });
     });
-    
+
     // Create intervention from alert
     window.addEventListener('createInterventionFromAlert', async (e) => {
         const { vehicule_id, operation_id } = e.detail;
-        
+
         await fetchTypes();
         await fetchCategories();
         await fetchOperations();
-        
+
         const operation = operations.find(o => o.id === operation_id);
-        
+
         openInterventionModal();
-        
+
         setTimeout(() => {
             if (interventionVehiculeSelect) interventionVehiculeSelect.value = vehicule_id;
             if (operation && interventionTypeSelect) {
@@ -1069,7 +1343,7 @@ export function initializeInterventionEvents() {
             }
         }, 100);
     });
-    
+
     // Modal backdrop close
     document.querySelectorAll('[data-close]').forEach(el => {
         el.addEventListener('click', () => {
@@ -1090,7 +1364,7 @@ export function activateInterventionTab(tabKey) {
         const key = panel.dataset.interventionPanel;
         panel.classList.toggle('active', key === tabKey);
     });
-    
+
     // Load data for the selected tab
     switch (tabKey) {
         case 'tableau':
@@ -1116,4 +1390,9 @@ export async function initializeInterventions() {
     await loadCatalogue();
     await loadInterventions();
     await loadAlertes();
+
+    // Listen for vehicules data update to repopulate filter
+    document.addEventListener('data:vehicules:updated', () => {
+        populateFilterSelects();
+    });
 }
