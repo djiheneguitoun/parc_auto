@@ -18,14 +18,12 @@ class InterventionOperation extends Model
         'categorie_id',
         'periodicite_km',
         'periodicite_mois',
-        'cout_estime',
         'actif',
     ];
 
     protected $casts = [
         'periodicite_km' => 'integer',
         'periodicite_mois' => 'integer',
-        'cout_estime' => 'decimal:2',
         'actif' => 'boolean',
     ];
 

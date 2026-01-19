@@ -97,26 +97,6 @@ function formatInterventionType(code) {
     return map[code] || code || '-';
 }
 
-function formatInterventionStatut(value) {
-    const map = { 
-        planifie: 'Planifié', 
-        en_cours: 'En cours', 
-        termine: 'Terminé', 
-        annule: 'Annulé' 
-    };
-    return map[value] || value || '-';
-}
-
-function getStatutClass(statut) {
-    const map = {
-        planifie: 'pill-info',
-        en_cours: 'pill-warning',
-        termine: 'pill-success',
-        annule: 'pill-muted'
-    };
-    return map[statut] || '';
-}
-
 function getTypeClass(code) {
     return code === 'ENT' ? 'pill-success' : 'pill-warning';
 }
@@ -227,7 +207,7 @@ function renderInterventionsTable() {
     
     if (!interventions.length) {
         interventionTableBody.innerHTML = `
-            <tr><td colspan="9" class="empty-state">
+            <tr><td colspan="8" class="empty-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                 </svg>
@@ -251,7 +231,6 @@ function renderInterventionsTable() {
                 <td>${cat.code || '-'}</td>
                 <td>${i.kilometrage ? i.kilometrage.toLocaleString() : '-'}</td>
                 <td>${formatCurrency(i.cout)}</td>
-                <td><span class="pill ${getStatutClass(i.statut)}">${formatInterventionStatut(i.statut)}</span></td>
                 <td>
                     <div class="action-btns">
                         <button class="action-btn view" title="Voir" data-action="view" data-id="${i.id}">
@@ -650,10 +629,7 @@ function openInterventionModal(intervention = null) {
         document.getElementById('intervention-cout').value = intervention.cout || '';
         document.getElementById('intervention-prestataire').value = intervention.prestataire || '';
         document.getElementById('intervention-immob').value = intervention.immobilisation_jours || 0;
-        document.getElementById('intervention-statut').value = intervention.statut || 'termine';
         document.getElementById('intervention-description').value = intervention.description || '';
-        document.getElementById('intervention-pieces').value = intervention.pieces_changees || '';
-        document.getElementById('intervention-observations').value = intervention.observations || '';
     } else {
         interventionOperationSelect.innerHTML = '<option value="">- Sélectionnez d\'abord un type -</option>';
         document.getElementById('intervention-date').value = toInputDate(new Date());
@@ -712,7 +688,6 @@ function openOperationModal(operation = null) {
         operationCategorieSelect.value = operation.categorie_id || '';
         document.getElementById('operation-periodicite-km').value = operation.periodicite_km || '';
         document.getElementById('operation-periodicite-mois').value = operation.periodicite_mois || '';
-        document.getElementById('operation-cout-estime').value = operation.cout_estime || '';
         document.getElementById('operation-actif').checked = operation.actif !== false;
         
         updatePeriodiciteVisibility(operation.type?.code);
@@ -737,8 +712,6 @@ function openInterventionDetailModal(intervention) {
     document.getElementById('intervention-detail-operation').textContent = op.libelle || '-';
     document.getElementById('intervention-detail-type-badge').textContent = formatInterventionType(type.code);
     document.getElementById('intervention-detail-type-badge').className = `pill ${getTypeClass(type.code)}`;
-    document.getElementById('intervention-detail-statut').textContent = formatInterventionStatut(intervention.statut);
-    document.getElementById('intervention-detail-statut').className = `pill ${getStatutClass(intervention.statut)}`;
     document.getElementById('intervention-detail-vehicule').textContent = vehiculeLabel(v);
     document.getElementById('intervention-detail-date').textContent = formatDate(intervention.date_intervention);
     document.getElementById('intervention-detail-categorie').textContent = cat.libelle || '-';
@@ -747,18 +720,7 @@ function openInterventionDetailModal(intervention) {
     document.getElementById('intervention-detail-prestataire').textContent = intervention.prestataire || '-';
     document.getElementById('intervention-detail-immob').textContent = intervention.immobilisation_jours ? intervention.immobilisation_jours + ' jours' : '-';
     document.getElementById('intervention-detail-description').textContent = intervention.description || 'Aucune description.';
-    document.getElementById('intervention-detail-pieces').textContent = intervention.pieces_changees || 'Aucune pièce enregistrée.';
-    document.getElementById('intervention-detail-observations').textContent = intervention.observations || 'Aucune observation.';
     
-    // Prochaine échéance (si entretien)
-    const echeanceSection = document.getElementById('intervention-detail-echeance-section');
-    if (type.code === 'ENT' && (intervention.date_prochaine_km || intervention.date_prochaine)) {
-        echeanceSection.style.display = 'block';
-        document.getElementById('intervention-detail-prochain-km').textContent = intervention.date_prochaine_km ? intervention.date_prochaine_km.toLocaleString() + ' km' : '-';
-        document.getElementById('intervention-detail-prochaine-date').textContent = formatDate(intervention.date_prochaine);
-    } else {
-        echeanceSection.style.display = 'none';
-    }
     
     // Update avatar color based on type
     const avatar = document.getElementById('intervention-detail-avatar');
@@ -922,7 +884,6 @@ async function handleOperationSubmit(e) {
         categorie_id: formData.get('categorie_id'),
         periodicite_km: formData.get('periodicite_km') || null,
         periodicite_mois: formData.get('periodicite_mois') || null,
-        cout_estime: formData.get('cout_estime') || null,
         actif: formData.get('actif') === 'on'
     };
     

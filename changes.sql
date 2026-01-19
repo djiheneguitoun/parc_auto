@@ -151,7 +151,6 @@ CREATE TABLE intervention_operations (
   
   periodicite_km INT NULL COMMENT 'Périodicité en km (uniquement pour entretien)',
   periodicite_mois INT NULL COMMENT 'Périodicité en mois (uniquement pour entretien)',
-  cout_estime DECIMAL(12,2) NULL COMMENT 'Coût estimé par défaut',
   actif BOOLEAN DEFAULT 1,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -217,20 +216,12 @@ CREATE TABLE intervention_vehicules (
   cout DECIMAL(12,2) NULL,
   prestataire VARCHAR(255) NULL COMMENT 'Nom du garage/prestataire',
   immobilisation_jours INT NULL DEFAULT 0,
-
-  statut ENUM('planifie', 'en_cours', 'termine', 'annule') NOT NULL DEFAULT 'termine',
-  date_prochaine_km INT NULL COMMENT 'Kilométrage prévu pour prochaine intervention',
-  date_prochaine DATE NULL COMMENT 'Date prévue pour prochaine intervention',
-  pieces_changees TEXT NULL COMMENT 'Liste des pièces changées',
-  observations TEXT NULL,
-  cree_par BIGINT UNSIGNED NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
 
   CONSTRAINT fk_interv_vehicule FOREIGN KEY (vehicule_id) REFERENCES vehicules(id) ON DELETE CASCADE,
-  CONSTRAINT fk_interv_operation FOREIGN KEY (operation_id) REFERENCES intervention_operations(id) ON DELETE RESTRICT,
-  CONSTRAINT fk_interv_utilisateur FOREIGN KEY (cree_par) REFERENCES utilisateurs(id) ON DELETE SET NULL
+  CONSTRAINT fk_interv_operation FOREIGN KEY (operation_id) REFERENCES intervention_operations(id) ON DELETE RESTRICT
 );
 
 -- Table intervention_suivi (optionnel) : Pour stocker les échéances calculées

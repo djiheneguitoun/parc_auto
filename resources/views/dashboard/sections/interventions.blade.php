@@ -80,7 +80,6 @@
                             <th style="width: 90px;">Catégorie</th>
                             <th style="width: 80px;">Km</th>
                             <th style="width: 100px;">Coût</th>
-                            <th style="width: 80px;">Statut</th>
                             <th style="width: 80px;">Actions</th>
                         </tr>
                     </thead>
@@ -531,27 +530,10 @@
                     <label>Jours d'immobilisation</label>
                     <input type="number" name="immobilisation_jours" id="intervention-immob" min="0" value="0">
                 </div>
-                <div class="form-group">
-                    <label>Statut</label>
-                    <select name="statut" id="intervention-statut">
-                        <option value="termine">Terminé</option>
-                        <option value="planifie">Planifié</option>
-                        <option value="en_cours">En cours</option>
-                        <option value="annule">Annulé</option>
-                    </select>
-                </div>
             </div>
             <div class="form-group full-width">
                 <label>Description</label>
                 <textarea name="description" id="intervention-description" rows="2" placeholder="Détails de l'intervention..."></textarea>
-            </div>
-            <div class="form-group full-width">
-                <label>Pièces changées</label>
-                <textarea name="pieces_changees" id="intervention-pieces" rows="2" placeholder="Liste des pièces remplacées..."></textarea>
-            </div>
-            <div class="form-group full-width">
-                <label>Observations</label>
-                <textarea name="observations" id="intervention-observations" rows="2" placeholder="Remarques, recommandations..."></textarea>
             </div>
             <div class="form-actions">
                 <button class="btn secondary" type="button" id="cancel-intervention-form">Annuler</button>
@@ -645,10 +627,6 @@
                     <p class="muted-small">Uniquement pour entretien</p>
                 </div>
                 <div class="form-group">
-                    <label>Coût estimé (DH)</label>
-                    <input type="number" name="cout_estime" id="operation-cout-estime" min="0" step="0.01" placeholder="0.00">
-                </div>
-                <div class="form-group">
                     <label class="checkbox-label">
                         <input type="checkbox" name="actif" id="operation-actif" checked>
                         <span>Actif</span>
@@ -685,7 +663,6 @@
                     <h3 id="intervention-detail-operation"></h3>
                     <div class="detail-badges">
                         <span class="pill" id="intervention-detail-type-badge"></span>
-                        <span class="pill" id="intervention-detail-statut"></span>
                     </div>
                 </div>
             </div>
@@ -704,30 +681,6 @@
                     Description
                 </h4>
                 <p id="intervention-detail-description" class="detail-description">Aucune description.</p>
-            </div>
-            <div class="detail-section">
-                <h4>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m6.8 14-3.5 2"/><path d="m20.7 16-3.5-2"/><path d="M6.8 10 3.3 8"/><path d="m20.7 8-3.5 2"/><path d="m9 22 3-8 3 8"/><path d="M8 6a6 6 0 0 1 12 0c0 2.22-.6 4.1-2 6-1.78 2.4-4 4-6 4.5-2-0.5-4.22-2.1-6-4.5-1.4-1.9-2-3.78-2-6Z"/></svg>
-                    Pièces changées
-                </h4>
-                <p id="intervention-detail-pieces" class="detail-description">Aucune pièce enregistrée.</p>
-            </div>
-            <div class="detail-section">
-                <h4>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                    Observations
-                </h4>
-                <p id="intervention-detail-observations" class="detail-description">Aucune observation.</p>
-            </div>
-            <div class="detail-section" id="intervention-detail-echeance-section" style="display:none;">
-                <h4>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Prochaine échéance
-                </h4>
-                <div class="detail-grid">
-                    <div class="detail-item"><label>Prochain km</label><span id="intervention-detail-prochain-km">-</span></div>
-                    <div class="detail-item"><label>Prochaine date</label><span id="intervention-detail-prochaine-date">-</span></div>
-                </div>
             </div>
         </div>
     </div>

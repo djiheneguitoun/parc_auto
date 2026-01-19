@@ -16,8 +16,6 @@ use Carbon\Carbon;
 
 class InterventionController extends Controller
 {
-    private const STATUTS = ['planifie', 'en_cours', 'termine', 'annule'];
-
     /**
      * Safe accessor for nested object properties
      */
@@ -123,7 +121,6 @@ class InterventionController extends Controller
             'categorie_id' => 'required|exists:intervention_categories,id',
             'periodicite_km' => 'nullable|integer|min:0',
             'periodicite_mois' => 'nullable|integer|min:0',
-            'cout_estime' => 'nullable|numeric|min:0',
             'actif' => 'boolean',
         ]);
 
@@ -150,7 +147,6 @@ class InterventionController extends Controller
             'categorie_id' => 'sometimes|exists:intervention_categories,id',
             'periodicite_km' => 'nullable|integer|min:0',
             'periodicite_mois' => 'nullable|integer|min:0',
-            'cout_estime' => 'nullable|numeric|min:0',
             'actif' => 'boolean',
         ]);
 
@@ -180,7 +176,6 @@ class InterventionController extends Controller
         $query = InterventionVehicule::with(['vehicule', 'operation.type', 'operation.categorie'])
             ->when($request->filled('vehicule_id'), fn ($q) => $q->where('vehicule_id', $request->get('vehicule_id')))
             ->when($request->filled('operation_id'), fn ($q) => $q->where('operation_id', $request->get('operation_id')))
-            ->when($request->filled('statut'), fn ($q) => $q->where('statut', $request->get('statut')))
             ->when($request->filled('type_code'), fn ($q) => $q->whereHas('operation.type', fn($inner) => $inner->where('code', $request->get('type_code'))))
             ->when($request->filled('categorie_id'), fn ($q) => $q->whereHas('operation', fn($inner) => $inner->where('categorie_id', $request->get('categorie_id'))))
             ->when($request->filled('date_start'), fn ($q) => $q->whereDate('date_intervention', '>=', $request->get('date_start')))
@@ -191,7 +186,6 @@ class InterventionController extends Controller
                 $q->where(function ($inner) use ($search) {
                     $inner->where('description', 'like', "%{$search}%")
                           ->orWhere('prestataire', 'like', "%{$search}%")
-                          ->orWhere('pieces_changees', 'like', "%{$search}%")
                           ->orWhereHas('operation', fn($op) => $op->where('libelle', 'like', "%{$search}%"))
                           ->orWhereHas('vehicule', fn($v) => $v->where('numero', 'like', "%{$search}%")
                               ->orWhere('marque', 'like', "%{$search}%")
@@ -212,11 +206,6 @@ class InterventionController extends Controller
         
         $intervention = InterventionVehicule::create($data);
 
-        // Calculer les prochaines échéances et mettre à jour le suivi
-        $intervention->load('operation');
-        $intervention->calculerProchainesEcheances();
-        $intervention->mettreAJourSuivi();
-
         return response()->json($intervention->load(['vehicule', 'operation.type', 'operation.categorie']), 201);
     }
 
@@ -225,7 +214,7 @@ class InterventionController extends Controller
      */
     public function show(InterventionVehicule $intervention)
     {
-        return $intervention->load(['vehicule', 'operation.type', 'operation.categorie', 'creePar']);
+        return $intervention->load(['vehicule', 'operation.type', 'operation.categorie']);
     }
 
     /**
@@ -236,11 +225,6 @@ class InterventionController extends Controller
         $data = $this->validateData($request, $intervention->id);
         
         $intervention->update($data);
-
-        // Recalculer les échéances
-        $intervention->load('operation');
-        $intervention->calculerProchainesEcheances();
-        $intervention->mettreAJourSuivi();
 
         return $intervention->load(['vehicule', 'operation.type', 'operation.categorie']);
     }
@@ -444,9 +428,6 @@ class InterventionController extends Controller
             'cout' => 'nullable|numeric|min:0',
             'prestataire' => 'nullable|string|max:255',
             'immobilisation_jours' => 'nullable|integer|min:0',
-            'statut' => ['nullable', Rule::in(self::STATUTS)],
-            'pieces_changees' => 'nullable|string',
-            'observations' => 'nullable|string',
         ]);
     }
 }
