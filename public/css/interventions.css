@@ -1031,27 +1031,26 @@
 /* ─────────────────────────────────────────
    EMPTY STATE
    ───────────────────────────────────────── */
-#interventions .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8) var(--space-4);
+#interventions td.empty-state {
+    display: table-cell;
     text-align: center;
+    padding: var(--space-6) var(--space-4);
+    vertical-align: middle;
+    box-sizing: border-box;
+    white-space: normal;
 }
 
-#interventions .empty-state svg {
+#interventions td.empty-state svg {
     color: var(--text-tertiary);
     margin-bottom: var(--space-3);
-    opacity: 0.5;
+    opacity: 0.6;
 }
 
-#interventions .empty-state p {
+#interventions td.empty-state p {
     font-size: var(--text-sm);
     color: var(--text-tertiary);
     margin: 0;
 }
-
 /* ─────────────────────────────────────────
    RESPONSIVE
    ───────────────────────────────────────── */
