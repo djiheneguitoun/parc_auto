@@ -214,30 +214,37 @@ export function initializeNavigation() {
     const navButtons = document.querySelectorAll('.nav-btn');
     const documentSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-doc-type]');
     const sinistreSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-sinistre-tab]');
+    const interventionSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-intervention-tab]');
     const documentsDropdownBtn = document.getElementById('documents-dropdown-btn');
     const documentsDropdown = documentsDropdownBtn?.parentElement;
     const sinistresDropdownBtn = document.getElementById('sinistres-dropdown-btn');
     const sinistresDropdown = sinistresDropdownBtn?.parentElement;
+    const interventionsDropdownBtn = document.getElementById('interventions-dropdown-btn');
+    const interventionsDropdown = interventionsDropdownBtn?.parentElement;
 
     const storageKeys = {
         section: 'nav:lastSection',
         docType: 'nav:lastDocType',
         sinistreTab: 'nav:lastSinistreTab',
+        interventionTab: 'nav:lastInterventionTab',
     };
 
     const saveNavState = (sectionId, tab = null) => {
         if (sectionId) localStorage.setItem(storageKeys.section, sectionId);
         if (tab && sectionId === 'documents') localStorage.setItem(storageKeys.docType, tab);
         if (tab && sectionId === 'sinistres') localStorage.setItem(storageKeys.sinistreTab, tab);
+        if (tab && sectionId === 'interventions') localStorage.setItem(storageKeys.interventionTab, tab);
     };
 
     const resetNav = () => {
         navButtons.forEach(b => b.classList.remove('active'));
         documentSubmenuButtons.forEach(b => b.classList.remove('active'));
         sinistreSubmenuButtons.forEach(b => b.classList.remove('active'));
+        interventionSubmenuButtons.forEach(b => b.classList.remove('active'));
         sections.forEach(s => s.classList.remove('active'));
         if (documentsDropdown) documentsDropdown.classList.remove('open');
         if (sinistresDropdown) sinistresDropdown.classList.remove('open');
+        if (interventionsDropdown) interventionsDropdown.classList.remove('open');
     };
 
     const activateDocuments = (docType) => {
@@ -278,6 +285,25 @@ export function initializeNavigation() {
             .catch(err => console.error('Error activating sinistres tab:', err));
     };
 
+    const activateInterventions = (tabKey) => {
+        const tabToUse = tabKey || localStorage.getItem(storageKeys.interventionTab) || 'tableau';
+        const targetSection = document.getElementById('interventions');
+
+        resetNav();
+        if (interventionsDropdownBtn) interventionsDropdownBtn.classList.add('active');
+        if (interventionsDropdown) interventionsDropdown.classList.add('open');
+        if (targetSection) targetSection.classList.add('active');
+
+        const matchingSubBtn = Array.from(interventionSubmenuButtons).find(btn => btn.dataset.interventionTab === tabToUse);
+        if (matchingSubBtn) matchingSubBtn.classList.add('active');
+
+        saveNavState('interventions', tabToUse);
+
+        import('./interventions.js')
+            .then(module => module.activateInterventionTab(tabToUse))
+            .catch(err => console.error('Error activating interventions tab:', err));
+    };
+
     const activateMainSection = (sectionId) => {
         resetNav();
         const targetSection = document.getElementById(sectionId);
@@ -307,6 +333,15 @@ export function initializeNavigation() {
                 }
                 return;
             }
+            if (btn.id === 'interventions-dropdown-btn') {
+                // Toggle: fermer si déjà ouvert
+                if (interventionsDropdown?.classList.contains('open')) {
+                    interventionsDropdown.classList.remove('open');
+                } else {
+                    activateInterventions();
+                }
+                return;
+            }
             activateMainSection(btn.dataset.target);
         });
     });
@@ -325,14 +360,24 @@ export function initializeNavigation() {
         });
     });
 
+    interventionSubmenuButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activateInterventions(btn.dataset.interventionTab);
+        });
+    });
+
     const lastSection = localStorage.getItem(storageKeys.section) || 'overview';
     const lastDocType = localStorage.getItem(storageKeys.docType) || state.documentCurrentType || 'assurance';
     const lastSinistreTab = localStorage.getItem(storageKeys.sinistreTab) || state.sinistreCurrentTab || 'tableau';
+    const lastInterventionTab = localStorage.getItem(storageKeys.interventionTab) || 'tableau';
 
     if (lastSection === 'documents') {
         activateDocuments(lastDocType);
     } else if (lastSection === 'sinistres') {
         activateSinistres(lastSinistreTab);
+    } else if (lastSection === 'interventions') {
+        activateInterventions(lastInterventionTab);
     } else {
         activateMainSection(lastSection);
     }

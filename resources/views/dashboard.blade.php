@@ -105,6 +105,30 @@
             
             </div>
         </div>
+        <div class="nav-dropdown">
+            <button class="nav-btn" id="interventions-dropdown-btn" type="button" data-target="interventions">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                <span>Interventions</span>
+            </button>
+            <div class="nav-submenu" id="interventions-submenu">
+                <button class="nav-submenu-btn" data-target="interventions" data-intervention-tab="tableau">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>Historique</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="interventions" data-intervention-tab="alertes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    <span>Alertes</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="interventions" data-intervention-tab="catalogue">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span>Catalogue</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="interventions" data-intervention-tab="stats">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    <span>Statistiques</span>
+                </button>
+            </div>
+        </div>
         <button class="nav-btn" data-target="utilisateurs">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
             <span>Utilisateurs</span>
@@ -121,6 +145,7 @@
         @include('dashboard.sections.rapports')
         @include('dashboard.sections.documents')
         @include('dashboard.sections.sinistres')
+        @include('dashboard.sections.interventions')
         @include('dashboard.sections.utilisateurs')
         @include('dashboard.sections.parametres')
     </main>

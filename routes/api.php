@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AssuranceSinistreController;
 use App\Http\Controllers\Api\ChauffeurController;
+use App\Http\Controllers\Api\InterventionController;
 use App\Http\Controllers\Api\ParametreController;
 use App\Http\Controllers\Api\ReparationSinistreController;
 use App\Http\Controllers\Api\SinistreController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\VehiculeDocumentController;
 use App\Http\Controllers\Api\VehiculeImageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -60,4 +62,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('reports/charges/preview', [ReportController::class, 'previewCharges']);
     Route::get('reports/factures/export', [ReportController::class, 'exportFactures']);
     Route::get('reports/factures/preview', [ReportController::class, 'previewFactures']);
+
+    // Module Interventions (Entretien & Réparation)
+    Route::prefix('interventions')->group(function () {
+        // Référentiels
+        Route::get('types', [InterventionController::class, 'types']);
+        Route::get('categories', [InterventionController::class, 'categories']);
+        Route::post('categories', [InterventionController::class, 'storeCategorie']);
+        Route::put('categories/{categorie}', [InterventionController::class, 'updateCategorie']);
+        Route::get('operations', [InterventionController::class, 'operations']);
+        Route::post('operations', [InterventionController::class, 'storeOperation']);
+        Route::put('operations/{operation}', [InterventionController::class, 'updateOperation']);
+        
+        // Suivi & Alertes
+        Route::get('suivis', [InterventionController::class, 'suivis']);
+        Route::get('alertes', [InterventionController::class, 'alertes']);
+        
+        // Statistiques
+        Route::get('stats', [InterventionController::class, 'stats']);
+    });
+    Route::apiResource('interventions', InterventionController::class);
 });

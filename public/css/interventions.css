@@ -1,0 +1,1091 @@
+/* ============================================
+   PARC AUTO - INTERVENTIONS STYLES
+   Same style as sinistres/chauffeurs/vehicules
+   Using ACCENT (night blue) color theme
+   ============================================ */
+
+#interventions {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ─────────────────────────────────────────
+   PANELS (Tab content)
+   ───────────────────────────────────────── */
+#interventions .intervention-panel {
+    display: none;
+}
+
+#interventions .intervention-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ─────────────────────────────────────────
+   SECTION HEADER
+   ───────────────────────────────────────── */
+#interventions .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+#interventions .section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+#interventions .section-header h2 .icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+}
+
+#interventions .section-header p {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin: 0;
+    padding-left: calc(40px + var(--space-3));
+}
+
+#interventions .section-header .section-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ─────────────────────────────────────────
+   TABLE CARD
+   ───────────────────────────────────────── */
+#interventions .table-card {
+    border-left: 4px solid var(--accent);
+    margin-bottom: var(--space-4);
+    transition: all 0.2s ease;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: visible;
+}
+
+#interventions .table-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+#interventions .card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-4);
+}
+
+/* Section subheader */
+#interventions .section-subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    position: relative;
+    overflow: visible;
+    z-index: 10;
+}
+
+#interventions .section-subheader h3 {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+#interventions .section-subheader h3 svg {
+    color: var(--accent);
+}
+
+/* Filter actions */
+#interventions .filter-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 20;
+}
+
+#interventions .stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+/* Custom select - FIXED OVERFLOW */
+#interventions .custom-select {
+    position: relative;
+    min-width: 160px;
+    z-index: 100;
+}
+
+#interventions .custom-select__trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+#interventions .custom-select__trigger:hover {
+    border-color: var(--accent-light);
+}
+
+#interventions .custom-select.open .custom-select__trigger {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+#interventions .custom-select__value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#interventions .custom-select__arrow {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: transform 0.2s ease;
+}
+
+#interventions .custom-select.open .custom-select__arrow {
+    transform: rotate(180deg);
+}
+
+#interventions .custom-select__options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 280px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    list-style: none;
+    margin: 0;
+    padding: var(--space-1);
+    display: none;
+}
+
+#interventions .custom-select.open .custom-select__options {
+    display: block;
+    animation: fadeIn 0.15s ease;
+}
+
+#interventions .custom-select__options li {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+#interventions .custom-select__options li:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+#interventions .custom-select__options li[aria-selected="true"] {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: var(--font-medium);
+}
+
+/* ─────────────────────────────────────────
+   TABLE - FIXED COLUMNS
+   ───────────────────────────────────────── */
+#interventions .table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+#interventions table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#interventions th,
+#interventions td {
+    padding: var(--space-3) var(--space-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#interventions th {
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#interventions td {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#interventions th:last-child,
+#interventions td:last-child {
+    text-align: center;
+}
+
+#interventions tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+#interventions tbody tr:hover {
+    background: rgba(59, 130, 246, 0.04);
+}
+
+#interventions tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ─────────────────────────────────────────
+   PILLS / STATUS BADGES
+   ───────────────────────────────────────── */
+#interventions .pill,
+#intervention-detail-modal .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-0-5) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+/* Type intervention */
+#interventions .pill.ENT,
+#intervention-detail-modal .pill.ENT {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+#interventions .pill.REP,
+#intervention-detail-modal .pill.REP {
+    background: var(--warning-100);
+    color: var(--warning-700);
+}
+
+/* Statut */
+#interventions .pill.planifie,
+#intervention-detail-modal .pill.planifie {
+    background: var(--info-100);
+    color: var(--info-700);
+}
+
+#interventions .pill.en_cours,
+#intervention-detail-modal .pill.en_cours {
+    background: var(--warning-100);
+    color: var(--warning-700);
+}
+
+#interventions .pill.termine,
+#intervention-detail-modal .pill.termine {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+#interventions .pill.annule,
+#intervention-detail-modal .pill.annule {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+/* Actif */
+#interventions .pill.actif-oui {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+#interventions .pill.actif-non {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+/* ─────────────────────────────────────────
+   ACTION BUTTONS
+   ───────────────────────────────────────── */
+#interventions .action-btns {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+}
+
+#interventions .action-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+#interventions .action-btn.view {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+#interventions .action-btn.view:hover,
+#interventions .action-btn.view:focus {
+    background: var(--accent);
+    color: white;
+}
+
+#interventions .action-btn.edit {
+    background: var(--primary-100);
+    color: var(--primary-600);
+}
+
+#interventions .action-btn.edit:hover,
+#interventions .action-btn.edit:focus {
+    background: var(--primary-500);
+    color: white;
+}
+
+#interventions .action-btn.delete {
+    background: var(--danger-100);
+    color: var(--danger-600);
+}
+
+#interventions .action-btn.delete:hover,
+#interventions .action-btn.delete:focus {
+    background: var(--danger-500);
+    color: white;
+}
+
+#interventions .action-btn.add {
+    background: var(--success-100);
+    color: var(--success-600);
+}
+
+#interventions .action-btn.add:hover,
+#interventions .action-btn.add:focus {
+    background: var(--success-500);
+    color: white;
+}
+
+/* ─────────────────────────────────────────
+   STATS KPI GRID
+   ───────────────────────────────────────── */
+#interventions .stats-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+#interventions .kpi-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+#interventions .kpi-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+#interventions .kpi-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+}
+
+#interventions .kpi-card.kpi-danger .kpi-icon {
+    background: var(--danger-100);
+    color: var(--danger-600);
+}
+
+#interventions .kpi-card.kpi-warning .kpi-icon {
+    background: var(--warning-100);
+    color: var(--warning-600);
+}
+
+#interventions .kpi-card.kpi-success .kpi-icon {
+    background: var(--success-100);
+    color: var(--success-600);
+}
+
+#interventions .kpi-card.kpi-info .kpi-icon {
+    background: var(--info-100);
+    color: var(--info-600);
+}
+
+#interventions .kpi-card.kpi-accent .kpi-icon {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+#interventions .kpi-content {
+    display: flex;
+    flex-direction: column;
+}
+
+#interventions .kpi-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+#interventions .kpi-label {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+/* ─────────────────────────────────────────
+   STATS PANEL
+   ───────────────────────────────────────── */
+#interventions .stats-filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+#interventions .stats-filters .filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+#interventions .stats-filters label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+}
+
+#interventions .stats-filters input[type="date"] {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: white;
+    transition: all 0.15s;
+}
+
+#interventions .stats-filters input[type="date"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Charts Grid */
+#interventions .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+    #interventions .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+#interventions .chart-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+#interventions .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#interventions .chart-header h4 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+#interventions .chart-header h4 svg {
+    color: var(--accent);
+}
+
+#interventions .chart-header .chart-subtitle {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+#interventions .chart-body {
+    padding: var(--space-4);
+    height: 280px;
+    position: relative;
+}
+
+#interventions .chart-body canvas {
+    max-height: 100%;
+}
+
+/* Ranking */
+#interventions .ranking-list {
+    padding: var(--space-4);
+}
+
+#interventions .ranking-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+#interventions .ranking-item:last-child {
+    border-bottom: none;
+}
+
+#interventions .ranking-position {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    flex-shrink: 0;
+}
+
+#interventions .ranking-info {
+    flex: 1;
+    min-width: 0;
+}
+
+#interventions .ranking-label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#interventions .ranking-value {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+/* ─────────────────────────────────────────
+   MODALS
+   ───────────────────────────────────────── */
+#intervention-modal,
+#categorie-modal,
+#operation-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#intervention-modal.hidden,
+#categorie-modal.hidden,
+#operation-modal.hidden {
+    display: none !important;
+}
+
+#intervention-modal .modal-backdrop,
+#categorie-modal .modal-backdrop,
+#operation-modal .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+#intervention-modal .modal-dialog,
+#categorie-modal .modal-dialog,
+#operation-modal .modal-dialog {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#categorie-modal .modal-dialog,
+#operation-modal .modal-dialog {
+    max-width: 500px;
+}
+
+#intervention-detail-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99998 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#intervention-detail-modal.hidden {
+    display: none !important;
+}
+
+#intervention-detail-modal .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+#intervention-detail-modal .modal-dialog.detail-dialog {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal header */
+#intervention-modal .modal-header,
+#categorie-modal .modal-header,
+#operation-modal .modal-header,
+#intervention-detail-modal .modal-header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    border-radius: 12px 12px 0 0;
+    z-index: 10;
+}
+
+#intervention-modal .modal-header h3,
+#categorie-modal .modal-header h3,
+#operation-modal .modal-header h3,
+#intervention-detail-modal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+#intervention-modal .modal-header h3 svg,
+#categorie-modal .modal-header h3 svg,
+#operation-modal .modal-header h3 svg,
+#intervention-detail-modal .modal-header h3 svg {
+    color: var(--accent);
+}
+
+#intervention-modal .close-btn,
+#categorie-modal .close-btn,
+#operation-modal .close-btn,
+#intervention-detail-modal .close-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+#intervention-modal .close-btn:hover,
+#categorie-modal .close-btn:hover,
+#operation-modal .close-btn:hover,
+#intervention-detail-modal .close-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Modal body */
+#intervention-modal .modal-body,
+#categorie-modal .modal-body,
+#operation-modal .modal-body,
+#intervention-detail-modal .modal-body {
+    padding: var(--space-5);
+}
+
+/* Form Grid */
+#interventions .form-grid,
+#intervention-modal .form-grid,
+#categorie-modal .form-grid,
+#operation-modal .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+#interventions .form-group,
+#intervention-modal .form-group,
+#categorie-modal .form-group,
+#operation-modal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+#interventions .form-group.full-width,
+#intervention-modal .form-group.full-width,
+#categorie-modal .form-group.full-width,
+#operation-modal .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+#interventions .form-group label,
+#intervention-modal .form-group label,
+#categorie-modal .form-group label,
+#operation-modal .form-group label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+}
+
+#interventions .form-group label .required,
+#intervention-modal .form-group label .required,
+#categorie-modal .form-group label .required,
+#operation-modal .form-group label .required {
+    color: var(--danger);
+}
+
+#interventions .form-group input,
+#interventions .form-group select,
+#interventions .form-group textarea,
+#intervention-modal .form-group input,
+#intervention-modal .form-group select,
+#intervention-modal .form-group textarea,
+#categorie-modal .form-group input,
+#categorie-modal .form-group select,
+#categorie-modal .form-group textarea,
+#operation-modal .form-group input,
+#operation-modal .form-group select,
+#operation-modal .form-group textarea {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: white;
+    transition: all 0.15s;
+}
+
+#interventions .form-group input:focus,
+#interventions .form-group select:focus,
+#interventions .form-group textarea:focus,
+#intervention-modal .form-group input:focus,
+#intervention-modal .form-group select:focus,
+#intervention-modal .form-group textarea:focus,
+#categorie-modal .form-group input:focus,
+#categorie-modal .form-group select:focus,
+#categorie-modal .form-group textarea:focus,
+#operation-modal .form-group input:focus,
+#operation-modal .form-group select:focus,
+#operation-modal .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+#interventions .form-group textarea,
+#intervention-modal .form-group textarea,
+#categorie-modal .form-group textarea,
+#operation-modal .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Checkbox */
+#interventions .checkbox-wrapper,
+#intervention-modal .checkbox-wrapper,
+#categorie-modal .checkbox-wrapper,
+#operation-modal .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+#interventions .checkbox-wrapper input[type="checkbox"],
+#intervention-modal .checkbox-wrapper input[type="checkbox"],
+#categorie-modal .checkbox-wrapper input[type="checkbox"],
+#operation-modal .checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+/* Modal footer */
+#intervention-modal .modal-footer,
+#categorie-modal .modal-footer,
+#operation-modal .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    border-radius: 0 0 12px 12px;
+}
+
+/* ─────────────────────────────────────────
+   DETAIL MODAL CONTENT
+   ───────────────────────────────────────── */
+#intervention-detail-modal .detail-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+}
+
+#intervention-detail-modal .detail-avatar {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+}
+
+#intervention-detail-modal .detail-info h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-1) 0;
+}
+
+#intervention-detail-modal .detail-badges {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+#intervention-detail-modal .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+#intervention-detail-modal .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+#intervention-detail-modal .detail-item label {
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+#intervention-detail-modal .detail-item span {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+}
+
+#intervention-detail-modal .detail-section {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-light);
+}
+
+#intervention-detail-modal .detail-section h4 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-3) 0;
+}
+
+#intervention-detail-modal .detail-section h4 svg {
+    color: var(--accent);
+}
+
+#intervention-detail-modal .detail-description {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ─────────────────────────────────────────
+   EMPTY STATE
+   ───────────────────────────────────────── */
+#interventions .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+}
+
+#interventions .empty-state svg {
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+}
+
+#interventions .empty-state p {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────── */
+@media (max-width: 768px) {
+    #interventions .section-header {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    #interventions .section-subheader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #interventions .filter-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    #interventions .custom-select {
+        width: 100%;
+    }
+
+    #interventions .stats-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #interventions .form-grid,
+    #intervention-modal .form-grid,
+    #operation-modal .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #intervention-detail-modal .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
