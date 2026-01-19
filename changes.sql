@@ -131,15 +131,7 @@ INSERT INTO intervention_categories (code, libelle) VALUES
 ('PNE', 'Pneumatiques'),
 ('CLI', 'Climatisation'),
 ('CAR', 'Carrosserie'),
-('REG', 'Réglementaire'),
-('MEC', 'Mécanique générale'),
-('TRA', 'Transmission'),
-('SUS', 'Suspension'),
-('DIR', 'Direction'),
-('ECH', 'Échappement'),
-('FIL', 'Filtration'),
-('LUB', 'Lubrification'),
-('REF', 'Refroidissement');
+('REG', 'Réglementaire');
 
 -- Table intervention_operation : Catalogue normalisé des opérations
 CREATE TABLE intervention_operations (
@@ -161,17 +153,10 @@ CREATE TABLE intervention_operations (
 -- Données initiales intervention_operation (Entretiens)
 INSERT INTO intervention_operations (code, libelle, type_id, categorie_id, periodicite_km, periodicite_mois) VALUES
 -- Entretiens périodiques (type_id = 1 = ENT)
-('VID_MOT', 'Vidange moteur', 1, (SELECT id FROM intervention_categories WHERE code='LUB'), 10000, 6),
-('FILT_HUILE', 'Remplacement filtre à huile', 1, (SELECT id FROM intervention_categories WHERE code='FIL'), 10000, 6),
-('FILT_AIR', 'Remplacement filtre à air', 1, (SELECT id FROM intervention_categories WHERE code='FIL'), 20000, 12),
-('FILT_HABIT', 'Remplacement filtre habitacle', 1, (SELECT id FROM intervention_categories WHERE code='FIL'), NULL, 12),
-('FILT_CARB', 'Remplacement filtre à carburant', 1, (SELECT id FROM intervention_categories WHERE code='FIL'), 40000, 24),
 ('CTRL_FREIN', 'Contrôle plaquettes/disques', 1, (SELECT id FROM intervention_categories WHERE code='FRE'), 20000, 12),
 ('LIQ_FREIN', 'Vidange liquide de frein', 1, (SELECT id FROM intervention_categories WHERE code='FRE'), 60000, 24),
-('LIQ_REFROID', 'Vidange liquide de refroidissement', 1, (SELECT id FROM intervention_categories WHERE code='REF'), 60000, 36),
 ('CTRL_PNEU', 'Contrôle pression/usure pneus', 1, (SELECT id FROM intervention_categories WHERE code='PNE'), 5000, 3),
 ('EQUIL_PNEU', 'Équilibrage pneus', 1, (SELECT id FROM intervention_categories WHERE code='PNE'), 20000, 12),
-('PARALL', 'Parallélisme', 1, (SELECT id FROM intervention_categories WHERE code='DIR'), 20000, 12),
 ('COURR_DIST', 'Remplacement courroie distribution', 1, (SELECT id FROM intervention_categories WHERE code='MOT'), 100000, 60),
 ('COURR_ACC', 'Remplacement courroie accessoires', 1, (SELECT id FROM intervention_categories WHERE code='MOT'), 80000, 48),
 ('BOUGIES', 'Remplacement bougies', 1, (SELECT id FROM intervention_categories WHERE code='MOT'), 60000, 48),
@@ -184,26 +169,19 @@ INSERT INTO intervention_operations (code, libelle, type_id, categorie_id, perio
 -- Données initiales intervention_operation (Réparations - sans périodicité)
 INSERT INTO intervention_operations (code, libelle, type_id, categorie_id, periodicite_km, periodicite_mois) VALUES
 -- Réparations (type_id = 2 = REP)
-('REP_EMBR', 'Remplacement embrayage', 2, (SELECT id FROM intervention_categories WHERE code='TRA'), NULL, NULL),
 ('REP_DEMARR', 'Remplacement démarreur', 2, (SELECT id FROM intervention_categories WHERE code='ELE'), NULL, NULL),
 ('REP_ALTER', 'Remplacement alternateur', 2, (SELECT id FROM intervention_categories WHERE code='ELE'), NULL, NULL),
 ('REP_BATT', 'Remplacement batterie', 2, (SELECT id FROM intervention_categories WHERE code='ELE'), NULL, NULL),
 ('REP_PLAQ', 'Remplacement plaquettes de frein', 2, (SELECT id FROM intervention_categories WHERE code='FRE'), NULL, NULL),
 ('REP_DISQ', 'Remplacement disques de frein', 2, (SELECT id FROM intervention_categories WHERE code='FRE'), NULL, NULL),
 ('REP_PNEU', 'Remplacement pneu(s)', 2, (SELECT id FROM intervention_categories WHERE code='PNE'), NULL, NULL),
-('REP_AMORT', 'Remplacement amortisseur(s)', 2, (SELECT id FROM intervention_categories WHERE code='SUS'), NULL, NULL),
-('REP_ROULE', 'Remplacement roulement(s)', 2, (SELECT id FROM intervention_categories WHERE code='SUS'), NULL, NULL),
-('REP_POMPE_EAU', 'Remplacement pompe à eau', 2, (SELECT id FROM intervention_categories WHERE code='REF'), NULL, NULL),
-('REP_RADIAT', 'Remplacement radiateur', 2, (SELECT id FROM intervention_categories WHERE code='REF'), NULL, NULL),
 ('REP_INJECTEUR', 'Remplacement injecteur(s)', 2, (SELECT id FROM intervention_categories WHERE code='MOT'), NULL, NULL),
 ('REP_VANNE_EGR', 'Remplacement vanne EGR', 2, (SELECT id FROM intervention_categories WHERE code='MOT'), NULL, NULL),
 ('REP_TURBO', 'Remplacement turbo', 2, (SELECT id FROM intervention_categories WHERE code='MOT'), NULL, NULL),
 ('REP_COMPRES', 'Remplacement compresseur clim', 2, (SELECT id FROM intervention_categories WHERE code='CLI'), NULL, NULL),
-('REP_ECHAPP', 'Réparation/remplacement échappement', 2, (SELECT id FROM intervention_categories WHERE code='ECH'), NULL, NULL),
 ('REP_CARROSS', 'Réparation carrosserie', 2, (SELECT id FROM intervention_categories WHERE code='CAR'), NULL, NULL),
 ('REP_PARE_BRISE', 'Remplacement pare-brise', 2, (SELECT id FROM intervention_categories WHERE code='CAR'), NULL, NULL),
-('REP_MOTEUR', 'Réparation moteur', 2, (SELECT id FROM intervention_categories WHERE code='MOT'), NULL, NULL),
-('REP_BOITE', 'Réparation boîte de vitesses', 2, (SELECT id FROM intervention_categories WHERE code='TRA'), NULL, NULL);
+('REP_MOTEUR', 'Réparation moteur', 2, (SELECT id FROM intervention_categories WHERE code='MOT'), NULL, NULL);
 
 -- Table intervention_vehicule : Historique réel des interventions
 CREATE TABLE intervention_vehicules (
@@ -240,4 +218,3 @@ CREATE TABLE intervention_suivis (
   CONSTRAINT fk_suivi_operation FOREIGN KEY (operation_id) REFERENCES intervention_operations(id) ON DELETE CASCADE,
   UNIQUE KEY unique_vehicule_operation (vehicule_id, operation_id)
 );
-
