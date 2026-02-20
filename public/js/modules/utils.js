@@ -215,18 +215,22 @@ export function initializeNavigation() {
     const documentSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-doc-type]');
     const sinistreSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-sinistre-tab]');
     const interventionSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-intervention-tab]');
+    const carburantSubmenuButtons = document.querySelectorAll('.nav-submenu-btn[data-carburant-tab]');
     const documentsDropdownBtn = document.getElementById('documents-dropdown-btn');
     const documentsDropdown = documentsDropdownBtn?.parentElement;
     const sinistresDropdownBtn = document.getElementById('sinistres-dropdown-btn');
     const sinistresDropdown = sinistresDropdownBtn?.parentElement;
     const interventionsDropdownBtn = document.getElementById('interventions-dropdown-btn');
     const interventionsDropdown = interventionsDropdownBtn?.parentElement;
+    const carburantDropdownBtn = document.getElementById('carburant-dropdown-btn');
+    const carburantDropdown = carburantDropdownBtn?.parentElement;
 
     const storageKeys = {
         section: 'nav:lastSection',
         docType: 'nav:lastDocType',
         sinistreTab: 'nav:lastSinistreTab',
         interventionTab: 'nav:lastInterventionTab',
+        carburantTab: 'nav:lastCarburantTab',
     };
 
     const saveNavState = (sectionId, tab = null) => {
@@ -234,6 +238,7 @@ export function initializeNavigation() {
         if (tab && sectionId === 'documents') localStorage.setItem(storageKeys.docType, tab);
         if (tab && sectionId === 'sinistres') localStorage.setItem(storageKeys.sinistreTab, tab);
         if (tab && sectionId === 'interventions') localStorage.setItem(storageKeys.interventionTab, tab);
+        if (tab && sectionId === 'carburant') localStorage.setItem(storageKeys.carburantTab, tab);
     };
 
     const resetNav = () => {
@@ -241,10 +246,12 @@ export function initializeNavigation() {
         documentSubmenuButtons.forEach(b => b.classList.remove('active'));
         sinistreSubmenuButtons.forEach(b => b.classList.remove('active'));
         interventionSubmenuButtons.forEach(b => b.classList.remove('active'));
+        carburantSubmenuButtons.forEach(b => b.classList.remove('active'));
         sections.forEach(s => s.classList.remove('active'));
         if (documentsDropdown) documentsDropdown.classList.remove('open');
         if (sinistresDropdown) sinistresDropdown.classList.remove('open');
         if (interventionsDropdown) interventionsDropdown.classList.remove('open');
+        if (carburantDropdown) carburantDropdown.classList.remove('open');
     };
 
     const activateDocuments = (docType) => {
@@ -304,6 +311,25 @@ export function initializeNavigation() {
             .catch(err => console.error('Error activating interventions tab:', err));
     };
 
+    const activateCarburant = (tabKey) => {
+        const tabToUse = tabKey || localStorage.getItem(storageKeys.carburantTab) || 'pleins';
+        const targetSection = document.getElementById('carburant');
+
+        resetNav();
+        if (carburantDropdownBtn) carburantDropdownBtn.classList.add('active');
+        if (carburantDropdown) carburantDropdown.classList.add('open');
+        if (targetSection) targetSection.classList.add('active');
+
+        const matchingSubBtn = Array.from(carburantSubmenuButtons).find(btn => btn.dataset.carburantTab === tabToUse);
+        if (matchingSubBtn) matchingSubBtn.classList.add('active');
+
+        saveNavState('carburant', tabToUse);
+
+        import('./carburant.js')
+            .then(module => module.activateCarburantTab(tabToUse))
+            .catch(err => console.error('Error activating carburant tab:', err));
+    };
+
     const activateMainSection = (sectionId) => {
         resetNav();
         const targetSection = document.getElementById(sectionId);
@@ -342,6 +368,14 @@ export function initializeNavigation() {
                 }
                 return;
             }
+            if (btn.id === 'carburant-dropdown-btn') {
+                if (carburantDropdown?.classList.contains('open')) {
+                    carburantDropdown.classList.remove('open');
+                } else {
+                    activateCarburant();
+                }
+                return;
+            }
             activateMainSection(btn.dataset.target);
         });
     });
@@ -367,10 +401,18 @@ export function initializeNavigation() {
         });
     });
 
+    carburantSubmenuButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activateCarburant(btn.dataset.carburantTab);
+        });
+    });
+
     const lastSection = localStorage.getItem(storageKeys.section) || 'overview';
     const lastDocType = localStorage.getItem(storageKeys.docType) || state.documentCurrentType || 'assurance';
     const lastSinistreTab = localStorage.getItem(storageKeys.sinistreTab) || state.sinistreCurrentTab || 'tableau';
     const lastInterventionTab = localStorage.getItem(storageKeys.interventionTab) || 'tableau';
+    const lastCarburantTab = localStorage.getItem(storageKeys.carburantTab) || 'pleins';
 
     if (lastSection === 'documents') {
         activateDocuments(lastDocType);
@@ -378,6 +420,8 @@ export function initializeNavigation() {
         activateSinistres(lastSinistreTab);
     } else if (lastSection === 'interventions') {
         activateInterventions(lastInterventionTab);
+    } else if (lastSection === 'carburant') {
+        activateCarburant(lastCarburantTab);
     } else {
         activateMainSection(lastSection);
     }

@@ -52,6 +52,12 @@ import {
     loadInterventions,
 } from './modules/interventions.js';
 
+import {
+    initializeCarburantEvents,
+    initializeCarburant,
+    loadPleins,
+} from './modules/carburant.js';
+
 // ============================================================================
 // Application Initialization
 // ============================================================================
@@ -204,6 +210,7 @@ function initializeApp() {
     initializeReportsEvents();
     initializeSinistreEvents();
     initializeInterventionEvents();
+    initializeCarburantEvents();
 
     // Load all initial data
     Promise.all([
@@ -216,6 +223,7 @@ function initializeApp() {
         loadSinistres(),
         loadSinistreStats(),
         initializeInterventions(),
+        initializeCarburant(),
     ]).then(() => {
         renderDashboardCharts();
     }).catch(err => console.error('Error loading initial data:', err));

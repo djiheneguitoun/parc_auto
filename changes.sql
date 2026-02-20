@@ -218,3 +218,27 @@ CREATE TABLE intervention_suivis (
   CONSTRAINT fk_suivi_operation FOREIGN KEY (operation_id) REFERENCES intervention_operations(id) ON DELETE CASCADE,
   UNIQUE KEY unique_vehicule_operation (vehicule_id, operation_id)
 );
+
+
+-- ============================================================================
+-- MODULE GESTION CARBURANT
+-- ============================================================================
+
+CREATE TABLE carburant_pleins (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  vehicule_id BIGINT UNSIGNED NOT NULL,
+  chauffeur_id BIGINT UNSIGNED NULL,
+  date_plein DATE NOT NULL,
+  kilometrage INT NULL,
+  quantite DECIMAL(10,2) NOT NULL COMMENT 'Quantité en litres',
+  prix_unitaire DECIMAL(10,2) NOT NULL COMMENT 'Prix par litre en DA',
+  montant_total DECIMAL(12,2) NOT NULL COMMENT 'Montant total en DA',
+  type_carburant ENUM('essence','diesel','gpl','electrique') NOT NULL DEFAULT 'diesel',
+  station VARCHAR(255) NULL COMMENT 'Nom de la station',
+  mode_paiement ENUM('especes','carte_carburant','bon','cheque') NOT NULL DEFAULT 'especes',
+  observation TEXT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_carburant_vehicule FOREIGN KEY (vehicule_id) REFERENCES vehicules(id) ON DELETE CASCADE,
+  CONSTRAINT fk_carburant_chauffeur FOREIGN KEY (chauffeur_id) REFERENCES chauffeurs(id) ON DELETE SET NULL
+);

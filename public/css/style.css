@@ -21,6 +21,7 @@
 @import url("documents.css");
 @import url("sinistres.css");
 @import url("interventions.css");
+@import url("carburant.css");
 @import url("utilisateurs.css");
 
 /* ============================================
@@ -31,7 +32,8 @@
    PAGE BACKGROUND GRADIENT
    ───────────────────────────────────────── */
 body {
-    background: radial-gradient(
+    background:
+        radial-gradient(
             ellipse at 0% 0%,
             rgba(30, 45, 120, 0.03) 0%,
             transparent 50%

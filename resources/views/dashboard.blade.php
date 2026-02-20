@@ -129,6 +129,34 @@
                 </button>
             </div>
         </div>
+        <div class="nav-dropdown">
+            <button class="nav-btn" id="carburant-dropdown-btn" type="button" data-target="carburant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h12"/><path d="M4 9h10"/><path d="M4 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"/><path d="M14 15a2 2 0 1 0 4 0v-3a2 2 0 0 0-2-2h-2"/><path d="M16 10V4"/></svg>
+                <span>Carburant</span>
+            </button>
+            <div class="nav-submenu" id="carburant-submenu">
+                <button class="nav-submenu-btn" data-target="carburant" data-carburant-tab="pleins">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22h12"/><path d="M4 9h10"/><path d="M4 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"/></svg>
+                    <span>Pleins</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="carburant" data-carburant-tab="consommation">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    <span>Consommation</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="carburant" data-carburant-tab="alertes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    <span>Alertes</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="carburant" data-carburant-tab="comparaison">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Comparaison</span>
+                </button>
+                <button class="nav-submenu-btn" data-target="carburant" data-carburant-tab="stats">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+                    <span>Statistiques</span>
+                </button>
+            </div>
+        </div>
         <button class="nav-btn" data-target="utilisateurs">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
             <span>Utilisateurs</span>
@@ -146,6 +174,7 @@
         @include('dashboard.sections.documents')
         @include('dashboard.sections.sinistres')
         @include('dashboard.sections.interventions')
+        @include('dashboard.sections.carburant')
         @include('dashboard.sections.utilisateurs')
         @include('dashboard.sections.parametres')
     </main>

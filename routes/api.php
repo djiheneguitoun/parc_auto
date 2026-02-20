@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AssuranceSinistreController;
+use App\Http\Controllers\Api\CarburantController;
 use App\Http\Controllers\Api\ChauffeurController;
 use App\Http\Controllers\Api\InterventionController;
 use App\Http\Controllers\Api\ParametreController;
@@ -82,4 +83,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('stats', [InterventionController::class, 'stats']);
     });
     Route::apiResource('interventions', InterventionController::class);
+
+    // Module Gestion Carburant
+    Route::prefix('carburant')->group(function () {
+        Route::get('stats', [CarburantController::class, 'stats']);
+        Route::get('comparaison', [CarburantController::class, 'comparaison']);
+        Route::get('alertes', [CarburantController::class, 'alertes']);
+        Route::get('export-pleins', [CarburantController::class, 'exportPleinsPdf']);
+        Route::get('export-comparaison', [CarburantController::class, 'exportComparaisonPdf']);
+        Route::get('export-stats', [CarburantController::class, 'exportStatsPdf']);
+    });
+    Route::apiResource('carburant', CarburantController::class);
 });
